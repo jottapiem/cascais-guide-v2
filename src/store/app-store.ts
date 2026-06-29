@@ -98,7 +98,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((state) => ({
       packingItems: [
         ...state.packingItems,
-        { id: `p${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, name, situations, packed: false },
+        { id: `p${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, name, situations, packed: false, category: "Essentials" },
       ],
     })),
   addPackingItems: (items) =>
@@ -110,6 +110,7 @@ export const useAppStore = create<AppState>((set, get) => ({
           name: it.name,
           situations: it.situations ?? [],
           packed: false,
+          category: "Essentials",
         })),
       ],
     })),

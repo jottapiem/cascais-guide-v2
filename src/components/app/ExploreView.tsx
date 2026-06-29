@@ -33,22 +33,23 @@ function Skeleton() {
   );
 }
 
+const ALL_FEED = exploreFeed();
+
 export function ExploreView() {
   const goSearch = useAppStore((s) => s.goSearch);
-  const allFeed = exploreFeed();
 
   const [activeCat, setActiveCat] = useState<CategoryId | "all">("all");
   const [cycle, setCycle] = useState(0);
-  const [visible, setVisible] = useState<Place[]>(allFeed.slice(0, PAGE));
+  const [visible, setVisible] = useState<Place[]>(ALL_FEED.slice(0, PAGE));
   const [loading, setLoading] = useState(false);
   const sentinel = useRef<HTMLDivElement>(null);
 
   const filteredFeed = useMemo(() => {
-    if (activeCat === "all") return allFeed;
+    if (activeCat === "all") return ALL_FEED;
     const cat = categories.find((c) => c.id === activeCat);
-    if (!cat) return allFeed;
-    return allFeed.filter(cat.filter);
-  }, [allFeed, activeCat]);
+    if (!cat) return ALL_FEED;
+    return ALL_FEED.filter(cat.filter);
+  }, [activeCat]);
 
   useEffect(() => {
     setCycle(0);

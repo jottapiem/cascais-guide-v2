@@ -1,0 +1,22 @@
+{
+  "id": "guincho",
+  "name": "Praia do Guincho",
+  "shortName": "Guincho",
+  "type": "Beach",
+  "vibe": "Nature",
+  "drukte": 3,
+  "besteTijd": "Sunset",
+  "moodTags": ["Relax", "Active"],
+  "tags": ["BEACH", "SUNSET", "ACTIVE"],
+  "vibeLine": "Wilde Atlantische kust met spectaculaire zonsondergangen",
+  "voorWie": ["vrienden", "koppel"],
+  "tips": ["Kom vroeg, het wordt snel druk in de zomer", "Neem een windjack mee, het waait altijd", "Ideaal voor kitesurfen"],
+  "mapLink": "https://maps.google.com/?q=Praia+do+Guincho",
+  "lat": 38.7278,
+  "lng": -9.4785,
+  "neighborhood": "Guincho",
+  "saves": 847,
+  "rating": 4.8,
+  "addedDaysAgo": 0,
+  "trending": true
+}

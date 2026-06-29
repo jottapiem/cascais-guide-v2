@@ -58,7 +58,6 @@ export const PlaceCard = memo(function PlaceCard({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.35, delay: Math.min(index * 0.02, 0.15), ease: [0.22, 1, 0.36, 1] }}
       whileTap={{ scale: 0.95 }}
-      tap={{ transition: { duration: 0.12, ease: [0.22, 1, 0.36, 1] } }}
       className={`group relative block overflow-hidden bg-muted text-left ${widthClass} ${premiumWrap}`}
     >
       <div className={`${aspectClass} w-full overflow-hidden`}>

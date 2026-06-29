@@ -1,0 +1,22 @@
+{
+  "id": "cabo-da-roca",
+  "name": "Cabo da Roca",
+  "shortName": "Cabo da Roca",
+  "type": "Viewpoint",
+  "vibe": "Nature",
+  "drukte": 4,
+  "besteTijd": "Sunset",
+  "moodTags": ["Romantic", "Active"],
+  "tags": ["VIEW", "SUNSET", "ACTIVE"],
+  "vibeLine": "Het meest westelijke punt van Europa — einde van de wereld gevoel",
+  "voorWie": ["koppel", "vrienden", "familie"],
+  "tips": ["Haal je certificaat bij het bezoekerscentrum", "Auto nodig of bus 403 vanuit Cascais", "Het waait hier altijd hard — neem een jasje mee"],
+  "mapLink": "https://maps.google.com/?q=Cabo+da+Roca+Portugal",
+  "lat": 38.7753,
+  "lng": -9.5006,
+  "neighborhood": "Sintra",
+  "saves": 891,
+  "rating": 4.7,
+  "addedDaysAgo": 1,
+  "trending": true
+}

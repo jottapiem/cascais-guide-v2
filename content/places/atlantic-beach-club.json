@@ -1,0 +1,22 @@
+{
+  "id": "atlantic-beach-club",
+  "name": "Atlantic Beach Club",
+  "shortName": "Atlantic",
+  "type": "Chill",
+  "vibe": "Luxury",
+  "drukte": 3,
+  "besteTijd": "Afternoon",
+  "moodTags": ["Hype", "Social"],
+  "tags": ["BEACH", "LUXURY", "SOCIAL", "CHILL"],
+  "vibeLine": "Premium beach club met infinity pool, cabana's en DJ sets",
+  "voorWie": ["vrienden", "koppel"],
+  "tips": ["Reserveer een sunbed online — ze gaan snel", "Minimum consumptie geldt voor sunbeds", "Het restaurant is ook toegankelijk zonder sunbed"],
+  "mapLink": "https://maps.google.com/?q=Atlantic+Beach+Club+Cascais",
+  "lat": 38.6985,
+  "lng": -9.4234,
+  "neighborhood": "Cascais Centrum",
+  "saves": 523,
+  "rating": 4.3,
+  "addedDaysAgo": 5,
+  "trending": true
+}

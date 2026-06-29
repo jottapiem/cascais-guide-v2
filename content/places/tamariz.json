@@ -1,0 +1,22 @@
+{
+  "id": "tamariz",
+  "name": "Praia de Tamariz",
+  "shortName": "Tamariz",
+  "type": "Beach",
+  "vibe": "Social",
+  "drukte": 5,
+  "besteTijd": "Afternoon",
+  "moodTags": ["Hype", "Social"],
+  "tags": ["BEACH", "SOCIAL", "TRENDING"],
+  "vibeLine": "Estoril's bruisende stadsstrand naast het casino",
+  "voorWie": ["vrienden", "familie"],
+  "tips": ["Één van de drukste stranden in de regio", "Goed bereikbaar per trein", "Strand heeft goede faciliteiten"],
+  "mapLink": "https://maps.google.com/?q=Praia+de+Tamariz+Estoril",
+  "lat": 38.7055,
+  "lng": -9.3940,
+  "neighborhood": "Estoril",
+  "saves": 389,
+  "rating": 4.1,
+  "addedDaysAgo": 5,
+  "trending": true
+}

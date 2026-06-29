@@ -1,0 +1,22 @@
+{
+  "id": "casa-da-guia",
+  "name": "Casa da Guia",
+  "shortName": "Casa da Guia",
+  "type": "Viewpoint",
+  "vibe": "Luxury",
+  "drukte": 2,
+  "besteTijd": "Sunset",
+  "moodTags": ["Romantic", "Relax"],
+  "tags": ["VIEW", "SUNSET", "LUXURY"],
+  "vibeLine": "Elegante klifvilla met terrassen boven de Atlantische oceaan",
+  "voorWie": ["koppel", "vrienden"],
+  "tips": ["Combineer met een drankje op het terras", "Goed restaurant op locatie", "Ideaal voor een romantische avond"],
+  "mapLink": "https://maps.google.com/?q=Casa+da+Guia+Cascais",
+  "lat": 38.6898,
+  "lng": -9.4421,
+  "neighborhood": "Cascais Centrum",
+  "saves": 445,
+  "rating": 4.6,
+  "addedDaysAgo": 4,
+  "trending": false
+}

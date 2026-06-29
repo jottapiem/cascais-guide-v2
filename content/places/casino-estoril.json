@@ -1,0 +1,22 @@
+{
+  "id": "casino-estoril",
+  "name": "Casino Estoril",
+  "shortName": "Casino Estoril",
+  "type": "Event",
+  "vibe": "Luxury",
+  "drukte": 3,
+  "besteTijd": "Night",
+  "moodTags": ["Hype", "Romantic"],
+  "tags": ["LUXURY", "SOCIAL", "TRENDING"],
+  "vibeLine": "Het grootste casino van Europa — elegantie en spanning in één",
+  "voorWie": ["vrienden", "koppel"],
+  "tips": ["Neem een geldig identiteitsbewijs mee (18+)", "Het restaurant heeft een uitstekend buffet", "Controleer de agenda voor shows en concerten"],
+  "mapLink": "https://maps.google.com/?q=Casino+Estoril",
+  "lat": 38.7055,
+  "lng": -9.3960,
+  "neighborhood": "Estoril",
+  "saves": 534,
+  "rating": 4.3,
+  "addedDaysAgo": 20,
+  "trending": false
+}

@@ -1,0 +1,22 @@
+{
+  "id": "rainha",
+  "name": "Praia da Rainha",
+  "shortName": "Rainha",
+  "type": "Beach",
+  "vibe": "Social",
+  "drukte": 4,
+  "besteTijd": "Afternoon",
+  "moodTags": ["Relax", "Social"],
+  "tags": ["BEACH", "SOCIAL", "CHILL"],
+  "vibeLine": "Het stadsstrand van Cascais — altijd gezellig",
+  "voorWie": ["vrienden", "familie"],
+  "tips": ["Kom voor 11 uur voor een goede plek", "Ligbedden te huur bij de strandwachterspost", "Het centrum is op loopafstand"],
+  "mapLink": "https://maps.google.com/?q=Praia+da+Rainha+Cascais",
+  "lat": 38.6973,
+  "lng": -9.4213,
+  "neighborhood": "Cascais Centrum",
+  "saves": 423,
+  "rating": 4.2,
+  "addedDaysAgo": 2,
+  "trending": false
+}

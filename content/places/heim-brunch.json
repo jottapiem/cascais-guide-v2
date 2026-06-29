@@ -1,0 +1,22 @@
+{
+  "id": "heim-brunch",
+  "name": "Heim Café",
+  "shortName": "Heim Brunch",
+  "type": "Food",
+  "vibe": "Social",
+  "drukte": 4,
+  "besteTijd": "Morning",
+  "moodTags": ["Hype", "Social", "Relax"],
+  "tags": ["FOOD", "SOCIAL", "TRENDING", "NEW"],
+  "vibeLine": "Scandinavisch-geïnspireerd café voor de beste brunch in Cascais",
+  "voorWie": ["vrienden", "koppel"],
+  "tips": ["Wacht buiten in de rij — het loont", "Probeer de smashed avocado toast", "Geen reserveringen — kom op tijd"],
+  "mapLink": "https://maps.google.com/?q=Heim+Cafe+Cascais",
+  "lat": 38.6962,
+  "lng": -9.4220,
+  "neighborhood": "Cascais Centrum",
+  "saves": 623,
+  "rating": 4.6,
+  "addedDaysAgo": 2,
+  "trending": true
+}

@@ -1,0 +1,22 @@
+{
+  "id": "guincho-surf-school",
+  "name": "Guincho Surf School",
+  "shortName": "Surf School",
+  "type": "Activity",
+  "vibe": "Social",
+  "drukte": 2,
+  "besteTijd": "Morning",
+  "moodTags": ["Active", "Hype"],
+  "tags": ["ACTIVE", "BEACH", "SOCIAL"],
+  "vibeLine": "Leer surfen op één van Europa's beste surfstranden",
+  "voorWie": ["vrienden", "solo", "koppel"],
+  "tips": ["Boek minimaal 2 dagen van tevoren", "Beginnerslessen zijn 2 uur inclusief board en wetsuit", "Guincho heeft consistente golven het hele jaar"],
+  "mapLink": "https://maps.google.com/?q=Guincho+Surf+School",
+  "lat": 38.7261,
+  "lng": -9.4762,
+  "neighborhood": "Guincho",
+  "saves": 312,
+  "rating": 4.6,
+  "addedDaysAgo": 7,
+  "trending": false
+}

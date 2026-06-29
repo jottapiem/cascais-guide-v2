@@ -1,0 +1,22 @@
+{
+  "id": "farol-santa-marta",
+  "name": "Farol de Santa Marta",
+  "shortName": "Farol Sta. Marta",
+  "type": "Viewpoint",
+  "vibe": "Chill",
+  "drukte": 2,
+  "besteTijd": "Afternoon",
+  "moodTags": ["Romantic", "Relax"],
+  "tags": ["VIEW", "CHILL", "HIDDEN"],
+  "vibeLine": "Charmante vuurtoren met panoramisch uitzicht over de baai van Cascais",
+  "voorWie": ["koppel", "familie"],
+  "tips": ["Er is een klein museum in de vuurtoren", "Perfect voor fotografie", "Weinig toeristen weten dit punt te vinden"],
+  "mapLink": "https://maps.google.com/?q=Farol+de+Santa+Marta+Cascais",
+  "lat": 38.6975,
+  "lng": -9.4189,
+  "neighborhood": "Cascais Centrum",
+  "saves": 287,
+  "rating": 4.5,
+  "addedDaysAgo": 6,
+  "trending": false
+}

@@ -1,0 +1,22 @@
+{
+  "id": "miradouro-santa-catarina",
+  "name": "Miradouro de Santa Catarina",
+  "shortName": "Santa Catarina",
+  "type": "Viewpoint",
+  "vibe": "Chill",
+  "drukte": 2,
+  "besteTijd": "Sunset",
+  "moodTags": ["Relax", "Romantic"],
+  "tags": ["VIEW", "SUNSET", "CHILL"],
+  "vibeLine": "Locals geheime uitzichtpunt boven de haven en de oceaan",
+  "voorWie": ["koppel", "solo", "vrienden"],
+  "tips": ["Een echte local spot", "Perfect voor een picknick bij zonsondergang", "Op loopafstand van het centrum"],
+  "mapLink": "https://maps.google.com/?q=Miradouro+Santa+Catarina+Cascais",
+  "lat": 38.6957,
+  "lng": -9.4205,
+  "neighborhood": "Cascais Centrum",
+  "saves": 189,
+  "rating": 4.4,
+  "addedDaysAgo": 12,
+  "trending": false
+}

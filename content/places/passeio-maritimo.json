@@ -1,0 +1,22 @@
+{
+  "id": "passeio-maritimo",
+  "name": "Passeio Marítimo",
+  "shortName": "Passeio Marítimo",
+  "type": "Chill",
+  "vibe": "Chill",
+  "drukte": 3,
+  "besteTijd": "Afternoon",
+  "moodTags": ["Relax", "Active"],
+  "tags": ["CHILL", "ACTIVE", "VIEW"],
+  "vibeLine": "De kustrondewandeling van Cascais tot Estoril langs de rotskust",
+  "voorWie": ["vrienden", "familie", "solo", "koppel"],
+  "tips": ["7 kilometer wandelpad langs de kust", "Fietsen te huur bij het beginpunt", "Perfect bij ochtendzonnetje"],
+  "mapLink": "https://maps.google.com/?q=Passeio+Maritimo+Cascais+Estoril",
+  "lat": 38.7015,
+  "lng": -9.4150,
+  "neighborhood": "Cascais Centrum",
+  "saves": 378,
+  "rating": 4.6,
+  "addedDaysAgo": 8,
+  "trending": false
+}

@@ -1,22 +1,44 @@
-export type PlaceType = "Beach" | "Food" | "Chill" | "Viewpoint" | "Shopping" | "Activity" | "Museum" | "Event";
+// Cascais Travel Discovery App V3 — Core Types
+
+import type { LucideIcon } from "lucide-react";
+
+export type PlaceType =
+  | "Beach"
+  | "Food"
+  | "Event"
+  | "Chill"
+  | "Viewpoint"
+  | "Shopping"
+  | "Activity"
+  | "Museum";
 
 export type Vibe = "Social" | "Chill" | "Nature" | "Luxury" | "Food";
 
-export type BestTime = "Morning" | "Afternoon" | "Sunset" | "Night";
+export type BestTime = "Morning" | "Sunset" | "Night";
 
 export type MoodTag = "Relax" | "Hype" | "Romantic" | "Active";
 
-export type Tag = "SUNSET" | "FOOD" | "BEACH" | "SOCIAL" | "HIDDEN" | "ACTIVE" | "VIEW" | "LUXURY" | "CHILL" | "TRENDING" | "NEW";
+export type Audience = "vrienden" | "familie" | "chill" | "social";
 
-export type Audience = "vrienden" | "familie" | "koppel" | "solo";
+export type Tag =
+  | "SUNSET"
+  | "FOOD"
+  | "BEACH"
+  | "SOCIAL"
+  | "HIDDEN"
+  | "ACTIVE"
+  | "VIEW"
+  | "LUXURY"
+  | "CHILL"
+  | "TRENDING"
+  | "NEW";
 
-export type Neighborhood = "Cascais Centrum" | "Estoril" | "Guincho" | "Sintra" | "Carcavelos" | "Lisboa" | "Belém";
-
-export type PhotoRole = "cover" | "explore" | "gallery";
-
-export type PhotoSource = "instagram" | "own" | "pexels" | "unsplash" | "wikimedia" | "web";
-
-export type PhotoPermission = "own" | "friend_shared" | "public_embed" | "unknown_private";
+export type Neighborhood =
+  | "Cascais Centrum"
+  | "Estoril"
+  | "Guincho"
+  | "Sintra"
+  | "Carcavelos";
 
 export interface Place {
   id: string;
@@ -24,7 +46,7 @@ export interface Place {
   shortName: string;
   type: PlaceType;
   vibe: Vibe;
-  drukte: 1 | 2 | 3 | 4 | 5; // Busy-ness rating from 1 to 5
+  drukte: number;
   besteTijd: BestTime;
   moodTags: MoodTag[];
   tags: Tag[];
@@ -32,14 +54,92 @@ export interface Place {
   voorWie: Audience[];
   tips: string[];
   mapLink: string;
+  coverImage: string;
+  gallery: string[];
+  exploreImage: string; // social media stijl foto voor explore (minder commercial)
   lat: number;
   lng: number;
   neighborhood: Neighborhood;
-  saves: number;
-  rating: number; // e.g., 4.8
-  addedDaysAgo: number;
+  // social discovery signals
+  saves: number; // aantal "opgeslagen"
+  rating: number; // 0-5
+  addedDaysAgo: number; // voor "nieuwste"
   trending?: boolean;
 }
+
+export type CategoryId =
+  | "beaches"
+  | "food"
+  | "sunset"
+  | "events"
+  | "chill"
+  | "viewpoints"
+  | "trending"
+  | "museums"
+  | "activities";
+
+export interface Category {
+  id: CategoryId;
+  label: string;
+  icon: LucideIcon; // lucide icon component
+  image: string;
+  color: string;
+  description: string;
+  filter: (p: Place) => boolean;
+}
+
+// ===== PACKING LIST V2 =====
+export type PackingCategory =
+  | "Kleding"
+  | "Schoenen"
+  | "Elektronica"
+  | "Verzorging"
+  | "Strand"
+  | "Accessoires"
+  | "Medicatie"
+  | "Documenten"
+  | "Snacks"
+  | "Drinken"
+  | "Parfum"
+  | "Essentials";
+
+export type Situation =
+  | "Strand"
+  | "Zwembad"
+  | "Restaurant"
+  | "Uitgaan"
+  | "Shopping"
+  | "Stad"
+  | "Hiking"
+  | "Roadtrip"
+  | "Vliegtuig"
+  | "Hotel"
+  | "Festival"
+  | "Boot"
+  | "Sport"
+  | "Picknick";
+
+export interface PackingItem {
+  id: string;
+  name: string;
+  category: PackingCategory; // automatisch bepaald, bewerkbaar
+  situations: Situation[]; // multiple choice, optioneel
+  packed: boolean;
+}
+
+export interface SmartCollection {
+  id: string;
+  situation: Situation;
+  icon: string; // lucide name
+  items: string[]; // voorgestelde item namen
+}
+
+// ===== PERFECT DAY (legacy — verwijderd in V3, vervangen door Favorieten) =====
+
+// ===== V2 PHOTO TYPES (voor toekomstige foto metadata) =====
+export type PhotoRole = "cover" | "explore" | "gallery";
+export type PhotoSource = "instagram" | "own" | "pexels" | "unsplash" | "wikimedia" | "web";
+export type PhotoPermission = "own" | "friend_shared" | "public_embed" | "unknown_private";
 
 export interface PlacePhoto {
   file: string;
@@ -55,15 +155,3 @@ export interface PlacePhotoMetadata {
   placeId: string;
   photos: PlacePhoto[];
 }
-
-// Constant arrays for convenient UI mapping, validation, or selection options
-export const PLACE_TYPES: PlaceType[] = ["Beach", "Food", "Chill", "Viewpoint", "Shopping", "Activity", "Museum", "Event"];
-export const VIBES: Vibe[] = ["Social", "Chill", "Nature", "Luxury", "Food"];
-export const BEST_TIMES: BestTime[] = ["Morning", "Afternoon", "Sunset", "Night"];
-export const MOOD_TAGS: MoodTag[] = ["Relax", "Hype", "Romantic", "Active"];
-export const TAGS: Tag[] = ["SUNSET", "FOOD", "BEACH", "SOCIAL", "HIDDEN", "ACTIVE", "VIEW", "LUXURY", "CHILL", "TRENDING", "NEW"];
-export const AUDIENCES: Audience[] = ["vrienden", "familie", "koppel", "solo"];
-export const NEIGHBORHOODS: Neighborhood[] = ["Cascais Centrum", "Estoril", "Guincho", "Sintra", "Carcavelos", "Lisboa", "Belém"];
-export const PHOTO_ROLES: PhotoRole[] = ["cover", "explore", "gallery"];
-export const PHOTO_SOURCES: PhotoSource[] = ["instagram", "own", "pexels", "unsplash", "wikimedia", "web"];
-export const PHOTO_PERMISSIONS: PhotoPermission[] = ["own", "friend_shared", "public_embed", "unknown_private"];

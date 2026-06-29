@@ -1,0 +1,22 @@
+{
+  "id": "rooftop-lounge",
+  "name": "Rooftop Lounge",
+  "shortName": "Rooftop",
+  "type": "Food",
+  "vibe": "Luxury",
+  "drukte": 3,
+  "besteTijd": "Sunset",
+  "moodTags": ["Hype", "Romantic"],
+  "tags": ["FOOD", "SUNSET", "LUXURY", "VIEW"],
+  "vibeLine": "Stijlvolle daktuin met cocktails en uitzicht over de hele kustlijn",
+  "voorWie": ["koppel", "vrienden"],
+  "tips": ["Reserveer een plek bij de railing voor het beste uitzicht", "Happy hour van 17:00 tot 19:00", "Dresscode geldt na 20:00"],
+  "mapLink": "https://maps.google.com/?q=Rooftop+Lounge+Cascais",
+  "lat": 38.6978,
+  "lng": -9.4215,
+  "neighborhood": "Cascais Centrum",
+  "saves": 412,
+  "rating": 4.4,
+  "addedDaysAgo": 10,
+  "trending": true
+}

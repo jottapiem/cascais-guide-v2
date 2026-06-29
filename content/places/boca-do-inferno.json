@@ -1,0 +1,22 @@
+{
+  "id": "boca-do-inferno",
+  "name": "Boca do Inferno",
+  "shortName": "Boca do Inferno",
+  "type": "Viewpoint",
+  "vibe": "Nature",
+  "drukte": 3,
+  "besteTijd": "Sunset",
+  "moodTags": ["Relax", "Active", "Romantic"],
+  "tags": ["VIEW", "SUNSET", "ACTIVE"],
+  "vibeLine": "Dramatische rotsformaties aan de Atlantische Oceaan — altijd spectaculair",
+  "voorWie": ["koppel", "vrienden", "familie"],
+  "tips": ["Op 2 km van het centrum, goed te lopen", "Indrukwekkend bij storm", "Souvenirwinkels in de buurt"],
+  "mapLink": "https://maps.google.com/?q=Boca+do+Inferno+Cascais",
+  "lat": 38.6924,
+  "lng": -9.4358,
+  "neighborhood": "Cascais Centrum",
+  "saves": 672,
+  "rating": 4.6,
+  "addedDaysAgo": 3,
+  "trending": false
+}

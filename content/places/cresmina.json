@@ -1,0 +1,22 @@
+{
+  "id": "cresmina",
+  "name": "Praia da Cresmina",
+  "shortName": "Cresmina",
+  "type": "Beach",
+  "vibe": "Nature",
+  "drukte": 2,
+  "besteTijd": "Morning",
+  "moodTags": ["Relax", "Active"],
+  "tags": ["BEACH", "HIDDEN", "ACTIVE"],
+  "vibeLine": "Rustig natuurstrand naast de Guincho duinen",
+  "voorWie": ["koppel", "solo"],
+  "tips": ["Minder druk dan Guincho", "Goed voor surfen en bodyboarden", "Parkeer vroeg want plek is beperkt"],
+  "mapLink": "https://maps.google.com/?q=Praia+da+Cresmina",
+  "lat": 38.7215,
+  "lng": -9.4680,
+  "neighborhood": "Guincho",
+  "saves": 198,
+  "rating": 4.5,
+  "addedDaysAgo": 8,
+  "trending": false
+}

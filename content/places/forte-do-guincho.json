@@ -1,0 +1,22 @@
+{
+  "id": "forte-do-guincho",
+  "name": "Forte do Guincho",
+  "shortName": "Forte Guincho",
+  "type": "Viewpoint",
+  "vibe": "Luxury",
+  "drukte": 1,
+  "besteTijd": "Sunset",
+  "moodTags": ["Romantic", "Relax"],
+  "tags": ["VIEW", "SUNSET", "LUXURY", "HIDDEN"],
+  "vibeLine": "Historisch fort aan de kust, nu een Relais & Châteaux hotel met Michelin-ster",
+  "voorWie": ["koppel"],
+  "tips": ["Reserveer ver van tevoren voor het restaurant", "Twee Michelin-sterren restaurant", "Zelfs een drankje bij zonsondergang is de moeite waard"],
+  "mapLink": "https://maps.google.com/?q=Forte+do+Guincho",
+  "lat": 38.7278,
+  "lng": -9.4736,
+  "neighborhood": "Guincho",
+  "saves": 356,
+  "rating": 4.8,
+  "addedDaysAgo": 9,
+  "trending": false
+}

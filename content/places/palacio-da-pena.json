@@ -1,0 +1,22 @@
+{
+  "id": "palacio-da-pena",
+  "name": "Palácio da Pena",
+  "shortName": "Pena Palace",
+  "type": "Museum",
+  "vibe": "Social",
+  "drukte": 5,
+  "besteTijd": "Morning",
+  "moodTags": ["Active", "Romantic"],
+  "tags": ["ACTIVE", "VIEW", "TRENDING"],
+  "vibeLine": "Fairy-tale kasteel op de top van Sintra — één van Portugal's meest iconische bezienswaardigheden",
+  "voorWie": ["familie", "vrienden", "koppel"],
+  "tips": ["Koop tickets online — kassarijen zijn eindeloos", "Kom vóór 9:30 voor het minste drukte", "De tuinen zijn ook de moeite waard (apart ticket)"],
+  "mapLink": "https://maps.google.com/?q=Palacio+da+Pena+Sintra",
+  "lat": 38.7877,
+  "lng": -9.3908,
+  "neighborhood": "Sintra",
+  "saves": 1247,
+  "rating": 4.8,
+  "addedDaysAgo": 0,
+  "trending": true
+}

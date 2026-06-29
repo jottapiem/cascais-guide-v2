@@ -1,0 +1,22 @@
+{
+  "id": "guincho-trail",
+  "name": "Costa do Guincho Trail",
+  "shortName": "Guincho Trail",
+  "type": "Activity",
+  "vibe": "Nature",
+  "drukte": 1,
+  "besteTijd": "Morning",
+  "moodTags": ["Active", "Relax"],
+  "tags": ["ACTIVE", "HIDDEN", "VIEW"],
+  "vibeLine": "Spectaculaire wandelroute langs de wilde Atlantische kust richting Guincho",
+  "voorWie": ["vrienden", "solo", "koppel"],
+  "tips": ["7 km retour, gemiddelde moeilijkheidsgraad", "Neem water mee — geen voorzieningen onderweg", "Vroeg in de ochtend voor de mooiste lichten"],
+  "mapLink": "https://maps.google.com/?q=Costa+Guincho+Trail",
+  "lat": 38.7050,
+  "lng": -9.4500,
+  "neighborhood": "Guincho",
+  "saves": 267,
+  "rating": 4.7,
+  "addedDaysAgo": 18,
+  "trending": false
+}

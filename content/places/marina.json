@@ -1,0 +1,22 @@
+{
+  "id": "marina",
+  "name": "Marina de Cascais",
+  "shortName": "Marina",
+  "type": "Chill",
+  "vibe": "Social",
+  "drukte": 3,
+  "besteTijd": "Afternoon",
+  "moodTags": ["Relax", "Social"],
+  "tags": ["CHILL", "SOCIAL", "VIEW"],
+  "vibeLine": "Gezellige jachthaven met terrassen, winkeltjes en bootjes",
+  "voorWie": ["familie", "vrienden", "koppel"],
+  "tips": ["Perfect voor een avondwandeling", "Veel goede restaurants langs de kade", "Zonsondergang is hier prachtig"],
+  "mapLink": "https://maps.google.com/?q=Marina+de+Cascais",
+  "lat": 38.6940,
+  "lng": -9.4200,
+  "neighborhood": "Cascais Centrum",
+  "saves": 445,
+  "rating": 4.4,
+  "addedDaysAgo": 11,
+  "trending": false
+}

@@ -1,0 +1,22 @@
+{
+  "id": "festival-do-mar",
+  "name": "Festival do Mar",
+  "shortName": "Festival do Mar",
+  "type": "Event",
+  "vibe": "Social",
+  "drukte": 5,
+  "besteTijd": "Night",
+  "moodTags": ["Hype", "Social", "Active"],
+  "tags": ["SOCIAL", "FOOD", "TRENDING", "NEW"],
+  "vibeLine": "Cascais' jaarlijks zomerfestival aan de haven met muziek, eten en vuurwerk",
+  "voorWie": ["vrienden", "familie"],
+  "tips": ["Vindt plaats in augustus — check de data", "Kom vroeg voor de beste plek bij het podium", "Gratis toegang voor de meeste optredens"],
+  "mapLink": "https://maps.google.com/?q=Festival+do+Mar+Cascais",
+  "lat": 38.6952,
+  "lng": -9.4198,
+  "neighborhood": "Cascais Centrum",
+  "saves": 712,
+  "rating": 4.7,
+  "addedDaysAgo": 1,
+  "trending": true
+}

@@ -1,0 +1,22 @@
+{
+  "id": "parque-carmona",
+  "name": "Parque Palmela",
+  "shortName": "Parque Carmona",
+  "type": "Chill",
+  "vibe": "Chill",
+  "drukte": 1,
+  "besteTijd": "Morning",
+  "moodTags": ["Relax", "Active"],
+  "tags": ["CHILL", "HIDDEN", "ACTIVE"],
+  "vibeLine": "Stadspark verborgen achter het paleis — groen, rustig en locals-only",
+  "voorWie": ["familie", "solo", "koppel"],
+  "tips": ["Weinig toeristen weten dit park te vinden", "Ideaal voor een ochtendwandeling", "Pauwen lopen vrij rond"],
+  "mapLink": "https://maps.google.com/?q=Parque+Palmela+Cascais",
+  "lat": 38.6990,
+  "lng": -9.4210,
+  "neighborhood": "Cascais Centrum",
+  "saves": 156,
+  "rating": 4.5,
+  "addedDaysAgo": 16,
+  "trending": false
+}

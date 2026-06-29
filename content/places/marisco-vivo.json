@@ -1,0 +1,22 @@
+{
+  "id": "marisco-vivo",
+  "name": "Marisco Vivo",
+  "shortName": "Marisco Vivo",
+  "type": "Food",
+  "vibe": "Food",
+  "drukte": 3,
+  "besteTijd": "Afternoon",
+  "moodTags": ["Hype", "Romantic"],
+  "tags": ["FOOD", "LUXURY"],
+  "vibeLine": "Verse zeevruchten direct van de vissers — de beste in Cascais",
+  "voorWie": ["koppel", "vrienden"],
+  "tips": ["Reserveer altijd — ze zitten altijd vol", "Vraag naar de vangst van de dag", "Bestel de gambas piri piri"],
+  "mapLink": "https://maps.google.com/?q=Marisco+Vivo+Cascais",
+  "lat": 38.6947,
+  "lng": -9.4219,
+  "neighborhood": "Cascais Centrum",
+  "saves": 478,
+  "rating": 4.7,
+  "addedDaysAgo": 7,
+  "trending": false
+}

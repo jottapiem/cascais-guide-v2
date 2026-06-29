@@ -1,0 +1,22 @@
+{
+  "id": "centro-historico",
+  "name": "Centro Histórico Cascais",
+  "shortName": "Centro Histórico",
+  "type": "Shopping",
+  "vibe": "Social",
+  "drukte": 4,
+  "besteTijd": "Afternoon",
+  "moodTags": ["Relax", "Social"],
+  "tags": ["SOCIAL", "CHILL", "FOOD"],
+  "vibeLine": "Kleurrijke steegjes vol onafhankelijke winkels, galeriers en cafés",
+  "voorWie": ["familie", "vrienden", "koppel", "solo"],
+  "tips": ["Maandag zijn veel winkels gesloten", "Zoek naar azulejos-winkels voor authentieke souvenirs", "Loop ook de zijsteegjes door voor verborgen parels"],
+  "mapLink": "https://maps.google.com/?q=Centro+Historico+Cascais",
+  "lat": 38.6971,
+  "lng": -9.4213,
+  "neighborhood": "Cascais Centrum",
+  "saves": 298,
+  "rating": 4.3,
+  "addedDaysAgo": 15,
+  "trending": false
+}

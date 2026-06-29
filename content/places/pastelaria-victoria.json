@@ -1,0 +1,22 @@
+{
+  "id": "pastelaria-victoria",
+  "name": "Pastelaria Victoria",
+  "shortName": "Victoria",
+  "type": "Food",
+  "vibe": "Chill",
+  "drukte": 3,
+  "besteTijd": "Morning",
+  "moodTags": ["Relax", "Social"],
+  "tags": ["FOOD", "CHILL"],
+  "vibeLine": "Iconische lokale bakkerij — de beste pasteis de nata buiten Lissabon",
+  "voorWie": ["vrienden", "familie", "solo"],
+  "tips": ["Kom 's ochtends voor verse pasteis", "Probeer ook de travesseiros (Sintra specialiteit)", "Altijd een rij maar het is de moeite waard"],
+  "mapLink": "https://maps.google.com/?q=Pastelaria+Victoria+Cascais",
+  "lat": 38.6971,
+  "lng": -9.4218,
+  "neighborhood": "Cascais Centrum",
+  "saves": 334,
+  "rating": 4.6,
+  "addedDaysAgo": 14,
+  "trending": false
+}

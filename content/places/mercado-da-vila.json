@@ -1,0 +1,22 @@
+{
+  "id": "mercado-da-vila",
+  "name": "Mercado da Vila",
+  "shortName": "Mercado da Vila",
+  "type": "Food",
+  "vibe": "Social",
+  "drukte": 4,
+  "besteTijd": "Afternoon",
+  "moodTags": ["Hype", "Social"],
+  "tags": ["FOOD", "SOCIAL", "TRENDING"],
+  "vibeLine": "Cascais' trendiest foodhall met lokale producenten en restaurant stands",
+  "voorWie": ["vrienden", "familie", "koppel"],
+  "tips": ["Probeer de pasteis de nata bij de bakker binnenin", "Vrijdag- en zaterdagavond het drukst", "Perfect voor lunch"],
+  "mapLink": "https://maps.google.com/?q=Mercado+da+Vila+Cascais",
+  "lat": 38.6966,
+  "lng": -9.4223,
+  "neighborhood": "Cascais Centrum",
+  "saves": 567,
+  "rating": 4.5,
+  "addedDaysAgo": 3,
+  "trending": true
+}

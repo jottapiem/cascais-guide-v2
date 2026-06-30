@@ -13,16 +13,19 @@ import { PlaceCard } from "./PlaceCard";
 import type { CategoryId } from "@/lib/types";
 
 function ThemeToggle() {
-  const { setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   return (
     <button
       type="button"
-      onClick={() => setTheme(document.documentElement.classList.contains("dark") ? "light" : "dark")}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
       className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-xl ring-1 ring-white/20 transition-all hover:bg-white/25 active:scale-90"
-      aria-label="Thema wisselen"
+      aria-label={isDark ? "Licht thema activeren" : "Donker thema activeren"}
     >
-      <Sun className="hidden h-[18px] w-[18px] dark:block" strokeWidth={2.2} />
-      <Moon className="block h-[18px] w-[18px] dark:hidden" strokeWidth={2.2} />
+      {isDark
+        ? <Sun className="h-[18px] w-[18px]" strokeWidth={2.2} />
+        : <Moon className="h-[18px] w-[18px]" strokeWidth={2.2} />
+      }
     </button>
   );
 }

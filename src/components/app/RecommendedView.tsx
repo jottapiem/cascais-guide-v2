@@ -56,7 +56,8 @@ export function RecommendedView() {
         <button
           type="button"
           onClick={goBack}
-          className="absolute left-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/25 text-white backdrop-blur-md transition-colors hover:bg-white/40 active:scale-95 pt-safe mt-0"
+          className="absolute left-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/25 text-white backdrop-blur-md transition-colors hover:bg-white/40 active:scale-95"
+          style={{ top: "max(1rem, calc(env(safe-area-inset-top, 0px) + 0.5rem))" }}
           aria-label="Terug"
         >
           <ChevronLeft className="h-5 w-5" strokeWidth={2.5} />

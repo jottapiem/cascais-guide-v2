@@ -13,11 +13,11 @@ export function FavoritesView() {
   const goRecommended = useAppStore((s) => s.goRecommended);
   const favorites = useAppStore((s) => s.favorites);
 
-  const favPlaces = places.filter((p) => favorites.has(p.id));
-  const recommendedPlaces = RECOMMENDED_IDS
-    .map((id) => places.find((p) => p.id === id))
-    .filter((p): p is NonNullable<typeof p> => Boolean(p))
-    .slice(0, 6);
+  const favPlaces = places.filter((p) => favorites.includes(p.id));
+
+  const recommendedPlaces = RECOMMENDED_IDS.map((id) =>
+    places.find((p) => p.id === id)
+  ).filter((p): p is NonNullable<typeof p> => Boolean(p)).slice(0, 3);
 
   return (
     <div className="min-h-screen">
@@ -44,12 +44,14 @@ export function FavoritesView() {
             >
               Favorieten
             </motion.h1>
-            <p className="text-[11px] text-muted-foreground">{favPlaces.length} opgeslagen plekken</p>
+            <p className="text-[11px] text-muted-foreground">
+              {favPlaces.length} opgeslagen{favPlaces.length === 1 ? " plek" : " plekken"}
+            </p>
           </div>
         </div>
       </header>
 
-      {/* Aanbevolen collectie — featured banner */}
+      {/* Aanbevolen collectie banner */}
       <section className="px-4 pt-4">
         <motion.button
           type="button"
@@ -60,15 +62,19 @@ export function FavoritesView() {
           whileTap={{ scale: 0.98 }}
           className="group relative w-full overflow-hidden rounded-3xl text-left shadow-premium"
         >
-          {/* Cover: collage van eerste 3 aanraders */}
           <div className="relative h-40 w-full">
             <div className="absolute inset-0 grid grid-cols-3 gap-[2px]">
-              {recommendedPlaces.slice(0, 3).map((p) => (
+              {recommendedPlaces.map((p) => (
                 <img
                   key={p.id}
                   src={p.exploreImage ?? p.coverImage}
                   alt={p.name}
                   className="h-full w-full object-cover"
+                  loading="lazy"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3C/svg%3E";
+                  }}
                 />
               ))}
             </div>
@@ -94,8 +100,14 @@ export function FavoritesView() {
         <h2 className="mb-2 px-4 text-[15px] font-bold tracking-tight">
           Opgeslagen plekken
         </h2>
+
         {favPlaces.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 px-8 py-12 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="flex flex-col items-center justify-center gap-3 px-8 py-12 text-center"
+          >
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
               <Heart className="h-6 w-6 text-muted-foreground" />
             </div>
@@ -108,17 +120,16 @@ export function FavoritesView() {
             <button
               type="button"
               onClick={goExplore}
-              className="mt-1 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground active:scale-95"
+              className="mt-1 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-opacity active:opacity-80 active:scale-95"
             >
               Ontdek plekken
             </button>
-          </div>
+          </motion.div>
         ) : (
-          <div className="columns-3 gap-[2px] px-4 [column-fill:balance]">
+          /* Uniforme 3-koloms grid — zelfde als ExploreView en CategoryView */
+          <div className="grid grid-cols-3 gap-[2px]">
             {favPlaces.map((p, i) => (
-              <div key={p.id} className="mb-[2px] break-inside-avoid">
-                <PlaceCard place={p} variant="masonry" index={i} />
-              </div>
+              <PlaceCard key={p.id} place={p} variant="masonry" index={i} />
             ))}
           </div>
         )}

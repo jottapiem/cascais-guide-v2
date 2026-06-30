@@ -27,7 +27,7 @@ export const PlaceCard = memo(function PlaceCard({
 }: PlaceCardProps) {
   const goDetail = useAppStore((s) => s.goDetail);
   const toggleFavorite = useAppStore((s) => s.toggleFavorite);
-  const isFav = useAppStore((s) => s.favorites.has(place.id));
+  const isFav = useAppStore((s) => s.favorites.includes(place.id));
 
   // Uniforme vierkante tiles voor 3-koloms Instagram grid (geen masonry glitch)
   const aspectClass = (() => {

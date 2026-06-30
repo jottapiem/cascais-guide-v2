@@ -12,7 +12,7 @@ interface NavItem {
 }
 
 export function BottomNav() {
-  const view = useAppStore((s) => s.view);
+  const rootView = useAppStore((s) => s.rootView);
   const goHome = useAppStore((s) => s.goHome);
   const goExplore = useAppStore((s) => s.goExplore);
   const goMap = useAppStore((s) => s.goMap);
@@ -20,19 +20,12 @@ export function BottomNav() {
   const goFavorites = useAppStore((s) => s.goFavorites);
 
   const items: NavItem[] = [
-    { view: "home", label: "Home", icon: Home, action: goHome },
-    { view: "explore", label: "Explore", icon: Compass, action: goExplore },
-    { view: "map", label: "Kaart", icon: Map, action: goMap },
-    { view: "packing", label: "Tas", icon: Backpack, action: goPacking },
-    { view: "favorites", label: "Favorieten", icon: Heart, action: goFavorites },
+    { view: "home",      label: "Home",       icon: Home,    action: goHome },
+    { view: "explore",   label: "Explore",    icon: Compass, action: goExplore },
+    { view: "map",       label: "Kaart",      icon: Map,     action: goMap },
+    { view: "packing",   label: "Tas",        icon: Backpack, action: goPacking },
+    { view: "favorites", label: "Favorieten", icon: Heart,   action: goFavorites },
   ];
-
-  const activeView: View =
-    view === "category" || view === "detail" || view === "search"
-      ? view === "search"
-        ? "explore"
-        : "home"
-      : view;
 
   return (
     <nav
@@ -41,7 +34,7 @@ export function BottomNav() {
     >
       <div className="mx-auto flex max-w-md items-stretch justify-around px-1.5 pt-1.5">
         {items.map((item) => {
-          const isActive = activeView === item.view;
+          const isActive = rootView === item.view;
           const Icon = item.icon;
           return (
             <motion.button
@@ -62,7 +55,7 @@ export function BottomNav() {
                 />
               )}
               <Icon
-                className={`relative h-[23px] w-[23px] transition-all duration-200 ${
+                className={`relative transition-all duration-200 h-[23px] w-[23px] ${
                   isActive
                     ? "text-primary scale-105"
                     : "text-muted-foreground scale-100"
@@ -70,10 +63,9 @@ export function BottomNav() {
                 strokeWidth={isActive ? 2.6 : 2}
               />
               <span
-                className={`relative text-[10px] font-semibold tracking-tight transition-colors ${
+                className={`relative text-[10px] font-semibold transition-colors ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
-                style={{ letterSpacing: "-0.01em" }}
               >
                 {item.label}
               </span>

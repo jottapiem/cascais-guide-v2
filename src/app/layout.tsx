@@ -1,48 +1,32 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "next-themes";
-import { Toaster } from "sonner";
+import type { Metadata, Viewport } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import { cn } from "@/lib/utils";
+import { Providers } from "@/components/providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
-  display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Cascais Guide",
-  description: "Ontdek de mooiste plekken in Cascais, Portugal",
-  robots: { index: false, follow: false },
+  title: "Cascais — Travel Discovery",
+  description: "Ontdek Cascais als een local. Stranden, food, sunset spots, events en hidden gems in één visuele app.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#0e7c7b",
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="nl"
-      className={cn("h-full antialiased", geistSans.variable, geistMono.variable)}
-      suppressHydrationWarning
-    >
-      <body className="min-h-full flex flex-col font-sans">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          disableTransitionOnChange
-        >
-          {children}
-          <Toaster richColors position="top-center" />
-        </ThemeProvider>
+    <html lang="nl" suppressHydrationWarning>
+      <body className={`${jakarta.variable} font-sans antialiased bg-background text-foreground`} style={{ WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale", textRendering: "optimizeLegibility" }}>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

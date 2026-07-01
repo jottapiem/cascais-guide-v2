@@ -14,10 +14,12 @@ export type View =
   | "map"
   | "packing"
   | "favorites"
-  | "recommended";
+  | "recommended"
+  | "trips"
+  | "profile";
 
 /** Root tabs — navigeren hiernaar updaten ook rootView */
-const ROOT_VIEWS: View[] = ["home", "explore", "map", "packing", "favorites"];
+const ROOT_VIEWS: View[] = ["home", "explore", "map", "packing", "favorites", "trips", "profile"];
 
 interface AppState {
   view: View;
@@ -41,6 +43,8 @@ interface AppState {
   goPacking: () => void;
   goFavorites: () => void;
   goRecommended: () => void;
+  goTrips: () => void;
+  goProfile: () => void;
   setRecommendedCat: (c: CategoryId | "all") => void;
   goBack: () => void;
 
@@ -100,6 +104,10 @@ export const useAppStore = create<AppState>()(
         set({ view: "search", history: pushHistory(get()) }),
       goRecommended: () =>
         set({ view: "recommended", recommendedCat: "all", history: pushHistory(get()) }),
+      goTrips: () =>
+        set({ view: "trips", rootView: "trips", history: pushHistory(get()) }),
+      goProfile: () =>
+        set({ view: "profile", rootView: "profile", history: pushHistory(get()) }),
       setRecommendedCat: (c) => set({ recommendedCat: c }),
 
       goBack: () => {

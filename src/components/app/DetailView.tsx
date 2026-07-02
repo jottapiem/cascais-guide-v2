@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Star, Clock, Users, MapPin, Navigation,
@@ -20,7 +20,7 @@ const OPACITY_DELAY = 0.2;
 const OPACITY_DURATION = 0.25;
 // Hero is aspect-[4/3] binnen een max-w-md (28rem) container — sheet-top volgt exact
 // de werkelijk gerenderde hero-hoogte i.p.v. een losse vh-gok die op smalle telefoons afwijkt.
-const HERO_HEIGHT_CSS = "calc(min(28rem, 100vw) * 0.75)";
+const HERO_HEIGHT_CSS = "calc(min(28rem, 100vw) * 0.75)";  // foto hoogte = sheet top
 
 const AUDIENCE_LABEL: Record<Audience, string> = {
   vrienden: "Vrienden",
@@ -40,6 +40,11 @@ const TIME_LABEL: Record<string, string> = {
 // Framer's projection engine 'm automatisch corrigeert tegen de FRAME-scale (geen vervorming).
 // Sheet is apart, slide-up met y: 100% → 0. Overlay/buttons fade in na morph.
 export function DetailOverlay({ placeId, sectionId }: { placeId: string; sectionId: string }) {
+  useEffect(() => {
+    // Lock body scroll tijdens detail view
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
   const place = getPlace(placeId);
   const goBack = useAppStore((s) => s.goBack);
   const setMorphPhase = useAppStore((s) => s.setMorphPhase);
@@ -82,7 +87,7 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
         <motion.div
           layoutId={`place-photo-${placeId}-${sectionId}`}
           transition={MORPH_TRANSITION}
-          style={{ borderRadius: 16 }}
+          style={{ borderRadius: "48px 48px 0 0", opacity: 0 }}
           className="relative aspect-[4/3] w-full overflow-hidden"
         >
           <motion.img
@@ -101,7 +106,7 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
           exit={{ opacity: 0 }}
           transition={{ delay: OPACITY_DELAY, duration: OPACITY_DURATION, ease: "linear" }}
           className="absolute inset-0 pointer-events-none overflow-hidden"
-          style={{ borderRadius: 16 }}
+          style={{ borderRadius: "48px 48px 0 0", opacity: 0 }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/10 to-black/85" />
           <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
@@ -115,7 +120,7 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
         exit={{ opacity: 0 }}
         transition={{ duration: 0.15, ease: "linear" }}
         style={{ top: HERO_HEIGHT_CSS }}
-        className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md bg-background rounded-t-[2rem] overflow-hidden"
+        className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md bg-[#F7F6F4] rounded-t-[2rem] overflow-hidden shadow-[0_-8px_24px_rgba(0,0,0,0.08)]"
       >
         <div ref={sheetRef} className="h-full overflow-y-auto overflow-x-hidden">
           {/* Content — fade in na morph */}

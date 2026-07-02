@@ -2,8 +2,8 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { defaultPackingItems, classifyItem } from "@/lib/packing-classifier";
-import type { CategoryId, PackingItem, PackingCategory, Situation } from "@/lib/types";
+import { defaultPackingItems } from "@/lib/packing-classifier";
+import type { CategoryId, PackingItem, Situation } from "@/lib/types";
 
 export type View =
   | "home"
@@ -55,7 +55,7 @@ interface AppState {
   isFavorite: (id: string) => boolean;
 
   addPackingItem: (name: string, situations?: Situation[]) => void;
-  addPackingItems: (items: { name: string; situations?: Situation[]; category?: PackingCategory }[]) => void;
+  addPackingItems: (items: { name: string; situations?: Situation[] }[]) => void;
   removePackingItem: (id: string) => void;
   updatePackingItem: (id: string, patch: Partial<PackingItem>) => void;
   togglePacked: (id: string) => void;
@@ -133,11 +133,11 @@ export const useAppStore = create<AppState>()(
         })),
       isFavorite: (id) => get().favorites.includes(id),
 
-      addPackingItem: (name, situations = [], category?) =>
+      addPackingItem: (name, situations = []) =>
         set((state) => ({
           packingItems: [
             ...state.packingItems,
-            { id: uid(), name, situations, packed: false, category: category ?? classifyItem(name) },
+            { id: uid(), name, situations, packed: false, category: "Essentials" as const },
           ],
         })),
 
@@ -150,7 +150,7 @@ export const useAppStore = create<AppState>()(
               name: it.name,
               situations: it.situations ?? [],
               packed: false,
-              category: it.category ?? classifyItem(it.name),
+              category: "Essentials" as const,
             })),
           ],
         })),

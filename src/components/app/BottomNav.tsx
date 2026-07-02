@@ -25,7 +25,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="sticky bottom-0 z-40 border-t border-border/40 bg-background/90 backdrop-blur-2xl pb-safe" aria-label="Hoofdnavigatie">
+    <nav className="sticky bottom-0 z-40 border-t border-border/40 bg-[#F7F6F4]/90 backdrop-blur-2xl pb-safe" aria-label="Hoofdnavigatie">
       <div className="mx-auto flex max-w-md items-stretch justify-around px-1.5 pt-1.5">
         {items.map((item) => {
           const isActive = rootView === item.view;

@@ -474,3 +474,31 @@ button, [role="button"], a {
 /* Tight, extruded, machined hardware feel. Not floating. */
 /* 5 layers: contact + ambient + bounce + highlight + hairline */
 
+
+
+/* ===== MORPH SCRIM — Airbnb-style blur + dim overlay ===== */
+@property --scrim-blur {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.morph-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+  opacity: 0;
+  background: rgba(0,0,0,0.25);
+  --scrim-blur: 0px;
+  backdrop-filter: blur(var(--scrim-blur));
+  -webkit-backdrop-filter: blur(var(--scrim-blur));
+  transition:
+    opacity 420ms cubic-bezier(0.1, 0.9, 0.2, 1),
+    --scrim-blur 420ms cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.morph-scrim.is-active {
+  opacity: 1;
+  --scrim-blur: 18px;
+}

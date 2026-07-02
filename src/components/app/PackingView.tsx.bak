@@ -148,7 +148,7 @@ export function PackingView() {
       toast.error("Selecteer minimaal één item");
       return;
     }
-    addPackingItems(selected.map((it) => ({ name: it.name, situations: it.situations, category: it.category })));
+    addPackingItems(selected.map((it) => ({ name: it.name, situations: it.situations })));
     toast.success(`${selected.length} item${selected.length === 1 ? "" : "s"} toegevoegd`);
     setImportText("");
     setImportResult(null);

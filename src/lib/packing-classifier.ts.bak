@@ -41,24 +41,15 @@ function norm(s: string): string {
 
 export function classifyItem(name: string): PackingCategory {
   const n = norm(name);
-  // Pass 1: exacte match (hoogste prioriteit — voorkomt "strandhanddoek" → Verzorging)
+  // exact + bevat match
   for (const rule of RULES) {
     for (const kw of rule.kw) {
-      if (n === norm(kw)) {
+      if (n === norm(kw) || n.includes(norm(kw))) {
         return rule.cat;
       }
     }
   }
-  // Pass 2: includes match (langste keyword eerst = specifiekere match wint)
-  const allKeywords = RULES.flatMap((r) =>
-    r.kw.map((kw) => ({ kw: norm(kw), cat: r.cat }))
-  ).sort((a, b) => b.kw.length - a.kw.length);
-  for (const { kw, cat } of allKeywords) {
-    if (kw && n.includes(kw)) {
-      return cat;
-    }
-  }
-  // Pass 3: fuzzy fallback (closest keyword met Levenshtein)
+  // fuzzy fallback: closest keyword
   let best: { cat: PackingCategory; d: number } | null = null;
   for (const rule of RULES) {
     for (const kw of rule.kw) {
@@ -102,7 +93,7 @@ export const SMART_COLLECTIONS: SmartCollection[] = [
   { id: "col-stad", situation: "Stad", icon: "Building2", items: ["Telefoon", "Powerbank", "Waterfles", "Zonnebril", "Comfortabele schoenen", "Pinpas"] },
   { id: "col-hiking", situation: "Hiking", icon: "Mountain", items: ["Wandelschoenen", "Waterfles", "Zonnebrand", "Snacks", "Energie reep", "Pleisters", "Telefoon"] },
   { id: "col-roadtrip", situation: "Roadtrip", icon: "Car", items: ["Rijbewijs", "Telefoon", "Oplader", "Water", "Snacks", "Zonnebril", "Cash"] },
-  { id: "col-vliegtuig", situation: "Vliegtuig", icon: "Plane", items: ["Paspoort", "Boarding pass", "Telefoon", "Oplader", "Koptelefoon", "Handdesinfectie"] },
+  { id: "col-vliegtuig", situation: "Vliegtuig", icon: "Plane", items: ["Paspoort", "Boarding pass", "Telefoon", "Oplader", "Koptelefoon", "Paspoort", "Handdesinfectie"] },
   { id: "col-hotel", situation: "Hotel", icon: "BedDouble", items: ["Paspoort/ID", "Pinpas", "Telefoon", "Oplader", "Verzorging", "Slaapkleding"] },
   { id: "col-festival", situation: "Festival", icon: "PartyPopper", items: ["Tickets", "Powerbank", "Deodorant", "Water", "Zonnebrand", "Telefoon", "ID", "Cash"] },
   { id: "col-boot", situation: "Boot", icon: "Sailboat", items: ["Zonnebril", "Zonnebrand", "Jas", "Waterfles", "Telefoon", "Pil tegen zeeziekte"] },

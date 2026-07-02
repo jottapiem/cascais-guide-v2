@@ -49,7 +49,7 @@ export function CategoryView() {
       {/* 3-koloms Instagram grid — alleen foto's */}
       <div className="grid grid-cols-3 gap-[2px]">
         {list.map((p, i) => (
-          <PlaceCard key={p.id} place={p} variant="masonry" index={i} />
+          <PlaceCard key={p.id} place={p} variant="masonry" index={i} sectionId={`category-${categoryId}`} />
         ))}
       </div>
 

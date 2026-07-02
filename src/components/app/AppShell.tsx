@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAppStore } from "@/store/app-store";
 import { BottomNav } from "./BottomNav";
 import { HomeView } from "./HomeView";
 import { ExploreView } from "./ExploreView";
 import { CategoryView } from "./CategoryView";
-import { DetailView } from "./DetailView";
+import { DetailOverlay } from "./DetailView";
+import { TransitionLayer } from "./TransitionLayer";
 import { SearchView } from "./SearchView";
 import { MapView } from "./MapView";
 import { PackingView } from "./PackingView";
@@ -15,41 +16,80 @@ import { FavoritesView } from "./FavoritesView";
 import { RecommendedView } from "./RecommendedView";
 import { TripsView } from "./TripsView";
 import { ProfileView } from "./ProfileView";
+import type { View } from "@/store/app-store";
 
-const SWIFT_EASE = [0.22, 1, 0.36, 1] as const;
+const EASE_ENTER = [0.16, 1, 0.3, 1] as const;
+const EASE_EXIT = [0.7, 0, 0.84, 0] as const;
+
+const OVERLAY_VIEWS: View[] = ["detail", "search", "recommended"];
 
 export function AppShell() {
   const view = useAppStore((s) => s.view);
   const selectedPlaceId = useAppStore((s) => s.selectedPlaceId);
+  const selectedSectionId = useAppStore((s) => s.selectedSectionId);
   const selectedCategory = useAppStore((s) => s.selectedCategory);
 
-  useEffect(() => { if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" }); }, [view, selectedPlaceId, selectedCategory]);
+  const isOverlay = OVERLAY_VIEWS.includes(view);
+  const lastBaseViewRef = useRef<View>("home");
+  if (!isOverlay) lastBaseViewRef.current = view;
+  const baseView = isOverlay ? lastBaseViewRef.current : view;
 
-  const showNav = view !== "detail" && view !== "search" && view !== "recommended";
-  const motionKey = view === "detail" ? `detail-${selectedPlaceId}` : view === "category" ? `category-${selectedCategory}` : view;
-  const isPushView = view === "detail" || view === "category" || view === "search" || view === "recommended";
+  const showNav = !isOverlay;
+  const isDetail = view === "detail" && selectedPlaceId;
 
   return (
     <div className="min-h-screen bg-neutral-200/60 dark:bg-neutral-950">
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col bg-background shadow-xl-premium sm:border-x border-border/40">
+        {/* BASE VIEW — blijft gemonteerd wanneer overlay open is */}
         <main className="flex-1">
           <AnimatePresence mode="wait" initial={false}>
-            <motion.div key={motionKey} initial={{ opacity: 0, scale: isPushView ? 0.98 : 1 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: isPushView ? 0.98 : 1 }} transition={{ duration: 0.3, ease: SWIFT_EASE }}>
-              {view === "home" && <HomeView />}
-              {view === "explore" && <ExploreView />}
-              {view === "category" && <CategoryView />}
-              {view === "detail" && <DetailView />}
-              {view === "search" && <SearchView />}
-              {view === "map" && <MapView />}
-              {view === "packing" && <PackingView />}
-              {view === "favorites" && <FavoritesView />}
-              {view === "recommended" && <RecommendedView />}
-              {view === "trips" && <TripsView />}
-              {view === "profile" && <ProfileView />}
+            <motion.div
+              key={baseView === "category" ? `category-${selectedCategory}` : baseView}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: EASE_ENTER }}
+            >
+              {baseView === "home" && <HomeView />}
+              {baseView === "explore" && <ExploreView />}
+              {baseView === "category" && <CategoryView />}
+              {baseView === "map" && <MapView />}
+              {baseView === "packing" && <PackingView />}
+              {baseView === "favorites" && <FavoritesView />}
+              {baseView === "trips" && <TripsView />}
+              {baseView === "profile" && <ProfileView />}
             </motion.div>
           </AnimatePresence>
         </main>
         {showNav && <BottomNav />}
+
+        {/* ── TRANSITION LAYER — morph overlay (hoogste z-index) ── */}
+        <TransitionLayer />
+
+        {/* ── DETAIL OVERLAY ── */}
+        <AnimatePresence mode="sync">
+          {isDetail && (
+            <DetailOverlay
+              key={`detail-${selectedPlaceId}`}
+              placeId={selectedPlaceId}
+              sectionId={selectedSectionId || "default"}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* SEARCH / RECOMMENDED OVERLAYS */}
+        <AnimatePresence>
+          {view === "search" && (
+            <motion.div key="search" className="fixed inset-0 z-50 mx-auto max-w-md overflow-y-auto bg-background" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2, ease: EASE_ENTER }}>
+              <SearchView />
+            </motion.div>
+          )}
+          {view === "recommended" && (
+            <motion.div key="recommended" className="fixed inset-0 z-50 mx-auto max-w-md overflow-y-auto bg-background" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2, ease: EASE_ENTER }}>
+              <RecommendedView />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

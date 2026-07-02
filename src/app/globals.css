@@ -331,8 +331,8 @@
   border: none !important;
   width: 36px !important;
   height: 36px !important;
-  line-height: 36px !important;
-  font-size: 18px !important;
+  line-height: 2.25rem !important;
+  font-size: 1.125rem !important;
 }
 .leaflet-control-zoom a:first-child {
   border-top-left-radius: 1rem;
@@ -352,7 +352,7 @@
   border-radius: 999px !important;
   width: 36px !important;
   height: 36px !important;
-  line-height: 36px !important;
+  line-height: 2.25rem !important;
   margin-left: 2px !important;
   margin-top: 2px !important;
   box-shadow: 0 2px 8px -2px oklch(0.2 0.02 220 / 0.3);

@@ -18,26 +18,26 @@ export type View =
   | "trips"
   | "profile";
 
-/** Root tabs — navigeren hiernaar updaten ook rootView */
 const ROOT_VIEWS: View[] = ["home", "explore", "map", "packing", "favorites", "trips", "profile"];
 
 interface AppState {
   view: View;
-  /** De actieve root-tab (wordt bijgehouden voor BottomNav-highlight) */
   rootView: View;
   selectedPlaceId: string | null;
+  selectedSectionId: string | null;
+  morphPlace: { id: string; coverImage: string; origin: { left: number; top: number; width: number; height: number } } | null;
+  morphPhase: "idle" | "forward" | "reverse";
   selectedCategory: CategoryId | null;
   recommendedCat: CategoryId | "all";
   history: View[];
   packingItems: PackingItem[];
-  /** String-array i.p.v. Set — direct JSON-serialiseerbaar voor persistence */
   favorites: string[];
   savedCollections: Situation[];
 
   goHome: () => void;
   goExplore: () => void;
   goCategory: (id: CategoryId) => void;
-  goDetail: (placeId: string) => void;
+  goDetail: (placeId: string, sectionId?: string | null) => void;
   goSearch: () => void;
   goMap: () => void;
   goPacking: () => void;
@@ -47,6 +47,9 @@ interface AppState {
   goProfile: () => void;
   setRecommendedCat: (c: CategoryId | "all") => void;
   goBack: () => void;
+  setMorphPlace: (place: { id: string; coverImage: string; origin: { left: number; top: number; width: number; height: number } }) => void;
+  setMorphPhase: (phase: "idle" | "forward" | "reverse") => void;
+  clearMorph: () => void;
 
   toggleFavorite: (id: string) => void;
   isFavorite: (id: string) => boolean;
@@ -76,6 +79,9 @@ export const useAppStore = create<AppState>()(
       view: "home",
       rootView: "home",
       selectedPlaceId: null,
+      selectedSectionId: null,
+  morphPlace: null,
+  morphPhase: "idle",
       selectedCategory: null,
       recommendedCat: "all",
       history: [],
@@ -83,7 +89,6 @@ export const useAppStore = create<AppState>()(
       favorites: [],
       savedCollections: [],
 
-      // ── Root navigatie (updaten rootView) ──────────────────────────────
       goHome: () =>
         set({ view: "home", rootView: "home", history: pushHistory(get()) }),
       goExplore: () =>
@@ -95,11 +100,10 @@ export const useAppStore = create<AppState>()(
       goFavorites: () =>
         set({ view: "favorites", rootView: "favorites", history: pushHistory(get()) }),
 
-      // ── Push navigatie (rootView blijft ongewijzigd) ────────────────────
       goCategory: (id) =>
         set({ view: "category", selectedCategory: id, history: pushHistory(get()) }),
-      goDetail: (placeId) =>
-        set({ view: "detail", selectedPlaceId: placeId, history: pushHistory(get()) }),
+      goDetail: (placeId, sectionId = null) =>
+        set({ view: "detail", selectedPlaceId: placeId, selectedSectionId: sectionId, history: pushHistory(get()) }),
       goSearch: () =>
         set({ view: "search", history: pushHistory(get()) }),
       goRecommended: () =>
@@ -117,12 +121,10 @@ export const useAppStore = create<AppState>()(
           return;
         }
         const prev = hist[hist.length - 1];
-        // Als we teruggaan naar een root view, sync rootView ook
         const nextRoot = ROOT_VIEWS.includes(prev) ? prev : get().rootView;
         set({ view: prev, rootView: nextRoot, history: hist.slice(0, -1) });
       },
 
-      // ── Favorieten ──────────────────────────────────────────────────────
       toggleFavorite: (id) =>
         set((state) => ({
           favorites: state.favorites.includes(id)
@@ -131,18 +133,11 @@ export const useAppStore = create<AppState>()(
         })),
       isFavorite: (id) => get().favorites.includes(id),
 
-      // ── Packing list ────────────────────────────────────────────────────
       addPackingItem: (name, situations = []) =>
         set((state) => ({
           packingItems: [
             ...state.packingItems,
-            {
-              id: uid(),
-              name,
-              situations,
-              packed: false,
-              category: "Essentials" as const,
-            },
+            { id: uid(), name, situations, packed: false, category: "Essentials" as const },
           ],
         })),
 
@@ -161,15 +156,11 @@ export const useAppStore = create<AppState>()(
         })),
 
       removePackingItem: (id) =>
-        set((state) => ({
-          packingItems: state.packingItems.filter((it) => it.id !== id),
-        })),
+        set((state) => ({ packingItems: state.packingItems.filter((it) => it.id !== id) })),
 
       updatePackingItem: (id, patch) =>
         set((state) => ({
-          packingItems: state.packingItems.map((it) =>
-            it.id === id ? { ...it, ...patch } : it
-          ),
+          packingItems: state.packingItems.map((it) => (it.id === id ? { ...it, ...patch } : it)),
         })),
 
       togglePacked: (id) =>
@@ -192,11 +183,14 @@ export const useAppStore = create<AppState>()(
             ? state
             : { savedCollections: [...state.savedCollections, s] }
         ),
+
+      setMorphPlace: (place) => set({ morphPlace: place, morphPhase: "forward" }),
+      setMorphPhase: (phase) => set({ morphPhase: phase }),
+      clearMorph: () => set({ morphPlace: null, morphPhase: "idle" }),
     }),
     {
       name: "cascais-guide-v2-store",
       storage: createJSONStorage(() => localStorage),
-      // Alleen persistente data opslaan — UI-state (view, history) reset bewust
       partialize: (state) => ({
         favorites: state.favorites,
         packingItems: state.packingItems,

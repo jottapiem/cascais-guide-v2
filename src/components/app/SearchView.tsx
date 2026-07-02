@@ -101,7 +101,7 @@ export function SearchView() {
               className="grid grid-cols-2 gap-2.5"
             >
               {results.map((r, i) => (
-                <PlaceCard key={r.place.id} place={r.place} variant="grid" index={i} />
+                <PlaceCard key={r.place.id} place={r.place} variant="grid" index={i} sectionId="search" />
               ))}
             </motion.div>
           </AnimatePresence>

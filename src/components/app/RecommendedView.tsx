@@ -116,7 +116,7 @@ export function RecommendedView() {
       <section className="mt-4 px-4">
         <div className="grid grid-cols-2 gap-2.5">
           {filtered.map((p, i) => (
-            <PlaceCard key={p.id} place={p} variant="named" index={i} />
+            <PlaceCard key={p.id} place={p} variant="named" index={i} sectionId="recommended" />
           ))}
         </div>
       </section>

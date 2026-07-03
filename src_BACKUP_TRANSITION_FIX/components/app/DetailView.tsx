@@ -82,7 +82,7 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
     <>
       {/* ── FOTO HERO — parallax-container (geen layoutId hier, alleen scroll-transform) ── */}
       <motion.div
-        style={{}}
+        style={{ y: fotoY, scale: fotoScale }}
         className="fixed inset-x-0 top-0 z-30 mx-auto max-w-md origin-top"
       >
         {/* FRAME — layoutId morph target, clipt naar 4:3, zelfde key als de kaart-frame */}
@@ -92,7 +92,7 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
           style={{ borderRadius: "48px 48px 0 0", opacity: morphPhase === "idle" ? 1 : 0, transition: "opacity 0ms ease" }}
           className="relative aspect-[4/3] w-full overflow-hidden"
         >
-          <img
+          <motion.img
             layout
             transition={MORPH_TRANSITION}
             src={place.coverImage}

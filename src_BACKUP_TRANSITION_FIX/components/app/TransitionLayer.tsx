@@ -124,7 +124,7 @@ export function TransitionLayer() {
       <div ref={scrimRef} className="morph-scrim" />
       <div
         ref={imgWrapperRef}
-        style={{ position: "fixed", zIndex: 90, overflow: "hidden", filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.18))", willChange: "left, top, width, height", opacity: morphPhase === "idle" ? 0 : 1, transition: "opacity 0ms ease", pointerEvents: "none" }}
+        style={{ position: "fixed", zIndex: 90, overflow: "hidden", filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.18))", willChange: "left, top, width, height", opacity: morphPhase === "idle" ? 0 : 1, transition: "opacity 0ms ease" }}
       >
         <img src={morphPlace.coverImage} alt="" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
       </div>

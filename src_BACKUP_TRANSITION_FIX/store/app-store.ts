@@ -37,7 +37,6 @@ interface AppState {
 
   // UI state acties
   setSelectedBagId: (id: string | null) => void;
-  setSelectedSmartListId: (id: string | null) => void;
   setPackingSubView: (v: PackingSubView) => void;
 
   goHome: () => void;
@@ -127,7 +126,6 @@ export const useAppStore = create<AppState>()(
       selectedSmartListId: null,
 
       setSelectedBagId: (id) => set({ selectedBagId: id }),
-      setSelectedSmartListId: (id) => set({ selectedSmartListId: id }),
       setPackingSubView: (v) => set({ packingSubView: v }),
 
       goHome: () => set({ view: "home", rootView: "home", history: pushHistory(get()) }),
@@ -422,7 +420,3 @@ export const useAppStore = create<AppState>()(
     }
   )
 );
-
-export const isTransitioning = () =>
-  typeof window !== "undefined" &&
-  (window as any).__TRANSITION_ACTIVE__;

@@ -3,9 +3,8 @@
 import { useAppStore } from "@/store/app-store";
 import { BagsView, SubTabSwitcher } from "./BagsView";
 import { BagDetailView } from "./BagDetailView";
-import { SmartListDetailView } from "./SmartListDetailView";
 import { motion, AnimatePresence } from "framer-motion";
-import { haptics } from "@/lib/premium";
+import { Sparkles } from "lucide-react";
 
 export function PackingView() {
   const subView = useAppStore((s) => s.packingSubView);
@@ -26,9 +25,7 @@ export function PackingView() {
         >
           {subView === "bag-detail" ? (
             <BagDetailView />
-          ) : subView === "smart-list-detail" ? (
-            <SmartListDetailView />
-          ) : subView === "smart-lists" ? (
+          ) : subView === "smart-lists" || subView === "smart-list-detail" ? (
             <SmartListsStub />
           ) : (
             <BagsView />
@@ -51,8 +48,6 @@ export function PackingView() {
 function SmartListsStub() {
   const items = useAppStore((s) => s.packingItems);
   const bags = useAppStore((s) => s.bags);
-  const setSelectedSmartListId = useAppStore((s) => s.setSelectedSmartListId);
-  const setPackingSubView = useAppStore((s) => s.setPackingSubView);
 
   // Berekent counts voor elke smart view
   const unpackedCount = items.filter((it) => it.packedCount < it.qty).length;
@@ -87,11 +82,6 @@ function SmartListsStub() {
           <motion.button
             key={sv.id}
             type="button"
-            onClick={() => {
-              haptics.selection();
-              setSelectedSmartListId(sv.id);
-              setPackingSubView("smart-list-detail");
-            }}
             initial={{ opacity: 0, filter: "blur(8px)" }}
             animate={{ opacity: 1, filter: "blur(0px)" }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: Math.min(i * 0.04, 0.3) }}
@@ -116,7 +106,13 @@ function SmartListsStub() {
         ))}
       </div>
 
-
+      {/* Hint dat dit nog in ontwikkeling is */}
+      <div className="mt-6 px-4">
+        <div className="flex items-center gap-2 rounded-xl bg-secondary/40 px-3 py-2 text-[11px] text-muted-foreground">
+          <Sparkles className="h-3.5 w-3.5 shrink-0" />
+          <p>Tap een lijst om items te zien — komt in Fase 2.4</p>
+        </div>
+      </div>
     </div>
   );
 }

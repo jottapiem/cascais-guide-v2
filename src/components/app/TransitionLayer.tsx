@@ -67,6 +67,9 @@ export function TransitionLayer() {
       greyRef.current.style.top = greyTargetTop + "px";
       greyRef.current.style.width = heroWidth + "px";
       greyRef.current.style.height = greyTargetHeight + "px";
+      greyRef.current.style.borderRadius = "2rem 2rem 0 0";
+      greyRef.current.style.borderRadius = "2rem 2rem 0 0";
+      greyRef.current.style.borderRadius = "2rem 2rem 0 0";
 
       timeoutRef.current = setTimeout(() => {
         goDetail(morphPlace.id);
@@ -98,7 +101,7 @@ export function TransitionLayer() {
       <div ref={scrimRef} className="morph-scrim" />
       <div
         ref={imgWrapperRef}
-        style={{ position: "fixed", zIndex: 91, overflow: "hidden", filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.18))", willChange: "left, top, width, height" }}
+        style={{ position: "fixed", zIndex: 30, overflow: "hidden", filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.18))", willChange: "left, top, width, height" }}
       >
         <img src={morphPlace.coverImage} alt="" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
@@ -106,7 +109,7 @@ export function TransitionLayer() {
         ref={greyRef}
         style={{
           position: "fixed",
-          zIndex: 90,
+          zIndex: 25,
           background: "#F7F6F4",
           willChange: "left, top, width, height",
           opacity: morphPhase === "idle" ? 0 : 1,

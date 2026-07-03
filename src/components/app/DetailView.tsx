@@ -47,16 +47,15 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
   }, []);
   const place = getPlace(placeId);
   const goBack = useAppStore((s) => s.goBack);
+  const clearMorph = useAppStore((s) => s.clearMorph);
   const setMorphPhase = useAppStore((s) => s.setMorphPhase);
   const morphPlace = useAppStore((s) => s.morphPlace);
 
   // Back = trigger reverse morph (TransitionLayer animeert terug)
   const handleBack = () => {
-    if (morphPlace) {
-      setMorphPhase("reverse");
-    } else {
-      goBack();
-    }
+    // Direct sluiten — geen reverse animatie
+    clearMorph();
+    goBack();
   };
   const toggleFavorite = useAppStore((s) => s.toggleFavorite);
   const isFav = useAppStore((s) => s.favorites.includes(placeId));
@@ -105,8 +104,8 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ delay: OPACITY_DELAY, duration: OPACITY_DURATION, ease: "linear" }}
-          className="absolute inset-0 pointer-events-none overflow-hidden"
-          style={{ borderRadius: "48px 48px 0 0", opacity: 0 }}
+          className="fixed inset-x-0 top-0 z-35 mx-auto max-w-md pointer-events-none overflow-hidden"
+          style={{ borderRadius: "48px 48px 0 0", opacity: 0, height: HERO_HEIGHT_CSS }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/10 to-black/85" />
           <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />

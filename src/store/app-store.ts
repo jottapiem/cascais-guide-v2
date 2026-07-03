@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { defaultPackingItems, classifyItem } from "@/lib/packing-classifier";
-import type { CategoryId, PackingItem, PackingCategory, Situation } from "@/lib/types";
+import type { CategoryId, PackingItem, PackingCategory, Priority, Situation } from "@/lib/types";
 
 export type View =
   | "home"
@@ -84,8 +84,8 @@ export const useAppStore = create<AppState>()(
       rootView: "home",
       selectedPlaceId: null,
       selectedSectionId: null,
-  morphPlace: null,
-  morphPhase: "idle",
+      morphPlace: null,
+      morphPhase: "idle",
       selectedCategory: null,
       recommendedCat: "all",
       history: [],
@@ -137,11 +137,16 @@ export const useAppStore = create<AppState>()(
         })),
       isFavorite: (id) => get().favorites.includes(id),
 
-      addPackingItem: (name, situations = [], category?) =>
+      addPackingItem: (name: string, situations: Situation[] = [], category?: PackingCategory) =>
         set((state) => ({
           packingItems: [
             ...state.packingItems,
-            { id: uid(), name, situations, packed: false, category: category ?? classifyItem(name) },
+            {
+              id: uid(), name, situations,
+              category: category ?? classifyItem(name),
+              qty: 1, packedCount: 0, priority: "nice" as Priority,
+              source: "manual" as const, createdAt: Date.now(),
+            },
           ],
         })),
 
@@ -153,8 +158,9 @@ export const useAppStore = create<AppState>()(
               id: uid(),
               name: it.name,
               situations: it.situations ?? [],
-              packed: false,
               category: it.category ?? classifyItem(it.name),
+              qty: 1, packedCount: 0, priority: "nice" as Priority,
+              source: "import" as const, createdAt: Date.now(),
             })),
           ],
         })),
@@ -170,13 +176,51 @@ export const useAppStore = create<AppState>()(
       togglePacked: (id) =>
         set((state) => ({
           packingItems: state.packingItems.map((it) =>
-            it.id === id ? { ...it, packed: !it.packed } : it
+            it.id === id
+              ? { ...it, packedCount: it.packedCount >= it.qty ? 0 : it.qty }
+              : it
           ),
         })),
 
       setPackedAll: (packed) =>
         set((state) => ({
-          packingItems: state.packingItems.map((it) => ({ ...it, packed })),
+          packingItems: state.packingItems.map((it) => ({
+            ...it,
+            packedCount: packed ? it.qty : 0,
+          })),
+        })),
+
+      // Nieuw (Fase 1.3):
+      togglePackedCount: (id, delta) =>
+        set((state) => ({
+          packingItems: state.packingItems.map((it) =>
+            it.id === id
+              ? {
+                  ...it,
+                  packedCount: Math.max(0, Math.min(it.qty, it.packedCount + delta)),
+                }
+              : it
+          ),
+        })),
+
+      setQty: (id, qty) =>
+        set((state) => ({
+          packingItems: state.packingItems.map((it) =>
+            it.id === id
+              ? {
+                  ...it,
+                  qty: Math.max(1, qty),
+                  packedCount: Math.min(it.packedCount, Math.max(1, qty)),
+                }
+              : it
+          ),
+        })),
+
+      setPriority: (id, priority) =>
+        set((state) => ({
+          packingItems: state.packingItems.map((it) =>
+            it.id === id ? { ...it, priority } : it
+          ),
         })),
 
       clearPacking: () => set({ packingItems: [] }),
@@ -184,7 +228,7 @@ export const useAppStore = create<AppState>()(
       acceptCollection: (s) =>
         set((state) =>
           state.savedCollections.includes(s)
-            ? state
+            ? {}
             : { savedCollections: [...state.savedCollections, s] }
         ),
 
@@ -195,6 +239,25 @@ export const useAppStore = create<AppState>()(
     {
       name: "cascais-guide-v2-store",
       storage: createJSONStorage(() => localStorage),
+      version: 1,
+      migrate: (persistedState: unknown, version: number) => {
+        const s = (persistedState ?? {}) as {
+          packingItems?: any[];
+          favorites?: string[];
+          savedCollections?: Situation[];
+        };
+        if (version < 1 && Array.isArray(s.packingItems)) {
+          s.packingItems = s.packingItems.map((it: any) => ({
+            ...it,
+            packedCount: it.packedCount ?? (it.packed ? 1 : 0),
+            qty: it.qty ?? 1,
+            priority: it.priority ?? "nice",
+            source: it.source ?? "manual",
+            createdAt: it.createdAt ?? Date.now(),
+          }));
+        }
+        return s;
+      },
       partialize: (state) => ({
         favorites: state.favorites,
         packingItems: state.packingItems,

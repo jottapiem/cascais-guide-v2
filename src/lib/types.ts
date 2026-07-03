@@ -101,7 +101,14 @@ export type PackingCategory =
   | "Snacks"
   | "Drinken"
   | "Parfum"
-  | "Essentials";
+  | "Essentials"
+  // Nieuw (Fase 1.3) — gebaseerd op marktonderzoek:
+  | "Sport"
+  | "Werk"
+  | "Camping"
+  | "Baby"
+  | "Huisdier"
+  | "Koken";
 
 export type Situation =
   | "Strand"
@@ -119,12 +126,22 @@ export type Situation =
   | "Sport"
   | "Picknick";
 
+// Prioriteit (Fase 1.3) — Must/Nice/Optional, zie PackPoint/Packing Pro
+export type Priority = "must" | "nice" | "optional";
+
 export interface PackingItem {
   id: string;
   name: string;
   category: PackingCategory; // automatisch bepaald, bewerkbaar
   situations: Situation[]; // multiple choice, optioneel
-  packed: boolean;
+  // Nieuw (Fase 1.3):
+  qty: number;              // hoeveelheid (default 1) — was impliciet 1
+  packedCount: number;      // 0..qty — partial check-off (was: packed boolean)
+  priority: Priority;       // default "nice"
+  notes?: string;           // per-item notities ("alleen als regen")
+  photo?: string;           // optioneel, voor VLM foto-herkenning later
+  source?: "manual" | "import" | "collection" | "ai" | "camera";
+  createdAt: number;        // sortering + "onlangs toegevoegd"
 }
 
 export interface SmartCollection {

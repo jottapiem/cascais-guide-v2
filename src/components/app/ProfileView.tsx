@@ -13,7 +13,7 @@ export function ProfileView() {
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const favCount = favorites.length;
-  const packedCount = packingItems.filter((i) => i.packed).length;
+  const packedCount = packingItems.filter((i) => i.packedCount >= i.qty).length;
   const pct = packingItems.length ? Math.round((packedCount / packingItems.length) * 100) : 0;
 
   const handleReset = () => {

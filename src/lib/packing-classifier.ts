@@ -1,7 +1,7 @@
 // Packing auto-classifier — lokale keyword → categorie mapping (snel, offline)
 // Voor onbekende items valt de LLM import API terug op slimme classificatie.
 
-import type { PackingCategory, Situation, SmartCollection } from "./types";
+import type { PackingCategory, Priority, Situation, SmartCollection } from "./types";
 
 // keyword (genormaliseerd) → categorie
 const RULES: { kw: string[]; cat: PackingCategory }[] = [
@@ -126,29 +126,33 @@ export const ALL_SITUATIONS: Situation[] = [
 
 // default starter packing items (geen context/prioriteit meer)
 export function defaultPackingItems() {
-  const base: { name: string; situations: Situation[] }[] = [
-    { name: "Paspoort / ID", situations: ["Vliegtuig", "Hotel"] },
-    { name: "Pinpas + cash", situations: ["Shopping", "Uitgaan"] },
-    { name: "Telefoon", situations: ["Stad", "Uitgaan"] },
-    { name: "Oplader + kabel", situations: ["Hotel"] },
-    { name: "Powerbank", situations: ["Festival", "Uitgaan"] },
+  const base: { name: string; situations: Situation[]; priority?: Priority; qty?: number }[] = [
+    { name: "Paspoort / ID", situations: ["Vliegtuig", "Hotel"], priority: "must" },
+    { name: "Pinpas + cash", situations: ["Shopping", "Uitgaan"], priority: "must" },
+    { name: "Telefoon", situations: ["Stad", "Uitgaan"], priority: "must" },
+    { name: "Oplader + kabel", situations: ["Hotel"], priority: "must" },
+    { name: "Powerbank", situations: ["Festival", "Uitgaan"], priority: "nice" },
     { name: "Zonnebril", situations: ["Strand", "Stad"] },
-    { name: "Zonnebrand SPF50", situations: ["Strand"] },
+    { name: "Zonnebrand SPF50", situations: ["Strand"], priority: "must" },
     { name: "Zwemkleding", situations: ["Strand", "Zwembad"] },
     { name: "Strandhanddoek", situations: ["Strand"] },
     { name: "Slippers", situations: ["Strand"] },
     { name: "Waterfles", situations: ["Strand", "Hiking", "Stad"] },
-    { name: "Linnen shirts", situations: ["Stad"] },
+    { name: "Linnen shirts", situations: ["Stad"], qty: 3 },
     { name: "Trui voor de avond", situations: ["Uitgaan"] },
     { name: "Comfortabele sneakers", situations: ["Stad", "Hiking"] },
     { name: "Koptelefoon", situations: ["Vliegtuig"] },
-    { name: "Reisapotheek", situations: ["Hotel"] },
+    { name: "Reisapotheek", situations: ["Hotel"], priority: "must" },
   ];
   return base.map((b, i) => ({
     id: `seed-${i}`,
     name: b.name,
     category: classifyItem(b.name),
     situations: b.situations,
-    packed: false,
+    qty: b.qty ?? 1,
+    packedCount: 0,
+    priority: b.priority ?? "nice",
+    source: "manual" as const,
+    createdAt: Date.now() - (base.length - i) * 1000,
   }));
 }

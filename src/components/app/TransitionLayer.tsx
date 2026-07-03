@@ -39,7 +39,7 @@ export function TransitionLayer() {
     const heroLeft = (vw - heroWidth) / 2;
     const heroTop = 0;
     const heroImgHeight = (heroWidth * 3) / 4;
-    const greyTargetTop = heroImgHeight;
+    const greyTargetTop = heroImgHeight - 48;
     const greyTargetHeight = vh - greyTargetTop;
 
     if (morphPhase === "forward") {
@@ -58,7 +58,7 @@ export function TransitionLayer() {
 
       greyRef.current.style.transition = "none";
       greyRef.current.style.left = origin.left + "px";
-      greyRef.current.style.top = (origin.top + origin.height) + "px";
+      greyRef.current.style.top = (origin.top + origin.height - 48) + "px";
       greyRef.current.style.width = origin.width + "px";
       greyRef.current.style.height = "0px";
       void greyRef.current.offsetHeight;
@@ -81,7 +81,7 @@ export function TransitionLayer() {
 
       greyRef.current.style.transition = "left " + GREY_DURATION + "ms " + MORPH_EASE + ", top " + GREY_DURATION + "ms " + MORPH_EASE + ", width " + GREY_DURATION + "ms " + MORPH_EASE + ", height " + GREY_DURATION + "ms " + MORPH_EASE;
       greyRef.current.style.left = origin.left + "px";
-      greyRef.current.style.top = (origin.top + origin.height) + "px";
+      greyRef.current.style.top = (origin.top + origin.height - 48) + "px";
       greyRef.current.style.width = origin.width + "px";
       greyRef.current.style.height = "0px";
 

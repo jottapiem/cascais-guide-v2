@@ -119,7 +119,7 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.15, ease: "linear" }}
-        style={{ top: HERO_HEIGHT_CSS }}
+        style={{ top: "calc(" + HERO_HEIGHT_CSS + " - 3rem)" }}
         className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md bg-[#F7F6F4] rounded-t-[2rem] overflow-hidden shadow-[0_-8px_24px_rgba(0,0,0,0.08)]"
       >
         <div ref={sheetRef} className="h-full overflow-y-auto overflow-x-hidden">
@@ -250,17 +250,17 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ delay: OPACITY_DELAY, duration: OPACITY_DURATION, ease: "linear" }}
-        className="fixed inset-x-0 top-0 z-50 mx-auto max-w-md pt-safe-lg pointer-events-none"
+        className="fixed inset-x-0 top-0 z-70 mx-auto max-w-md pt-safe-lg pointer-events-none"
       >
         <button
           type="button"
           onClick={handleBack}
-          className="absolute left-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-xl transition-all hover:bg-white/25 active:scale-90 pointer-events-auto"
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.5rem)" }} className="absolute left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-xl transition-all hover:bg-white/25 active:scale-90 pointer-events-auto"
           aria-label="Terug"
         >
           <ChevronLeft className="h-5 w-5" strokeWidth={2.6} />
         </button>
-        <div className="absolute right-4 top-4 z-10 flex items-center gap-2 pointer-events-auto">
+        <div style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.5rem)" }} className="absolute right-4 z-10 flex items-center gap-2 pointer-events-auto">
           <span className="rounded-full bg-white/15 px-3 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white ring-1 ring-white/25 backdrop-blur-xl">
             {place.type}
           </span>

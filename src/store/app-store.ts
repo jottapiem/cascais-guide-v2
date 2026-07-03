@@ -54,12 +54,16 @@ interface AppState {
   toggleFavorite: (id: string) => void;
   isFavorite: (id: string) => boolean;
 
-  addPackingItem: (name: string, situations?: Situation[]) => void;
+  addPackingItem: (name: string, situations?: Situation[], category?: PackingCategory) => void;
   addPackingItems: (items: { name: string; situations?: Situation[]; category?: PackingCategory }[]) => void;
   removePackingItem: (id: string) => void;
   updatePackingItem: (id: string, patch: Partial<PackingItem>) => void;
   togglePacked: (id: string) => void;
   setPackedAll: (packed: boolean) => void;
+  // Nieuw (Fase 1.3):
+  togglePackedCount: (id: string, delta: number) => void;
+  setQty: (id: string, qty: number) => void;
+  setPriority: (id: string, priority: Priority) => void;
   clearPacking: () => void;
 
   acceptCollection: (s: Situation) => void;

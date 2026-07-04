@@ -92,6 +92,7 @@ function AirbnbCard({ place, index, userCoords, variant = "rail", sectionId }: {
       id: place.id,
       cardInstanceId,
       coverImage: place.coverImage,
+      sectionId,
       origin: {
         left: rect.left,
         top: rect.top,

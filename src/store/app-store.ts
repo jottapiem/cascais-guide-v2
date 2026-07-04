@@ -20,7 +20,7 @@ interface AppState {
   rootView: View;
   selectedPlaceId: string | null;
   selectedSectionId: string | null;
-  morphPlace: { id: string; cardInstanceId: string; coverImage: string; origin: { left: number; top: number; width: number; height: number } } | null;
+  morphPlace: { id: string; cardInstanceId: string; coverImage: string; sectionId: string; origin: { left: number; top: number; width: number; height: number } } | null;
   morphPhase: "idle" | "forward" | "reverse";
   selectedCategory: CategoryId | null;
   recommendedCat: CategoryId | "all";
@@ -53,7 +53,7 @@ interface AppState {
   goProfile: () => void;
   setRecommendedCat: (c: CategoryId | "all") => void;
   goBack: () => void;
-  setMorphPlace: (place: { id: string; cardInstanceId: string; coverImage: string; origin: { left: number; top: number; width: number; height: number } }) => void;
+  setMorphPlace: (place: { id: string; cardInstanceId: string; coverImage: string; sectionId: string; origin: { left: number; top: number; width: number; height: number } }) => void;
   setMorphPhase: (phase: "idle" | "forward" | "reverse") => void;
   clearMorph: () => void;
 

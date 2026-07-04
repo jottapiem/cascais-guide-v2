@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useLayoutEffect, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { useAppStore } from "@/store/app-store";
 
 const MORPH_DURATION = 420;
@@ -83,7 +83,7 @@ export function TransitionLayer() {
       greyRef.current.style.borderRadius = "2rem 2rem 0 0";
 
       timeoutRef.current = setTimeout(() => {
-        goDetail(morphPlace.id);
+        goDetail(morphPlace.id, morphPlace.sectionId);
         setMorphPhase("idle");
       }, MORPH_DURATION);
     } else if (morphPhase === "reverse") {
@@ -111,7 +111,10 @@ export function TransitionLayer() {
       greyRef.current.style.height = "0px";
       greyRef.current.style.borderRadius = "2rem 2rem 0 0";
 
-      timeoutRef.current = setTimeout(() => { clearMorph(); goBack(); }, MORPH_DURATION);
+      timeoutRef.current = setTimeout(() => {
+        flushSync(() => { goBack(); }); // Unmount DetailView direct (geen tijd om te flitsen)
+        clearMorph();                   // Reset state pas na unmount
+      }, MORPH_DURATION);
     }
 
     return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };

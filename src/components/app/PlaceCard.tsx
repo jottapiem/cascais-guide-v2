@@ -1,5 +1,5 @@
 "use client";
-import { memo, useState } from "react";
+import { memo, useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
 import type { Place } from "@/lib/types";
@@ -16,6 +16,13 @@ export const PlaceCard = memo(function PlaceCard({ place, variant = "masonry", i
   const toggleFavorite = useAppStore((s) => s.toggleFavorite);
   const isFav = useAppStore((s) => s.favorites.includes(place.id));
   const [imgLoaded, setImgLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // Images may already be in cache when this card mounts — onLoad won't fire for cached images
+  // in some browsers. Check synchronously on mount as AirbnbCard does.
+  useEffect(() => {
+    if (imgRef.current?.complete) setImgLoaded(true);
+  }, []);
 
   const aspectClass = variant === "square" ? "aspect-square" : variant === "wide" ? "aspect-[4/5]" : variant === "grid" ? "aspect-[3/4]" : variant === "named" ? "aspect-[4/5]" : "aspect-square";
   const widthClass = variant === "wide" || variant === "named" ? "w-full" : "";
@@ -25,9 +32,18 @@ export const PlaceCard = memo(function PlaceCard({ place, variant = "masonry", i
 
   return (
     <motion.button type="button" onClick={() => { goDetail(place.id, sectionId); haptics.selection(); }} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.35, delay: staggerDelay(index), ease: SWIFT_EASE }} whileTap={{ scale: 0.95, transition: { duration: 0.12, ease: SWIFT_EASE } }} className={`group relative block overflow-hidden bg-muted text-left ${widthClass} ${premiumWrap}`}>
-      {/* FRAME — layoutId morph target naar DetailOverlay hero. Radius via style (niet Tailwind class) zodat Framer 'm kan interpoleren tijdens de FLIP. */}
+      {/* FRAME — layoutId morph target. motion.img (not plain img) participates in Framer's
+          projection system so the image corrects for parent scale during the FLIP. */}
       <motion.div layoutId={`place-photo-${place.id}-${sectionId}`} style={{ borderRadius: radius }} transition={MORPH_TRANSITION} className={`relative ${aspectClass} w-full overflow-hidden`}>
-        <img layout transition={MORPH_TRANSITION} src={variant === "masonry" ? (place.exploreImage ?? place.coverImage) : place.coverImage} alt={place.name} onLoad={() => setImgLoaded(true)} className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${imgLoaded ? "opacity-100" : "opacity-0"}`} />
+        <motion.img
+          ref={imgRef}
+          layout
+          transition={MORPH_TRANSITION}
+          src={variant === "masonry" ? (place.exploreImage ?? place.coverImage) : place.coverImage}
+          alt={place.name}
+          onLoad={() => setImgLoaded(true)}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+        />
         {!imgLoaded && <div className="absolute inset-0 skeleton-shimmer" />}
       </motion.div>
       {isPremium && variant !== "named" && <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />}

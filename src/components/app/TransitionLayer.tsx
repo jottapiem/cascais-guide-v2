@@ -100,6 +100,8 @@ export function TransitionLayer() {
           opacity: morphPhase === "idle" ? 0 : 1,
           transition: "opacity 0ms ease",
           pointerEvents: "none",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         {/* FOTO - Behoudt originele 4:3 ratio, vult bovenkant van container */}
@@ -107,27 +109,22 @@ export function TransitionLayer() {
           src={morphPlace.coverImage} 
           alt="" 
           style={{ 
-            position: "absolute", 
-            top: 0, 
-            left: 0, 
             width: "100%", 
-            height: `calc(100% - ${SHEET_OVERLAP}px)`, 
+            height: "auto",
+            aspectRatio: "4 / 3", 
             objectFit: "cover",
-            zIndex: 2 // Boven de sheet
+            zIndex: 2,
+            position: "relative"
           }} 
         />
         {/* SHEET - Vult rest van container, overlapt foto van onderen */}
         <div 
           style={{ 
-            position: "absolute", 
-            bottom: 0, 
-            left: 0, 
-            width: "100%", 
-            height: `calc(100% - ${SHEET_OVERLAP}px + ${SHEET_OVERLAP}px)`, 
+            flex: 1,
             background: "#F7F6F4",
             borderRadius: "48px 48px 0 0",
             marginTop: `-${SHEET_OVERLAP}px`,
-            zIndex: 2
+            zIndex: 3
           }} 
         />
       </div>

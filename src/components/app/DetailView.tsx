@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Star, Clock, Users, MapPin, Navigation,
@@ -20,7 +20,7 @@ const OPACITY_DELAY = 0.2;
 const OPACITY_DURATION = 0.25;
 // Hero is aspect-[4/3] binnen een max-w-md (28rem) container — sheet-top volgt exact
 // de werkelijk gerenderde hero-hoogte i.p.v. een losse vh-gok die op smalle telefoons afwijkt.
-const HERO_HEIGHT_CSS = "calc(min(28rem, 100vw) * 0.75)";  // foto hoogte = sheet top
+const HERO_HEIGHT_CSS = "calc(min(28rem, 100vw) * 0.75)";  // foto hoogte = sheet top (4:3)
 
 const AUDIENCE_LABEL: Record<Audience, string> = {
   vrienden: "Vrienden",
@@ -47,10 +47,12 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
   }, []);
   const place = getPlace(placeId);
   const goBack = useAppStore((s) => s.goBack);
+  const [exiting, setExiting] = useState(false);
   const clearMorph = useAppStore((s) => s.clearMorph);
   const setMorphPhase = useAppStore((s) => s.setMorphPhase);
   const morphPlace = useAppStore((s) => s.morphPlace);
   const morphPhase = useAppStore((s) => s.morphPhase);
+  useEffect(() => { if (morphPhase === "reverse") setExiting(true); }, [morphPhase]);
 
   // Back = trigger reverse morph (TransitionLayer animeert terug)
   const handleBack = () => {
@@ -86,29 +88,25 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
         className="fixed inset-x-0 top-0 z-30 mx-auto max-w-md origin-top"
       >
         {/* FRAME — layoutId morph target, clipt naar 4:3, zelfde key als de kaart-frame */}
-        <motion.div
-          layoutId={`place-photo-${placeId}-${sectionId}`}
-          transition={MORPH_TRANSITION}
-          style={{ borderRadius: "48px 48px 0 0", opacity: !morphPlace || morphPhase === "idle" ? 1 : 0, transition: "opacity 0ms ease" }}
+        <div
+          style={{ borderRadius: "48px 48px 0 0", opacity: exiting ? 0 : (!morphPlace || morphPhase === "idle" ? 1 : 0), transition: "opacity 0ms ease" }}
           className="relative aspect-[4/3] w-full overflow-hidden"
         >
-          <motion.img
-            layout
-            transition={MORPH_TRANSITION}
+          <img
             src={place.coverImage}
             alt={place.name}
             className="absolute inset-0 h-full w-full object-cover"
           />
-        </motion.div>
+        </div>
 
       </motion.div>
 
       {/* Shadow overlay — sibling (z-35), boven foto (z-30), onder sheet (z-40) */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: morphPhase === "reverse" ? 0 : 1 }}
+        animate={{ opacity: exiting ? 0 : 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: morphPhase === "reverse" ? 0 : OPACITY_DURATION, delay: morphPhase === "reverse" ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
+        transition={{ duration: exiting ? 0 : OPACITY_DURATION, delay: exiting ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
         className="fixed inset-x-0 top-0 z-35 mx-auto max-w-md pointer-events-none overflow-hidden"
         style={{ borderRadius: "48px 48px 0 0", height: HERO_HEIGHT_CSS, opacity: 1 }}
       >
@@ -119,9 +117,9 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
       {/* ── SHEET — snelle fade-in (150ms, geen delay) ── */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: morphPhase === "reverse" ? 0 : 1 }}
+        animate={{ opacity: exiting ? 0 : 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: morphPhase === "reverse" ? 0 : 0.15, ease: "linear" }}
+        transition={{ duration: exiting ? 0 : OPACITY_DURATION, delay: exiting ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
         style={{ top: "calc(" + HERO_HEIGHT_CSS + " - 3rem)" }}
         className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md bg-[#F7F6F4] rounded-t-[48px] overflow-hidden shadow-[0_-8px_24px_rgba(0,0,0,0.08)]"
       >
@@ -129,9 +127,9 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
           {/* Content — fade in na morph */}
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: morphPhase === "reverse" ? 0 : 1 }}
+            animate={{ opacity: exiting ? 0 : 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: morphPhase === "reverse" ? 0 : OPACITY_DURATION, delay: morphPhase === "reverse" ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
+            transition={{ duration: exiting ? 0 : OPACITY_DURATION, delay: exiting ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
             className="px-4 pb-28 pt-6"
           >
             {/* TITEL — bovenaan, gecentreerd (NIET op foto) */}
@@ -250,9 +248,9 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
       {/* ── BUTTONS — fade in na morph ── */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: morphPhase === "reverse" ? 0 : 1 }}
+        animate={{ opacity: exiting ? 0 : 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: morphPhase === "reverse" ? 0 : OPACITY_DURATION, delay: morphPhase === "reverse" ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
+        transition={{ duration: exiting ? 0 : OPACITY_DURATION, delay: exiting ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
         className="fixed inset-x-0 top-0 z-70 mx-auto max-w-md pt-safe-lg pointer-events-none"
       >
         <button
@@ -291,9 +289,9 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
       {/* ── STICKY MAPS BUTTON ── */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: morphPhase === "reverse" ? 0 : 1 }}
+        animate={{ opacity: exiting ? 0 : 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: morphPhase === "reverse" ? 0 : OPACITY_DURATION, delay: morphPhase === "reverse" ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
+        transition={{ duration: exiting ? 0 : OPACITY_DURATION, delay: exiting ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
         className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md glass-strong px-4 pt-3 pb-safe hairline-t"
       >
         <a href={place.mapLink} target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-[0.9375rem] font-bold tracking-tight text-primary-foreground shadow-float transition-transform active:scale-[0.97]">

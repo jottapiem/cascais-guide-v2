@@ -122,11 +122,9 @@ function AirbnbCard({ place, index, userCoords, variant = "rail", sectionId }: {
           className="relative aspect-[4/3] w-full overflow-hidden"
           style={{ boxShadow: CARD_SHADOW, border: "1px solid rgba(0,0,0,0.05)", background: "#F7F6F4", borderRadius: 16, opacity: isMorphing ? 0 : 1, transition: "opacity 100ms" }}
         >
-          <motion.div layoutId={`place-photo-${place.id}-${sectionId}`} transition={MORPH_TRANSITION} className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden">
             <img
-              layout
               ref={imgRef}
-              transition={MORPH_TRANSITION}
               src={place.coverImage}
               alt={place.name}
               loading="lazy"
@@ -134,7 +132,7 @@ function AirbnbCard({ place, index, userCoords, variant = "rail", sectionId }: {
               className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${imgLoaded ? "opacity-100" : "opacity-0"}`}
             />
             {!imgLoaded && <div className="absolute inset-0 skeleton-shimmer" />}
-          </motion.div>
+          </div>
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); toggleFavorite(place.id); haptics.light(); }}

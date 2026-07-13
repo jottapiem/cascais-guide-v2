@@ -5,8 +5,8 @@ import { createPortal, flushSync } from "react-dom";
 import { useAppStore } from "@/store/app-store";
 
 const MORPH_DURATION = 420;
-const GREY_DURATION = 250;
 const MORPH_EASE = "cubic-bezier(0.1, 0.9, 0.2, 1)";
+const SHEET_OVERLAP = 48; // Hoeveel de sheet achter de foto begint (visuele overlap)
 
 export function TransitionLayer() {
   const morphPlace = useAppStore((s) => s.morphPlace);
@@ -16,14 +16,12 @@ export function TransitionLayer() {
   const clearMorph = useAppStore((s) => s.clearMorph);
   const setMorphPhase = useAppStore((s) => s.setMorphPhase);
 
-  const imgWrapperRef = useRef<HTMLDivElement>(null);
-  const greyRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const scrimRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!scrimRef.current) return;
-    // Only show scrim during FORWARD morph. Reverse must not darken.
     if (morphPhase === "forward") {
       scrimRef.current.classList.add("is-active");
     } else {
@@ -32,88 +30,55 @@ export function TransitionLayer() {
   }, [morphPhase]);
 
   useLayoutEffect(() => {
-    if (!morphPlace || !imgWrapperRef.current || !greyRef.current) return;
+    if (!morphPlace || !containerRef.current) return;
     const origin = morphPlace.origin;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+    
     const heroWidth = Math.min(vw, 448);
     const heroLeft = (vw - heroWidth) / 2;
     const heroTop = 0;
-    const heroImgHeight = (heroWidth * 3) / 4;
-    const greyTargetTop = heroImgHeight - 48;
-    const greyTargetHeight = vh - greyTargetTop;
+    
+    // Totale container hoogte = iPhone portrait frame (19.5:9)
+    const heroContainerHeight = heroWidth * (19.5 / 9);
+    const startContainerHeight = origin.width * (19.5 / 9);
+
+    const el = containerRef.current;
 
     if (morphPhase === "forward") {
-      imgWrapperRef.current.style.transition = "none";
-      imgWrapperRef.current.style.left = origin.left + "px";
-      imgWrapperRef.current.style.top = origin.top + "px";
-      imgWrapperRef.current.style.width = origin.width + "px";
-      imgWrapperRef.current.style.height = origin.height + "px";
-      imgWrapperRef.current.style.borderRadius = "16px";
-      // Radius is now interpolated inside the animation frame loop
-      void imgWrapperRef.current.offsetHeight;
-      imgWrapperRef.current.style.transition = "left " + MORPH_DURATION + "ms " + MORPH_EASE + ", top " + MORPH_DURATION + "ms " + MORPH_EASE + ", width " + MORPH_DURATION + "ms " + MORPH_EASE + ", height " + MORPH_DURATION + "ms " + MORPH_EASE;
-      imgWrapperRef.current.style.left = heroLeft + "px";
-      imgWrapperRef.current.style.top = heroTop + "px";
-      imgWrapperRef.current.style.width = heroWidth + "px";
-      imgWrapperRef.current.style.height = heroImgHeight + "px";
-      
-      // Animate border-radius via rAF
-      const start_time = performance.now();
-      const animate_radius = () => {
-        const elapsed = performance.now() - start_time;
-        const t = Math.min(elapsed / MORPH_DURATION, 1);
-        const r = 16 + (48 - 16) * t;
-        if (imgWrapperRef.current) imgWrapperRef.current.style.borderRadius = r + "px " + r + "px 0 0";
-        if (t < 1) requestAnimationFrame(animate_radius);
-      };
-      requestAnimationFrame(animate_radius);
+      // START STATE
+      el.style.transition = "none";
+      el.style.left = origin.left + "px";
+      el.style.top = origin.top + "px";
+      el.style.width = origin.width + "px";
+      el.style.height = startContainerHeight + "px";
+      el.style.borderRadius = "16px";
+      void el.offsetHeight;
 
-      greyRef.current.style.transition = "none";
-      greyRef.current.style.left = origin.left + "px";
-      greyRef.current.style.top = (origin.top + origin.height - 48) + "px";
-      greyRef.current.style.width = origin.width + "px";
-      greyRef.current.style.height = "0px";
-      void greyRef.current.offsetHeight;
-      greyRef.current.style.transition = "left " + GREY_DURATION + "ms " + MORPH_EASE + ", top " + GREY_DURATION + "ms " + MORPH_EASE + ", width " + GREY_DURATION + "ms " + MORPH_EASE + ", height " + GREY_DURATION + "ms " + MORPH_EASE;
-      greyRef.current.style.left = heroLeft + "px";
-      greyRef.current.style.top = greyTargetTop + "px";
-      greyRef.current.style.width = heroWidth + "px";
-      greyRef.current.style.height = greyTargetHeight + "px";
-      greyRef.current.style.borderRadius = "2rem 2rem 0 0";
+      // ANIMATE TO HERO STATE
+      el.style.transition = `left ${MORPH_DURATION}ms ${MORPH_EASE}, top ${MORPH_DURATION}ms ${MORPH_EASE}, width ${MORPH_DURATION}ms ${MORPH_EASE}, height ${MORPH_DURATION}ms ${MORPH_EASE}`;
+      el.style.left = heroLeft + "px";
+      el.style.top = heroTop + "px";
+      el.style.width = heroWidth + "px";
+      el.style.height = heroContainerHeight + "px";
+      el.style.borderRadius = "48px";
 
       timeoutRef.current = setTimeout(() => {
         goDetail(morphPlace.id, morphPlace.sectionId);
         setMorphPhase("idle");
       }, MORPH_DURATION);
     } else if (morphPhase === "reverse") {
-      imgWrapperRef.current.style.transition = "left " + MORPH_DURATION + "ms " + MORPH_EASE + ", top " + MORPH_DURATION + "ms " + MORPH_EASE + ", width " + MORPH_DURATION + "ms " + MORPH_EASE + ", height " + MORPH_DURATION + "ms " + MORPH_EASE;
-      imgWrapperRef.current.style.left = origin.left + "px";
-      imgWrapperRef.current.style.top = origin.top + "px";
-      imgWrapperRef.current.style.width = origin.width + "px";
-      imgWrapperRef.current.style.height = origin.height + "px";
-      
-      // Animate border-radius via rAF (reverse)
-      const start_time_rev = performance.now();
-      const animate_radius_rev = () => {
-        const elapsed = performance.now() - start_time_rev;
-        const t = Math.min(elapsed / MORPH_DURATION, 1);
-        const r = 48 + (16 - 48) * t;
-        if (imgWrapperRef.current) imgWrapperRef.current.style.borderRadius = r + "px " + r + "px 0 0";
-        if (t < 1) requestAnimationFrame(animate_radius_rev);
-      };
-      requestAnimationFrame(animate_radius_rev);
-
-      greyRef.current.style.transition = "left " + GREY_DURATION + "ms " + MORPH_EASE + ", top " + GREY_DURATION + "ms " + MORPH_EASE + ", width " + GREY_DURATION + "ms " + MORPH_EASE + ", height " + GREY_DURATION + "ms " + MORPH_EASE;
-      greyRef.current.style.left = origin.left + "px";
-      greyRef.current.style.top = (origin.top + origin.height - 48) + "px";
-      greyRef.current.style.width = origin.width + "px";
-      greyRef.current.style.height = "0px";
-      greyRef.current.style.borderRadius = "2rem 2rem 0 0";
+      // ANIMATE BACK TO START STATE
+      el.style.transition = `left ${MORPH_DURATION}ms ${MORPH_EASE}, top ${MORPH_DURATION}ms ${MORPH_EASE}, width ${MORPH_DURATION}ms ${MORPH_EASE}, height ${MORPH_DURATION}ms ${MORPH_EASE}`;
+      el.style.left = origin.left + "px";
+      el.style.top = origin.top + "px";
+      el.style.width = origin.width + "px";
+      el.style.height = startContainerHeight + "px";
+      el.style.borderRadius = "16px";
 
       timeoutRef.current = setTimeout(() => {
-        flushSync(() => { goBack(); }); // Unmount DetailView direct (geen tijd om te flitsen)
-        clearMorph();                   // Reset state pas na unmount
+        flushSync(() => { goBack(); });
+        clearMorph();
       }, MORPH_DURATION);
     }
 
@@ -126,24 +91,46 @@ export function TransitionLayer() {
     <>
       <div ref={scrimRef} className="morph-scrim" />
       <div
-        ref={imgWrapperRef}
-        style={{ position: "fixed", zIndex: 90, overflow: "hidden", filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.18))", willChange: "left, top, width, height", opacity: morphPhase === "idle" ? 0 : 1, transition: "opacity 0ms ease", pointerEvents: "none" }}
-      >
-        <img src={morphPlace.coverImage} alt="" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-      </div>
-      <div
-        ref={greyRef}
+        ref={containerRef}
         style={{
           position: "fixed",
-          zIndex: 95,
-          background: "#F7F6F4",
-          borderRadius: "48px 48px 0 0",
+          zIndex: 90,
+          overflow: "hidden",
           willChange: "left, top, width, height",
           opacity: morphPhase === "idle" ? 0 : 1,
           transition: "opacity 0ms ease",
           pointerEvents: "none",
         }}
-      />
+      >
+        {/* FOTO - Behoudt originele 4:3 ratio, vult bovenkant van container */}
+        <img 
+          src={morphPlace.coverImage} 
+          alt="" 
+          style={{ 
+            position: "absolute", 
+            top: 0, 
+            left: 0, 
+            width: "100%", 
+            height: `calc(100% - ${SHEET_OVERLAP}px)`, 
+            objectFit: "cover",
+            zIndex: 2 // Boven de sheet
+          }} 
+        />
+        {/* SHEET - Vult rest van container, overlapt foto van onderen */}
+        <div 
+          style={{ 
+            position: "absolute", 
+            bottom: 0, 
+            left: 0, 
+            width: "100%", 
+            height: `calc(100% - ${SHEET_OVERLAP}px + ${SHEET_OVERLAP}px)`, 
+            background: "#F7F6F4",
+            borderRadius: "48px 48px 0 0",
+            marginTop: `-${SHEET_OVERLAP}px`,
+            zIndex: 2
+          }} 
+        />
+      </div>
     </>,
     document.body
   );

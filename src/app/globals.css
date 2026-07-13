@@ -46,7 +46,10 @@
 
 :root {
   --radius: 1.5rem;
-  --background: #F7F6F4;
+  /* Premium coastal palette — iOS 26 / Instagram / Airbnb feel.
+     Layered neutrals met warme ondertoon (geen koud grijs), diepe teal
+     primary en sunset-coraal accent. Chroma bewust laag voor premium rust. */
+  --background: oklch(0.985 0.004 85);
   --foreground: oklch(0.16 0.012 230);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.16 0.012 230);
@@ -78,10 +81,12 @@
   --sidebar-border: oklch(0.9 0.004 85);
   --sidebar-ring: oklch(0.44 0.085 200);
 
-  --shadow-xs: 0 1px 2px oklch(0.2 0.02 220 / 0.04);
-  --shadow-sm: 0 1px 3px oklch(0.2 0.02 220 / 0.05), 0 2px 4px oklch(0.2 0.02 220 / 0.04);
-  --shadow-md: 0 1px 2px oklch(0.2 0.02 220 / 0.04), 0 4px 12px oklch(0.2 0.02 220 / 0.06);
-  --shadow-lg: 0 2px 4px oklch(0.2 0.02 220 / 0.04), 0 8px 20px oklch(0.2 0.02 220 / 0.08);
+  /* Premium layered shadows — Apple HIG stijl: diffuse, zacht, nooit hard.
+     Variabelen zodat we donker/licht kunnen tunen. */
+  --shadow-xs: 0 1px 2px -1px oklch(0.2 0.02 220 / 0.06);
+  --shadow-sm: 0 1px 3px -1px oklch(0.2 0.02 220 / 0.08), 0 2px 6px -2px oklch(0.2 0.02 220 / 0.06);
+  --shadow-md: 0 2px 8px -2px oklch(0.2 0.02 220 / 0.08), 0 8px 24px -8px oklch(0.2 0.02 220 / 0.12);
+  --shadow-lg: 0 4px 12px -2px oklch(0.2 0.02 220 / 0.10), 0 16px 40px -12px oklch(0.2 0.02 220 / 0.18);
   --shadow-xl: 0 8px 24px -4px oklch(0.2 0.02 220 / 0.14), 0 28px 64px -16px oklch(0.2 0.02 220 / 0.24);
   --shadow-float: 0 12px 32px -8px oklch(0.2 0.02 220 / 0.22), 0 4px 12px -2px oklch(0.2 0.02 220 / 0.10);
 }
@@ -132,6 +137,7 @@
     @apply border-border outline-ring/50;
   }
   html {
+    /* Voorkom letter-schaling op iOS orientation change — native feel */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
@@ -140,21 +146,25 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* voorkom overscroll bounce op iOS */
     overscroll-behavior-y: none;
+    /* Premium font-feature: tabular nums waar van toepassing */
     font-feature-settings: "cv11", "ss01", "ss03";
+    /* native-feel letterafstand */
     letter-spacing: -0.011em;
   }
   ::selection {
     background: color-mix(in oklch, var(--primary) 22%, transparent);
   }
+  /* premium tap feedback — geen blauwe iOS highlight */
   button, a, [role="button"] {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
   img {
+    /* Voorkom sub-pixel rendering artefacts — native app feel */
     -webkit-user-drag: none;
     user-drag: none;
-    backface-visibility: hidden;
   }
 }
 
@@ -167,17 +177,17 @@
 .slim-scroll::-webkit-scrollbar-track { background: transparent; }
 .slim-scroll::-webkit-scrollbar-thumb { background: oklch(0.85 0.005 85); border-radius: 999px; }
 
-/* Safe areas */
+/* Safe areas — native iOS notch / home-indicator support */
 .pb-safe { padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.5rem); }
 .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
 .pt-safe-lg { padding-top: max(env(safe-area-inset-top, 0px), 0.75rem); }
 
-/* Hairline border */
+/* Hairline border — true 1px zoals iOS, scherper op retina */
 .hairline-b { box-shadow: inset 0 -0.5px 0 0 var(--border); }
 .hairline-t { box-shadow: inset 0 0.5px 0 0 var(--border); }
 .hairline-tb { box-shadow: inset 0 0.5px 0 0 var(--border), inset 0 -0.5px 0 0 var(--border); }
 
-/* Glassmorphism */
+/* Glassmorphism — iOS 26 / Apple HIG material. Triple-layer: tint + blur + saturation */
 .glass {
   background: color-mix(in oklch, var(--background) 72%, transparent);
   backdrop-filter: blur(20px) saturate(180%);
@@ -194,14 +204,28 @@
   -webkit-backdrop-filter: blur(24px) saturate(180%);
 }
 
-/* Premium layered shadows */
+/* Premium layered shadows — gebaseerd op iOS HIG. Zachte, diffuse schaduwen. */
 .shadow-premium { box-shadow: var(--shadow-md); }
 .shadow-card { box-shadow: var(--shadow-sm); }
 .shadow-card-hover { box-shadow: var(--shadow-lg); }
 .shadow-float { box-shadow: var(--shadow-float); }
 .shadow-xl-premium { box-shadow: var(--shadow-xl); }
 
-/* Masonry columns */
+/* Inner highlight — subtiel top-edge wit voor native glass feel */
+.highlight-top {
+  position: relative;
+}
+.highlight-top::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, oklch(1 0 0 / 0.18), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Masonry columns — Instagram explore feel, 3px gap edge-to-edge */
 .masonry {
   column-gap: 3px;
 }
@@ -210,7 +234,7 @@
   margin-bottom: 3px;
 }
 
-/* Keyframes */
+/* Premium micro-interaction keyframes */
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -235,13 +259,18 @@
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.6; }
 }
+@keyframes press {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
 
-/* Utility animatie classes */
+/* Utility animatie classes (gebruik via Tailwind aanroep of className) */
 .animate-fade-up { animation: fade-up 0.42s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .animate-fade-in { animation: fade-in 0.3s ease-out both; }
 .animate-scale-in { animation: scale-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-/* Premium skeleton shimmer */
+/* Premium skeleton shimmer (vervangt naive pulse waar passend) */
 .shimmer {
   background: linear-gradient(
     90deg,
@@ -253,13 +282,13 @@
   animation: shimmer 1.6s ease-in-out infinite;
 }
 
-/* Press feedback */
+/* Press feedback — gebruikt door buttons voor native tap */
 .press-sm { transition: transform 0.12s cubic-bezier(0.22, 1, 0.36, 1); }
 .press-sm:active { transform: scale(0.96); }
 .press-md { transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1); }
 .press-md:active { transform: scale(0.97); }
 
-/* Native-feel gradient text */
+/* Native-feel gradient text (voor hero accenten) */
 .text-gradient-coastal {
   background: linear-gradient(135deg, oklch(0.65 0.14 200), oklch(0.72 0.16 42));
   -webkit-background-clip: text;
@@ -267,10 +296,10 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* Detail page "sheet" overlap */
+/* Detail page "sheet" overlap — laat de content over de hero vallen zoals Airbnb */
 .sheet-overlap { margin-top: -2.5rem; position: relative; z-index: 10; }
 
-/* Leaflet overrides */
+/* Leaflet overrides for premium look + z-index fix (kaart blijft onder sticky chips) */
 .leaflet-container {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   background: oklch(0.94 0.01 200);
@@ -352,81 +381,4 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-/* ===== PREMIUM POLISH ===== */
-body {
-  font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "ss01" 1;
-  letter-spacing: -0.011em;
-}
-h1, h2, h3, h4, h5, h6 {
-  letter-spacing: -0.025em;
-}
-.img-fade {
-  opacity: 0;
-  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.img-fade.loaded {
-  opacity: 1;
-}
-* {
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-}
-button, [role="button"], a {
-  -webkit-tap-highlight-color: transparent;
-}
-
-.skeleton-shimmer {
-  background: linear-gradient(90deg, var(--muted) 25%, oklch(0.93 0.003 85) 50%, var(--muted) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* ===== MORPH SCRIM ===== */
-@property --scrim-blur {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
-}
-
-.morph-scrim {
-  position: fixed;
-  inset: 0;
-  z-index: 25;
-  pointer-events: none;
-  opacity: 0;
-  background: rgba(0,0,0,0.25);
-  --scrim-blur: 0px;
-  backdrop-filter: blur(var(--scrim-blur));
-  -webkit-backdrop-filter: blur(var(--scrim-blur));
-  will-change: opacity, backdrop-filter;
-}
-
-.morph-scrim.is-forward {
-  opacity: 1;
-  --scrim-blur: 18px;
-  transition:
-    opacity 280ms cubic-bezier(0.1, 0.9, 0.2, 1),
-    --scrim-blur 280ms cubic-bezier(0.1, 0.9, 0.2, 1);
-}
-
-.morph-scrim.is-reverse {
-  opacity: 0;
-  --scrim-blur: 0px;
-  transition:
-    opacity 320ms linear,
-    --scrim-blur 180ms ease-out;
 }

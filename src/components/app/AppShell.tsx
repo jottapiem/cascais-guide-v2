@@ -7,7 +7,7 @@ import { BottomNav } from "./BottomNav";
 import { HomeView } from "./HomeView";
 import { ExploreView } from "./ExploreView";
 import { CategoryView } from "./CategoryView";
-import { DetailOverlay } from "./DetailView";
+import { DetailOverlay as DetailView } from "./DetailView";
 import { TransitionLayer } from "./TransitionLayer";
 import { SearchView } from "./SearchView";
 import { MapView } from "./MapView";
@@ -40,7 +40,7 @@ export function AppShell() {
   return (
     <div className="min-h-screen bg-neutral-200/60 dark:bg-neutral-950">
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col bg-background shadow-xl-premium sm:border-x border-border/40">
-        {/* BASE VIEW — blijft gemonteerd wanneer overlay open is */}
+        {/* BASE VIEW */}
         <main className="flex-1">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
@@ -63,13 +63,13 @@ export function AppShell() {
         </main>
         {showNav && <BottomNav />}
 
-        {/* ── TRANSITION LAYER — morph overlay (hoogste z-index) ── */}
+        {/* TRANSITION LAYER - Must be here to render the morphing image */}
         <TransitionLayer />
 
-        {/* ── DETAIL OVERLAY ── */}
+        {/* DETAIL OVERLAY */}
         <AnimatePresence mode="sync">
           {isDetail && (
-            <DetailOverlay
+            <DetailView
               key={`detail-${selectedPlaceId}`}
               placeId={selectedPlaceId}
               sectionId={selectedSectionId || "default"}

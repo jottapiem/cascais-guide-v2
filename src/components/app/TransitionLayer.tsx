@@ -4,8 +4,8 @@ import { useRef, useLayoutEffect, useEffect } from "react";
 import { createPortal, flushSync } from "react-dom";
 import { useAppStore } from "@/store/app-store";
 
-const MORPH_DURATION = 420;
-const MORPH_EASE = "cubic-bezier(0.1, 0.9, 0.2, 1)";
+const MORPH_DURATION = 480;
+const MORPH_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const SHEET_OVERLAP = 48; // Hoeveel de sheet achter de foto begint (visuele overlap)
 
 export function TransitionLayer() {
@@ -52,7 +52,7 @@ export function TransitionLayer() {
       el.style.top = origin.top + "px";
       el.style.width = origin.width + "px";
       el.style.height = startContainerHeight + "px";
-      el.style.borderRadius = "16px";
+      el.style.borderRadius = "28px";
       void el.offsetHeight;
 
       // ANIMATE TO HERO STATE
@@ -63,8 +63,8 @@ export function TransitionLayer() {
       el.style.height = heroContainerHeight + "px";
       el.style.borderRadius = "48px";
 
+      goDetail(morphPlace.id, morphPlace.sectionId);
       timeoutRef.current = setTimeout(() => {
-        goDetail(morphPlace.id, morphPlace.sectionId);
         setMorphPhase("idle");
       }, MORPH_DURATION);
     } else if (morphPhase === "reverse") {
@@ -74,7 +74,7 @@ export function TransitionLayer() {
       el.style.top = origin.top + "px";
       el.style.width = origin.width + "px";
       el.style.height = startContainerHeight + "px";
-      el.style.borderRadius = "16px";
+      el.style.borderRadius = "28px";
 
       timeoutRef.current = setTimeout(() => {
         flushSync(() => { goBack(); });
@@ -124,7 +124,11 @@ export function TransitionLayer() {
             background: "#F7F6F4",
             borderRadius: "48px 48px 0 0",
             marginTop: `-${SHEET_OVERLAP}px`,
-            zIndex: 3
+            zIndex: 3,
+            opacity: morphPhase === "reverse" ? 0 : 1,
+            transition: morphPhase === "reverse" 
+              ? "opacity 150ms cubic-bezier(0.4, 0, 0.2, 1)" 
+              : "opacity 250ms cubic-bezier(0.1, 0.9, 0.2, 1) 50ms"
           }} 
         />
       </div>

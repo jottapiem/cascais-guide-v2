@@ -18,7 +18,7 @@ import { TripsView } from "./TripsView";
 import { ProfileView } from "./ProfileView";
 import type { View } from "@/store/app-store";
 
-const EASE_ENTER = [0.16, 1, 0.3, 1] as const;
+const EASE_ENTER = [0.22, 1, 0.36, 1] as const;
 const EASE_EXIT = [0.7, 0, 0.84, 0] as const;
 
 const OVERLAY_VIEWS: View[] = ["detail", "search", "recommended"];
@@ -28,6 +28,7 @@ export function AppShell() {
   const selectedPlaceId = useAppStore((s) => s.selectedPlaceId);
   const selectedSectionId = useAppStore((s) => s.selectedSectionId);
   const selectedCategory = useAppStore((s) => s.selectedCategory);
+  const morphPhase = useAppStore((s) => s.morphPhase);
 
   const isOverlay = OVERLAY_VIEWS.includes(view);
   const lastBaseViewRef = useRef<View>("home");
@@ -46,9 +47,9 @@ export function AppShell() {
             <motion.div
               key={baseView === "category" ? `category-${selectedCategory}` : baseView}
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, ease: EASE_ENTER }}
+              animate={{ opacity: 1, scale: (isDetail && morphPhase !== "reverse") ? 0.97 : 1, filter: (isDetail && morphPhase !== "reverse") ? "blur(8px)" : "blur(0px)" }}
+              exit={{ opacity: 1, scale: 0.97, filter: "blur(8px)" }}
+              transition={{ duration: 0.48, ease: EASE_ENTER }}
             >
               {baseView === "home" && <HomeView />}
               {baseView === "explore" && <ExploreView />}

@@ -120,7 +120,7 @@ function AirbnbCard({ place, index, userCoords, variant = "rail", sectionId }: {
         <div
           ref={imgWrapperRef}
           className="relative aspect-[4/3] w-full overflow-hidden"
-          style={{ boxShadow: CARD_SHADOW, border: "1px solid rgba(0,0,0,0.05)", background: "#F7F6F4", borderRadius: 16, opacity: isMorphing ? 0 : 1, transition: "opacity 100ms" }}
+          style={{ boxShadow: CARD_SHADOW, border: "1px solid rgba(0,0,0,0.05)", background: "#F7F6F4", borderRadius: 28, opacity: isMorphing ? 0 : 1, transition: "opacity 0ms ease" }}
         >
           <div className="absolute inset-0 overflow-hidden">
             <img

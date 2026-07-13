@@ -12,12 +12,12 @@ import { LAYER_COLORS, socialScore } from "@/lib/categories-data";
 import { PlaceCard } from "./PlaceCard";
 import type { Audience } from "@/lib/types";
 
-const MORPH_EASE = [0.16, 1, 0.3, 1] as const;
+const MORPH_EASE = [0.22, 1, 0.36, 1] as const;
 const SHEET_EASE = [0.16, 1, 0.3, 1] as const;
-const MORPH_DURATION = 0.5;
+const MORPH_DURATION = 0.48;
 const MORPH_TRANSITION = { duration: MORPH_DURATION, ease: MORPH_EASE };
-const OPACITY_DELAY = 0.2;
-const OPACITY_DURATION = 0.25;
+const OPACITY_DELAY = 0.05;
+const OPACITY_DURATION = 0.3;
 // Hero is aspect-[4/3] binnen een max-w-md (28rem) container — sheet-top volgt exact
 // de werkelijk gerenderde hero-hoogte i.p.v. een losse vh-gok die op smalle telefoons afwijkt.
 const HERO_HEIGHT_CSS = "calc(min(28rem, 100vw) * 0.75)";  // foto hoogte = sheet top (4:3)

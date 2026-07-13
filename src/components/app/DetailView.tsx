@@ -101,25 +101,12 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
 
       </motion.div>
 
-      {/* Shadow overlay — sibling (z-35), boven foto (z-30), onder sheet (z-40) */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: exiting ? 0 : 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: exiting ? 0 : OPACITY_DURATION, delay: exiting ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
-        className="fixed inset-x-0 top-0 z-35 mx-auto max-w-md pointer-events-none overflow-hidden"
-        style={{ borderRadius: "48px 48px 0 0", height: HERO_HEIGHT_CSS, opacity: 1 }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/10 to-black/85" />
-        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
-      </motion.div>
-
       {/* ── SHEET — snelle fade-in (150ms, geen delay) ── */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: exiting ? 0 : 1 }}
+        animate={{ opacity: (exiting || morphPhase !== "idle") ? 0 : 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: exiting ? 0 : OPACITY_DURATION, delay: exiting ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
+        transition={{ duration: (exiting || morphPhase !== "idle") ? 0 : OPACITY_DURATION, delay: (exiting || morphPhase !== "idle") ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
         style={{ top: "calc(" + HERO_HEIGHT_CSS + " - 3rem)" }}
         className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md bg-[#F7F6F4] rounded-t-[48px] overflow-hidden shadow-[0_-8px_24px_rgba(0,0,0,0.08)]"
       >
@@ -127,9 +114,9 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
           {/* Content — fade in na morph */}
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: exiting ? 0 : 1 }}
+            animate={{ opacity: (exiting || morphPhase !== "idle") ? 0 : 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: exiting ? 0 : OPACITY_DURATION, delay: exiting ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
+            transition={{ duration: (exiting || morphPhase !== "idle") ? 0 : OPACITY_DURATION, delay: (exiting || morphPhase !== "idle") ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
             className="px-4 pb-28 pt-6"
           >
             {/* TITEL — bovenaan, gecentreerd (NIET op foto) */}
@@ -248,9 +235,9 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
       {/* ── BUTTONS — fade in na morph ── */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: exiting ? 0 : 1 }}
+        animate={{ opacity: (exiting || morphPhase !== "idle") ? 0 : 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: exiting ? 0 : OPACITY_DURATION, delay: exiting ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
+        transition={{ duration: (exiting || morphPhase !== "idle") ? 0 : OPACITY_DURATION, delay: (exiting || morphPhase !== "idle") ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
         className="fixed inset-x-0 top-0 z-70 mx-auto max-w-md pt-safe-lg pointer-events-none"
       >
         <button
@@ -289,9 +276,9 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
       {/* ── STICKY MAPS BUTTON ── */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: exiting ? 0 : 1 }}
+        animate={{ opacity: (exiting || morphPhase !== "idle") ? 0 : 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: exiting ? 0 : OPACITY_DURATION, delay: exiting ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
+        transition={{ duration: (exiting || morphPhase !== "idle") ? 0 : OPACITY_DURATION, delay: (exiting || morphPhase !== "idle") ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
         className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md glass-strong px-4 pt-3 pb-safe hairline-t"
       >
         <a href={place.mapLink} target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-[0.9375rem] font-bold tracking-tight text-primary-foreground shadow-float transition-transform active:scale-[0.97]">

@@ -35,12 +35,12 @@ export function AppShell() {
   if (!isOverlay) lastBaseViewRef.current = view;
   const baseView = isOverlay ? lastBaseViewRef.current : view;
 
-  const showNav = !isOverlay;
+  const showNav = baseView === "home";
   const isDetail = view === "detail" && selectedPlaceId;
 
   return (
-    <div className="min-h-screen bg-neutral-200/60 dark:bg-neutral-950">
-      <div className="relative mx-auto flex min-h-screen max-w-md flex-col bg-background shadow-xl-premium sm:border-x border-border/40">
+    <div className="min-h-[100dvh] bg-neutral-200/60 dark:bg-neutral-950">
+      <div className="relative mx-auto flex min-h-[100dvh] max-w-md flex-col bg-background shadow-xl-premium sm:border-x border-border/40">
         {/* BASE VIEW */}
         <main className="flex-1">
           <AnimatePresence mode="wait" initial={false}>
@@ -48,7 +48,7 @@ export function AppShell() {
               key={baseView === "category" ? `category-${selectedCategory}` : baseView}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, scale: (isDetail && morphPhase !== "reverse") ? 0.97 : 1, filter: (isDetail && morphPhase !== "reverse") ? "blur(8px)" : "blur(0px)" }}
-              exit={{ opacity: 1, scale: 0.97, filter: "blur(8px)" }}
+              exit={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
               transition={{ duration: 0.48, ease: EASE_ENTER }}
             >
               {baseView === "home" && <HomeView />}
@@ -59,10 +59,10 @@ export function AppShell() {
               {baseView === "favorites" && <FavoritesView />}
               {baseView === "trips" && <TripsView />}
               {baseView === "profile" && <ProfileView />}
+              {showNav && <BottomNav />}
             </motion.div>
           </AnimatePresence>
         </main>
-        {showNav && <BottomNav />}
 
         {/* TRANSITION LAYER - Must be here to render the morphing image */}
         <TransitionLayer />

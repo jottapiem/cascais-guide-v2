@@ -60,13 +60,13 @@ export function TransitionLayer() {
       el.style.top = heroTop + "px";
       el.style.transformOrigin = "top left";
       el.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
-      el.style.borderRadius = "28px";
+      el.style.borderRadius = "28px 28px 28px 28px";
       void el.offsetHeight;
 
       // ANIMATE TO HERO STATE (compositor-only: transform + opacity)
       el.style.transition = `transform ${MORPH_DURATION}ms ${MORPH_EASE}, border-radius ${MORPH_DURATION}ms ${MORPH_EASE}`;
       el.style.transform = "translate(0px, 0px) scale(1, 1)";
-      el.style.borderRadius = "28px";
+      el.style.borderRadius = "48px 48px 0 0";
 
       timeoutRef.current = setTimeout(() => {
         goDetail(morphPlace.id, morphPlace.sectionId);
@@ -81,7 +81,7 @@ export function TransitionLayer() {
       
       el.style.transition = `transform ${MORPH_DURATION}ms ${MORPH_EASE}, border-radius ${MORPH_DURATION}ms ${MORPH_EASE}`;
       el.style.transform = `translate(${translateX_rev}px, ${translateY_rev}px) scale(${scaleX_rev}, ${scaleY_rev})`;
-      el.style.borderRadius = "28px";
+      el.style.borderRadius = "48px 48px 0 0";
 
       timeoutRef.current = setTimeout(() => {
         flushSync(() => { goBack(); });
@@ -103,6 +103,7 @@ export function TransitionLayer() {
           position: "fixed",
           zIndex: 90,
           overflow: "hidden",
+          borderRadius: "28px",
           willChange: "left, top, width, height",
           opacity: morphPhase === "idle" ? 0 : 1,
           transition: "opacity 0ms ease",

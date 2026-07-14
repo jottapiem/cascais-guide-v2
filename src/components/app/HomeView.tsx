@@ -232,7 +232,7 @@ export function HomeView() {
   }, [activeCat]);
 
   return (
-    <div className="min-h-[100dvh] pb-4">
+    <div className="min-h-screen pb-4">
       <header className="sticky top-0 z-30 backdrop-blur-2xl transition-shadow duration-300" style={{ background: "#F7F6F4", boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.06)" : "none", borderBottom: scrolled ? "1px solid rgba(0,0,0,0.04)" : "1px solid transparent" }}>
         <div className="px-4 pt-safe-lg pb-3">
           <motion.button type="button" onClick={() => { goSearch(); haptics.selection(); }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.15, ease: SWIFT_EASE }} className="flex w-full items-center justify-center rounded-full px-4 py-3 text-left" style={{ boxShadow: SEARCH_SHADOW, background: "#F7F6F4" }}>

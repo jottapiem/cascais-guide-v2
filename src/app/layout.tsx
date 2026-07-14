@@ -13,6 +13,11 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Cascais — Travel Discovery",
   description: "Ontdek Cascais als een local. Stranden, food, sunset spots, events en hidden gems in één visuele app.",
+  appleWebApp: {
+    capable: true,
+    title: "Cascais",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {

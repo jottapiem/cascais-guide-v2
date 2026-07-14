@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useLayoutEffect, useEffect } from "react";
-import { createPortal, flushSync } from "react-dom";
+import { flushSync } from "react-dom";
 import { useAppStore } from "@/store/app-store";
 
 const MORPH_DURATION = 480;
@@ -87,7 +87,7 @@ export function TransitionLayer() {
 
   if (!morphPlace) return null;
 
-  return createPortal(
+  return (
     <>
       <div ref={scrimRef} className="morph-scrim" />
       <div
@@ -132,7 +132,6 @@ export function TransitionLayer() {
           }} 
         />
       </div>
-    </>,
-    document.body
+    </>
   );
 }

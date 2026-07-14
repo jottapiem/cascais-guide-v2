@@ -66,7 +66,7 @@ export function TransitionLayer() {
       // ANIMATE TO HERO STATE (compositor-only: transform + opacity)
       el.style.transition = `transform ${MORPH_DURATION}ms ${MORPH_EASE}, border-radius ${MORPH_DURATION}ms ${MORPH_EASE}`;
       el.style.transform = "translate(0px, 0px) scale(1, 1)";
-      el.style.borderRadius = "48px";
+      el.style.borderRadius = "28px";
 
       timeoutRef.current = setTimeout(() => {
         goDetail(morphPlace.id, morphPlace.sectionId);

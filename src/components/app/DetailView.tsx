@@ -103,20 +103,20 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
 
       {/* ── SHEET — snelle fade-in (150ms, geen delay) ── */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: (exiting || morphPhase !== "idle") ? 0 : 1 }}
+        initial={{ opacity: 1 }}
+        animate={{ opacity: exiting ? 0 : 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: (exiting || morphPhase !== "idle") ? 0 : OPACITY_DURATION, delay: (exiting || morphPhase !== "idle") ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
+        transition={{ duration: exiting ? 0 : 0 }}
         style={{ top: "calc(" + HERO_HEIGHT_CSS + " - 3rem)" }}
         className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md bg-[#F7F6F4] rounded-t-[48px] overflow-hidden shadow-[0_-8px_24px_rgba(0,0,0,0.08)]"
       >
         <div ref={sheetRef} className="h-full overflow-y-auto overflow-x-hidden">
           {/* Content — fade in na morph */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: (exiting || morphPhase !== "idle") ? 0 : 1 }}
+            initial={{ opacity: 1 }}
+            animate={{ opacity: exiting ? 0 : 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: (exiting || morphPhase !== "idle") ? 0 : OPACITY_DURATION, delay: (exiting || morphPhase !== "idle") ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
+            transition={{ duration: exiting ? 0 : 0 }}
             className="px-4 pb-28 pt-6"
           >
             {/* TITEL — bovenaan, gecentreerd (NIET op foto) */}

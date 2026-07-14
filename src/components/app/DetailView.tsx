@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Star, Clock, Users, MapPin, Navigation,
@@ -80,7 +81,8 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
     .sort((a, b) => socialScore(b) - socialScore(a))
     .slice(0, 6);
 
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <>
       {/* ── FOTO HERO — parallax-container (geen layoutId hier, alleen scroll-transform) ── */}
       <motion.div
@@ -286,7 +288,8 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
           Open in Google Maps
         </a>
       </motion.div>
-    </>
+    </>,
+    document.body
   );
 }
 

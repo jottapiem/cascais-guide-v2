@@ -47,7 +47,7 @@ export function AppShell() {
             <motion.div
               key={baseView === "category" ? `category-${selectedCategory}` : baseView}
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1, scale: (isDetail && morphPhase !== "reverse") ? 0.97 : 1, filter: (isDetail && morphPhase !== "reverse") ? "blur(8px)" : "blur(0px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
               exit={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
               transition={{ duration: 0.48, ease: EASE_ENTER }}
             >

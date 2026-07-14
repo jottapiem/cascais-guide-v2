@@ -13,11 +13,6 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Cascais — Travel Discovery",
   description: "Ontdek Cascais als een local. Stranden, food, sunset spots, events en hidden gems in één visuele app.",
-  appleWebApp: {
-    capable: true,
-    title: "Cascais",
-    statusBarStyle: "black-translucent",
-  },
 };
 
 export const viewport: Viewport = {
@@ -25,7 +20,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
-  themeColor: "#F7F6F4",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F7F6F4" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

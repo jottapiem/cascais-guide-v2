@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Star, Clock, Users, MapPin, Navigation,
@@ -47,12 +48,11 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
   }, []);
   const place = getPlace(placeId);
   const goBack = useAppStore((s) => s.goBack);
-  const [exiting, setExiting] = useState(false);
   const clearMorph = useAppStore((s) => s.clearMorph);
   const setMorphPhase = useAppStore((s) => s.setMorphPhase);
   const morphPlace = useAppStore((s) => s.morphPlace);
   const morphPhase = useAppStore((s) => s.morphPhase);
-  useEffect(() => { if (morphPhase === "reverse") setExiting(true); }, [morphPhase]);
+  const exiting = morphPhase === "reverse";
 
   // Back = trigger reverse morph (TransitionLayer animeert terug)
   const handleBack = () => {
@@ -80,7 +80,8 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
     .sort((a, b) => socialScore(b) - socialScore(a))
     .slice(0, 6);
 
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <>
       {/* ── FOTO HERO — parallax-container (geen layoutId hier, alleen scroll-transform) ── */}
       <motion.div
@@ -238,7 +239,7 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
         animate={{ opacity: (exiting || morphPhase !== "idle") ? 0 : 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: (exiting || morphPhase !== "idle") ? 0 : OPACITY_DURATION, delay: (exiting || morphPhase !== "idle") ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
-        className="fixed inset-x-0 top-0 z-70 mx-auto max-w-md pt-safe-lg pointer-events-none"
+        className="fixed inset-x-0 top-0 z-[70] mx-auto max-w-md pt-safe-lg pointer-events-none"
       >
         <button
           type="button"
@@ -286,7 +287,8 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
           Open in Google Maps
         </a>
       </motion.div>
-    </>
+    </>,
+    document.body
   );
 }
 

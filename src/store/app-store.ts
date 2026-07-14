@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { defaultPackingItems, classifyItem } from "@/lib/packing-classifier";
-import { DEFAULT_BAGS, DEFAULT_PEOPLE } from "@/lib/bags-data";
+import { DEFAULT_BAGS, DEFAULT_PEOPLE, STARTER_BAG_TEMPLATES } from "@/lib/bags-data";
 import type {
   CategoryId, PackingItem, PackingCategory, Priority, Situation,
   Bag, Person, BagTemplate,
@@ -327,8 +327,7 @@ export const useAppStore = create<AppState>()(
         set((state) => ({ bagTemplates: state.bagTemplates.filter((t) => t.id !== id) })),
 
       instantiateBagFromTemplate: (templateId) => {
-        const STARTER_TEMPLATES = require("@/lib/bags-data").STARTER_BAG_TEMPLATES as BagTemplate[];
-        const template = get().bagTemplates.find((t) => t.id === templateId) ?? STARTER_TEMPLATES.find((t) => t.id === templateId);
+        const template = get().bagTemplates.find((t) => t.id === templateId) ?? STARTER_BAG_TEMPLATES.find((t) => t.id === templateId);
         if (!template) return null;
         const newBagId = bagId();
         const now = Date.now();
@@ -377,6 +376,7 @@ export const useAppStore = create<AppState>()(
     {
       name: "cascais-guide-v2-store",
       storage: createJSONStorage(() => localStorage),
+      skipHydration: true,
       version: 2,
       migrate: (persistedState: unknown, version: number) => {
         const s = (persistedState ?? {}) as {
@@ -423,6 +423,3 @@ export const useAppStore = create<AppState>()(
   )
 );
 
-export const isTransitioning = () =>
-  typeof window !== "undefined" &&
-  (window as any).__TRANSITION_ACTIVE__;

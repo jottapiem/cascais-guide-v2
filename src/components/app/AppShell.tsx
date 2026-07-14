@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAppStore } from "@/store/app-store";
 import { BottomNav } from "./BottomNav";
@@ -19,7 +19,6 @@ import { ProfileView } from "./ProfileView";
 import type { View } from "@/store/app-store";
 
 const EASE_ENTER = [0.22, 1, 0.36, 1] as const;
-const EASE_EXIT = [0.7, 0, 0.84, 0] as const;
 
 const OVERLAY_VIEWS: View[] = ["detail", "search", "recommended"];
 
@@ -31,11 +30,11 @@ export function AppShell() {
   const morphPhase = useAppStore((s) => s.morphPhase);
 
   const isOverlay = OVERLAY_VIEWS.includes(view);
-  const lastBaseViewRef = useRef<View>("home");
-  if (!isOverlay) lastBaseViewRef.current = view;
-  const baseView = isOverlay ? lastBaseViewRef.current : view;
+  const [baseView, setBaseView] = useState<View>(view);
+  if (!isOverlay && view !== baseView) setBaseView(view);
 
-  const showNav = baseView === "home";
+  const NAV_VIEWS: View[] = ["home", "favorites", "map", "trips", "packing"];
+  const showNav = NAV_VIEWS.includes(baseView);
   const isDetail = view === "detail" && selectedPlaceId;
 
   return (
@@ -81,12 +80,12 @@ export function AppShell() {
         {/* SEARCH / RECOMMENDED OVERLAYS */}
         <AnimatePresence>
           {view === "search" && (
-            <motion.div key="search" className="fixed inset-0 z-90 mx-auto max-w-md overflow-y-auto bg-background" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2, ease: EASE_ENTER }}>
+            <motion.div key="search" className="fixed inset-0 z-[90] mx-auto max-w-md overflow-y-auto bg-background" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2, ease: EASE_ENTER }}>
               <SearchView />
             </motion.div>
           )}
           {view === "recommended" && (
-            <motion.div key="recommended" className="fixed inset-0 z-90 mx-auto max-w-md overflow-y-auto bg-background" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2, ease: EASE_ENTER }}>
+            <motion.div key="recommended" className="fixed inset-0 z-[90] mx-auto max-w-md overflow-y-auto bg-background" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2, ease: EASE_ENTER }}>
               <RecommendedView />
             </motion.div>
           )}

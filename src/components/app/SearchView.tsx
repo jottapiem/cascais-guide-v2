@@ -89,7 +89,7 @@ export function SearchView() {
       {query.trim() && (
         <div className="px-4 pt-4">
           <p className="mb-3 text-xs text-muted-foreground">
-            {results.length} resultaat{results.length === 1 ? "" : "ten"} voor <span className="font-semibold text-foreground">"{query}"</span>
+            {results.length} resultaat{results.length === 1 ? "" : "ten"} voor <span className="font-semibold text-foreground">&quot;{query}&quot;</span>
           </p>
           <AnimatePresence mode="popLayout">
             <motion.div

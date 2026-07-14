@@ -51,10 +51,12 @@ export function ExploreView() {
     return ALL_FEED.filter(cat.filter);
   }, [activeCat]);
 
-  useEffect(() => {
+  const [prevFilteredFeed, setPrevFilteredFeed] = useState(filteredFeed);
+  if (filteredFeed !== prevFilteredFeed) {
+    setPrevFilteredFeed(filteredFeed);
     setCycle(0);
     setVisible(filteredFeed.slice(0, PAGE));
-  }, [filteredFeed]);
+  }
 
   const loadMore = useCallback(() => {
     if (loading) return;

@@ -46,34 +46,41 @@ export function TransitionLayer() {
     const el = containerRef.current;
 
     if (morphPhase === "forward") {
-      // START STATE
+      // Calculate scale and translate for compositor-only animation
+      const scaleX = origin.width / heroWidth;
+      const scaleY = startContainerHeight / heroContainerHeight;
+      const translateX = origin.left - heroLeft;
+      const translateY = origin.top - heroTop;
+      
+      // START STATE (at origin)
       el.style.transition = "none";
-      el.style.left = origin.left + "px";
-      el.style.top = origin.top + "px";
-      el.style.width = origin.width + "px";
-      el.style.height = startContainerHeight + "px";
+      el.style.width = heroWidth + "px";
+      el.style.height = heroContainerHeight + "px";
+      el.style.left = heroLeft + "px";
+      el.style.top = heroTop + "px";
+      el.style.transformOrigin = "top left";
+      el.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
       el.style.borderRadius = "28px";
       void el.offsetHeight;
 
-      // ANIMATE TO HERO STATE
-      el.style.transition = `left ${MORPH_DURATION}ms ${MORPH_EASE}, top ${MORPH_DURATION}ms ${MORPH_EASE}, width ${MORPH_DURATION}ms ${MORPH_EASE}, height ${MORPH_DURATION}ms ${MORPH_EASE}`;
-      el.style.left = heroLeft + "px";
-      el.style.top = heroTop + "px";
-      el.style.width = heroWidth + "px";
-      el.style.height = heroContainerHeight + "px";
+      // ANIMATE TO HERO STATE (compositor-only: transform + opacity)
+      el.style.transition = `transform ${MORPH_DURATION}ms ${MORPH_EASE}, border-radius ${MORPH_DURATION}ms ${MORPH_EASE}`;
+      el.style.transform = "translate(0px, 0px) scale(1, 1)";
       el.style.borderRadius = "48px";
 
-      goDetail(morphPlace.id, morphPlace.sectionId);
       timeoutRef.current = setTimeout(() => {
+        goDetail(morphPlace.id, morphPlace.sectionId);
         setMorphPhase("idle");
       }, MORPH_DURATION);
     } else if (morphPhase === "reverse") {
-      // ANIMATE BACK TO START STATE
-      el.style.transition = `left ${MORPH_DURATION}ms ${MORPH_EASE}, top ${MORPH_DURATION}ms ${MORPH_EASE}, width ${MORPH_DURATION}ms ${MORPH_EASE}, height ${MORPH_DURATION}ms ${MORPH_EASE}`;
-      el.style.left = origin.left + "px";
-      el.style.top = origin.top + "px";
-      el.style.width = origin.width + "px";
-      el.style.height = startContainerHeight + "px";
+      // ANIMATE BACK TO START STATE (compositor-only)
+      const scaleX_rev = origin.width / heroWidth;
+      const scaleY_rev = startContainerHeight / heroContainerHeight;
+      const translateX_rev = origin.left - heroLeft;
+      const translateY_rev = origin.top - heroTop;
+      
+      el.style.transition = `transform ${MORPH_DURATION}ms ${MORPH_EASE}, border-radius ${MORPH_DURATION}ms ${MORPH_EASE}`;
+      el.style.transform = `translate(${translateX_rev}px, ${translateY_rev}px) scale(${scaleX_rev}, ${scaleY_rev})`;
       el.style.borderRadius = "28px";
 
       timeoutRef.current = setTimeout(() => {

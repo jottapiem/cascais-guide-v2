@@ -40,7 +40,7 @@ export function AppShell() {
 
   return (
     <div className="min-h-[100dvh] bg-background sm:bg-neutral-200/60 dark:bg-neutral-950">
-      <div className="relative mx-auto flex min-h-[100dvh] max-w-md flex-col bg-background shadow-xl-premium sm:border-x border-border/40">
+      <div className="relative mx-auto flex min-h-[100dvh] max-w-md flex-col bg-background sm:shadow-xl-premium sm:border-x border-border/40">
         {/* BASE VIEW */}
         <main className="flex-1">
           <AnimatePresence mode="wait" initial={false}>

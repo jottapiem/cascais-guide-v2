@@ -3,15 +3,16 @@
 import { useRef, useLayoutEffect, useEffect } from "react";
 import { flushSync } from "react-dom";
 import { useAppStore } from "@/store/app-store";
+import { MORPH_RADIUS_ALL, MORPH_RADIUS_SHEET, MORPH_RADIUS_PX } from "@/lib/morph-config";
 
 const MORPH_DURATION = 480;
 const MORPH_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const SHEET_OVERLAP = 48; // Hoeveel de sheet achter de foto begint (visuele overlap)
 // Card radius (matches AirbnbCard's 28px frame) vs. hero radius (matches DetailView's
-// "48px 48px 0 0" frame + rounded-t-[48px] sheet). The FLIP must interpolate between
+// sheet). The FLIP must interpolate between
 // these, not stay pinned to one value, so the hand-off to/from DetailView is seamless.
-const CARD_RADIUS = "28px 28px 28px 28px";
-const HERO_RADIUS = "28px 28px 28px 28px";
+const CARD_RADIUS = MORPH_RADIUS_ALL;
+const HERO_RADIUS = MORPH_RADIUS_ALL;
 
 export function TransitionLayer() {
   const morphPlace = useAppStore((s) => s.morphPlace);
@@ -74,7 +75,7 @@ export function TransitionLayer() {
 
       // ANIMATE TO HERO STATE (compositor-only: transform + opacity).
       // Radius must interpolate from the card radius to the hero radius so it
-      // hands off seamlessly to DetailView's static "48px 48px 0 0" frame.
+      // hands off seamlessly to DetailView's static frame (same MORPH_RADIUS_ALL).
       el.style.transition = `transform ${MORPH_DURATION}ms ${MORPH_EASE}, border-radius ${MORPH_DURATION}ms ${MORPH_EASE}`;
       el.style.transform = "translate(0px, 0px) scale(1, 1)";
       el.style.borderRadius = HERO_RADIUS;
@@ -121,7 +122,7 @@ export function TransitionLayer() {
           position: "fixed",
           zIndex: 90,
           overflow: "hidden",
-          borderRadius: "28px",
+          borderRadius: `${MORPH_RADIUS_PX}px`,
           willChange: "left, top, width, height",
           opacity: morphPhase === "idle" ? 0 : 1,
           transition: "opacity 0ms ease",
@@ -142,7 +143,7 @@ export function TransitionLayer() {
             objectFit: "cover",
             zIndex: 2,
             position: "relative",
-            borderRadius: morphPhase === "reverse" ? "28px" : "0px",
+            borderRadius: morphPhase === "reverse" ? `${MORPH_RADIUS_PX}px` : "0px",
           }} 
         />
         {/* SHEET - Vult rest van container, overlapt foto van onderen */}
@@ -150,7 +151,7 @@ export function TransitionLayer() {
           style={{ 
             flex: 1,
             background: "#F7F6F4",
-            borderRadius: "48px 48px 0 0",
+            borderRadius: MORPH_RADIUS_SHEET,
             marginTop: `-${SHEET_OVERLAP}px`,
             zIndex: 3,
             opacity: morphPhase === "reverse" ? 0 : 1,

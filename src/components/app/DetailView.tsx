@@ -11,6 +11,7 @@ import { useAppStore } from "@/store/app-store";
 import { getPlace, places } from "@/lib/places-data";
 import { LAYER_COLORS, socialScore } from "@/lib/categories-data";
 import { PlaceCard } from "./PlaceCard";
+import { MORPH_RADIUS_ALL, MORPH_RADIUS_SHEET } from "@/lib/morph-config";
 import type { Audience } from "@/lib/types";
 
 const MORPH_EASE = [0.22, 1, 0.36, 1] as const;
@@ -90,7 +91,7 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
       >
         {/* FRAME — layoutId morph target, clipt naar 4:3, zelfde key als de kaart-frame */}
         <div
-          style={{ borderRadius: "48px 48px 0 0", opacity: exiting ? 0 : (!morphPlace || morphPhase === "idle" ? 1 : 0), transition: "opacity 0ms ease" }}
+          style={{ borderRadius: MORPH_RADIUS_ALL, opacity: exiting ? 0 : (!morphPlace || morphPhase === "idle" ? 1 : 0), transition: "opacity 0ms ease" }}
           className="relative aspect-[4/3] w-full overflow-hidden"
         >
           <img
@@ -108,8 +109,8 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
         animate={{ opacity: exiting ? 0 : 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: exiting ? 0 : 0 }}
-        style={{ top: "calc(" + HERO_HEIGHT_CSS + " - 3rem)" }}
-        className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md bg-[#F7F6F4] rounded-t-[48px] overflow-hidden shadow-[0_-8px_24px_rgba(0,0,0,0.08)]"
+        className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md bg-[#F7F6F4] overflow-hidden shadow-[0_-8px_24px_rgba(0,0,0,0.08)]"
+        style={{ top: "calc(" + HERO_HEIGHT_CSS + " - 3rem)", borderRadius: MORPH_RADIUS_SHEET }}
       >
         <div ref={sheetRef} className="h-full overflow-y-auto overflow-x-hidden">
           {/* Content — fade in na morph */}

@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cascais Guide V2
+
+A private travel discovery web app for friends and family, focused on Cascais (Portugal) and surroundings: Guincho, Sintra, Lisboa, Belém and day trips. Mobile-first, entirely in Dutch, designed to feel like a native iOS app in the browser.
+
+## Tech Stack
+- **Next.js 16** (App Router, webpack — not Turbopack)
+- **React 19** + **TypeScript 5** (strict)
+- **Tailwind CSS v4** + shadcn/ui (base-lyra)
+- **Zustand 5** (persisted state)
+- **Framer Motion 12** (view transitions + custom FLIP morph)
+- **Leaflet** + react-leaflet (maps)
+- **npm** package manager
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Shared-element transition (card → detail)
+The signature animation uses a custom FLIP (First-Last-Invert-Play) technique:
 
-## Learn More
+1. **AirbnbCard** (HomeView) — on tap, captures the card rect and stores it in Zustand (`setMorphPlace`)
+2. **TransitionLayer** — a fixed-position overlay that clones the cover image and animates it from the card rect to the hero position using compositor-only transforms. Uses `requestAnimationFrame` to ensure the start state is painted before the transition begins.
+3. **DetailView** — fades in after the morph completes (480ms). The hero image and sheet use the same radius as the card (via `src/lib/morph-config.ts`).
+4. **morph-scrim** — a backdrop-blur layer at `z-20` that builds opacity during the forward morph, stays active behind the detail view, and fades out during reverse.
 
-To learn more about Next.js, take a look at the following resources:
+### Design tokens
+- **Morph radius:** `src/lib/morph-config.ts` — single source of truth for all border-radius in the transition pipeline (`MORPH_RADIUS_PX = 28`)
+- **Colors:** `oklch()` in `globals.css` `:root`
+- **Ease curves:** SwiftUI `cubic-bezier(0.22, 1, 0.36, 1)`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Documentation
+- `AGENTS.md` — project context (Dutch)
+- `.ai/ui-rules.md` — design system rules
+- `.ai/tech-stack.md` — technology details
+- `.ai/coding-standards.md` — how to safely modify animations
+- `.ai/product.md` — product context
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Build
 
-## Deploy on Vercel
+```bash
+npm run build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Lint
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run lint
+```
+

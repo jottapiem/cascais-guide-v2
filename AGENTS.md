@@ -44,6 +44,15 @@ scripts/         # validate-places, validate-photos, photos:check
 - SwiftUI ease curves: cubic-bezier(0.22, 1, 0.36, 1)
 - Mobile-first, max 2 klikken tot informatie
 
+## Shared-element morph radius — ENKELE SOURCE OF TRUTH
+De border-radius voor alle shared-element transitie elementen staat in
+`src/lib/morph-config.ts` (`MORPH_RADIUS_PX = 28`). Deze waarde wordt gebruikt door:
+1. **AirbnbCard** (HomeView.tsx) — kaart image wrapper
+2. **TransitionLayer** (TransitionLayer.tsx) — morphing container + image + sheet
+3. **DetailView** (DetailView.tsx) — hero frame + sheet
+Alles importeert uit `morph-config.ts`. Wijzig de waarde daar, nergens anders.
+
+
 ## Foto conventie
 public/photos/<place-id>/cover.jpg       # hoofdfoto, detail hero
 public/photos/<place-id>/explore-1.jpg   # social media stijl, explore grid

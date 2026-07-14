@@ -28,8 +28,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="nl" suppressHydrationWarning>
-      <body className={`${jakarta.variable} font-sans antialiased bg-background text-foreground`} style={{ WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale", textRendering: "optimizeLegibility" }}>
+    <html lang="nl" suppressHydrationWarning style={{ margin: 0, padding: 0, height: "100%", width: "100%" }}>
+      <body className={`${jakarta.variable} font-sans antialiased bg-background text-foreground`} style={{ margin: 0, padding: 0, WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale", textRendering: "optimizeLegibility" }}>
         <Providers>{children}</Providers>
       </body>
     </html>

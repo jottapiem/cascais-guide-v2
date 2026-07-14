@@ -84,8 +84,8 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
     <>
       {/* ── FOTO HERO — parallax-container (geen layoutId hier, alleen scroll-transform) ── */}
       <motion.div
-        style={{}}
-        className="fixed inset-x-0 top-0 z-30 mx-auto max-w-md origin-top"
+        style={{ top: 0, left: 0, right: 0, margin: "0 auto" }}
+        className="fixed z-30 max-w-md origin-top"
       >
         {/* FRAME — layoutId morph target, clipt naar 4:3, zelfde key als de kaart-frame */}
         <div

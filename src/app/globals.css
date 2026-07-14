@@ -137,11 +137,17 @@
     @apply border-border outline-ring/50;
   }
   html {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100dvh;
     /* Voorkom letter-schaling op iOS orientation change — native feel */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
   body {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100dvh;
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

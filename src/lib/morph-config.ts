@@ -8,9 +8,18 @@
 // CSS transition durations that had to be hand-kept in sync across files (see git history —
 // "fix: transition sync" shows up repeatedly). A single driver removes that failure mode.
 
-export const MORPH_RADIUS_PX = 28;
+// Corner-radius system — proportional, not fixed.
+// The card (256px wide) uses MORPH_RADIUS_PX = 28 (ratio ≈ 0.1094).
+// The hero/sheet (448px wide) scales the same ratio → 49px, so the fullscreen
+// surfaces feel like the same physical corner as the card, just larger —
+// matching iPhone 16's proportional corner language where bigger surfaces
+// get proportionally bigger radii.
+export const MORPH_RADIUS_PX = 28; // card (256px)
+export const MORPH_RADIUS_HERO_PX = 49; // hero + sheet (448px) — 448 × (28/256)
 export const MORPH_RADIUS_ALL = `${MORPH_RADIUS_PX}px ${MORPH_RADIUS_PX}px ${MORPH_RADIUS_PX}px ${MORPH_RADIUS_PX}px`;
 export const MORPH_RADIUS_SHEET = `${MORPH_RADIUS_PX}px ${MORPH_RADIUS_PX}px 0 0`;
+export const MORPH_RADIUS_HERO_ALL = `${MORPH_RADIUS_HERO_PX}px ${MORPH_RADIUS_HERO_PX}px ${MORPH_RADIUS_HERO_PX}px ${MORPH_RADIUS_HERO_PX}px`;
+export const MORPH_RADIUS_HERO_SHEET = `${MORPH_RADIUS_HERO_PX}px ${MORPH_RADIUS_HERO_PX}px 0 0`;
 
 // Reference duration — used only to size the non-spring bits (scrim CSS transition,
 // a ballpark for design/QA). The transform itself is a real spring and settles by

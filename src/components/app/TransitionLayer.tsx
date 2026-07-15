@@ -3,7 +3,8 @@
 import { useRef, useLayoutEffect, useEffect } from "react";
 import { animate, type AnimationPlaybackControls } from "framer-motion";
 import { useAppStore } from "@/store/app-store";
-import { MORPH_RADIUS_SHEET, MORPH_RADIUS_PX, MORPH_SPRING, SHEET_FADE_END, SCRIM_FADE_END, SHEET_OVERLAP_PX } from "@/lib/morph-config";
+import { MORPH_RADIUS_HERO_SHEET, MORPH_RADIUS_HERO_PX, MORPH_SPRING, SHEET_FADE_END, SCRIM_FADE_END, SHEET_OVERLAP_PX } from "@/lib/morph-config";
+import { PlaceImage } from "./PlaceImage";
 
 function clamp01(n: number): number {
   return n < 0 ? 0 : n > 1 ? 1 : n;
@@ -30,11 +31,11 @@ interface Geometry {
 export function TransitionLayer() {
   const morphPlace = useAppStore((s) => s.morphPlace);
   const morphPhase = useAppStore((s) => s.morphPhase);
+  const view = useAppStore((s) => s.view);
   const finishMorphForward = useAppStore((s) => s.finishMorphForward);
   const finishMorphReverse = useAppStore((s) => s.finishMorphReverse);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const scrimRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(0);
@@ -50,11 +51,10 @@ export function TransitionLayer() {
     const translateY = mix(g.originTop, 0, t);
     const scaleX = mix(g.scaleX, 1, t);
     const scaleY = mix(g.scaleY, 1, t);
-    const radius = mix(g.startRadius, MORPH_RADIUS_PX, t);
+    const radius = mix(g.startRadius, MORPH_RADIUS_HERO_PX, t);
 
     el.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
     el.style.borderRadius = `${radius}px`;
-    if (imgRef.current) imgRef.current.style.borderRadius = `${radius}px`;
 
     // Sheet: fades in/out as a function of progress, finishing shortly before the
     // transform itself arrives (SHEET_FADE_END < 1) so it reads as "attached to the
@@ -155,29 +155,18 @@ export function TransitionLayer() {
           display: "flex",
           flexDirection: "column",
           opacity: morphPhase === "idle" ? 0 : 1,
-          transition: "none",
+          transition: morphPhase === "idle" ? "opacity 500ms ease-out" : "none",
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element -- intentional: raw img for FLIP compositor performance */}
-        <img
-          ref={imgRef}
-          src={morphPlace.coverImage}
-          alt=""
-          style={{
-            width: "100%",
-            height: "auto",
-            aspectRatio: "4 / 3",
-            objectFit: "cover",
-            zIndex: 2,
-            position: "relative",
-          }}
-        />
+        <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", overflow: "hidden", borderRadius: `${MORPH_RADIUS_HERO_PX}px`, zIndex: 2 }}>
+          <PlaceImage src={morphPlace.coverImage} alt="" />
+        </div>
         <div
           ref={sheetRef}
           style={{
             flex: 1,
             background: "#F7F6F4",
-            borderRadius: MORPH_RADIUS_SHEET,
+            borderRadius: MORPH_RADIUS_HERO_SHEET,
             marginTop: `-${SHEET_OVERLAP_PX}px`,
             zIndex: 3,
             opacity: 0,

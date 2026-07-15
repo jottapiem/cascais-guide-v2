@@ -398,7 +398,7 @@
 .morph-scrim {
   position: fixed;
   inset: 0;
-  z-index: 92; /* above Search/Recommended overlays (z-90), below the FLIP clone (z-95) */
+  z-index: 20; /* below DetailView (z-30/40/50/70) so the scrim only blurs the base view, not the detail content */
   background: oklch(0.16 0.012 230 / 0.10);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);

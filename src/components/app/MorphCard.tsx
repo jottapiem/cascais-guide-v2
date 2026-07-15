@@ -7,6 +7,7 @@ import { useAppStore } from "@/store/app-store";
 import { haptics, staggerDelay } from "@/lib/premium";
 import { MORPH_RADIUS_PX } from "@/lib/morph-config";
 import { BlurFade } from "@/components/magicui";
+import { PlaceImage } from "./PlaceImage";
 
 const SWIFT_EASE = [0.22, 1, 0.36, 1] as const;
 const CARD_SHADOW =
@@ -125,13 +126,13 @@ export const MorphCard = memo(function MorphCard({
             className="relative h-24 w-24 shrink-0 overflow-hidden"
             style={{ borderRadius: MORPH_RADIUS_PX, opacity: isMorphing ? 0 : 1, transition: "opacity 0ms ease" }}
           >
-            <img
+            <PlaceImage
               ref={imgRef}
               src={imageSrc}
               alt={place.name}
               loading="lazy"
               onLoad={() => setImgLoaded(true)}
-              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+              className={`transition-opacity duration-700 ease-out ${imgLoaded ? "opacity-100" : "opacity-0"}`}
             />
             {!imgLoaded && <div className="absolute inset-0 skeleton-shimmer" />}
           </div>
@@ -174,13 +175,13 @@ export const MorphCard = memo(function MorphCard({
             }}
           >
             <div className="absolute inset-0 overflow-hidden">
-              <img
+              <PlaceImage
                 ref={imgRef}
                 src={imageSrc}
                 alt={place.name}
                 loading="lazy"
                 onLoad={() => setImgLoaded(true)}
-                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+                className={`transition-opacity duration-700 ease-out ${imgLoaded ? "opacity-100" : "opacity-0"}`}
               />
               {!imgLoaded && <div className="absolute inset-0 skeleton-shimmer" />}
             </div>
@@ -233,12 +234,12 @@ export const MorphCard = memo(function MorphCard({
           style={{ borderRadius: radius, opacity: isMorphing ? 0 : 1, transition: "opacity 0ms ease" }}
           className={`relative ${aspectClass} w-full overflow-hidden`}
         >
-          <img
+          <PlaceImage
             ref={imgRef}
             src={imageSrc}
             alt={place.name}
             onLoad={() => setImgLoaded(true)}
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+            className={`transition-opacity duration-700 ease-out ${imgLoaded ? "opacity-100" : "opacity-0"}`}
           />
           {!imgLoaded && <div className="absolute inset-0 skeleton-shimmer" />}
         </div>

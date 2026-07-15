@@ -3,17 +3,16 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
-import { Search, Map as MapIcon, ArrowRight, Star, Heart } from "lucide-react";
+import { Search, Map as MapIcon, ArrowRight } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { categories, exploreFeed } from "@/lib/categories-data";
 import { places } from "@/lib/places-data";
 import { haptics } from "@/lib/premium";
-import { MORPH_RADIUS_PX } from "@/lib/morph-config";
 import { BlurFade } from "@/components/magicui";
+import { MorphCard } from "./MorphCard";
 import type { Place, CategoryId } from "@/lib/types";
 
 const SWIFT_EASE = [0.22, 1, 0.36, 1] as const;
-const MORPH_TRANSITION = { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const };
 
 const CAT_BUBBLES = [
   { id: "all" as const, label: "Alles", icon: "lucide:compass", color: "#0891b2" },
@@ -50,115 +49,6 @@ function useGeolocation() {
     );
   }, []);
   return coords;
-}
-
-function calcDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
-  return Math.round(R * 2 * Math.asin(Math.sqrt(a)) * 10) / 10;
-}
-
-function AirbnbCard({ place, index, userCoords, variant = "rail", sectionId }: {
-  place: Place;
-  index: number;
-  userCoords: { lat: number; lng: number } | null;
-  variant?: "rail" | "grid";
-  sectionId: string;
-}) {
-  const goDetail = useAppStore((s) => s.goDetail);
-  const toggleFavorite = useAppStore((s) => s.toggleFavorite);
-  const isFav = useAppStore((s) => s.favorites.includes(place.id));
-  const setMorphPlace = useAppStore((s) => s.setMorphPlace);
-  const morphPlace = useAppStore((s) => s.morphPlace);
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const imgWrapperRef = useRef<HTMLDivElement>(null);
-  const cardInstanceId = `${sectionId}-${place.id}-${index}`;
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  // Check if image is already loaded (cached) on mount
-  useEffect(() => {
-    if (imgRef.current?.complete) {
-      setImgLoaded(true);
-    }
-  }, []);
-  const distance = userCoords ? calcDistance(userCoords.lat, userCoords.lng, place.lat, place.lng) : null;
-
-  const handleTap = () => {
-    const wrapper = imgWrapperRef.current;
-    if (!wrapper) return;
-    const rect = wrapper.getBoundingClientRect();
-    setMorphPlace({
-      id: place.id,
-      cardInstanceId,
-      coverImage: place.coverImage,
-      sectionId,
-      origin: {
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height,
-      },
-    });
-    haptics.selection();
-  };
-
-  const isMorphing = morphPlace?.cardInstanceId === cardInstanceId;
-
-  const wrapperClass = variant === "rail"
-    ? "w-64 shrink-0 cursor-pointer text-left"
-    : "w-full cursor-pointer text-left";
-
-  return (
-    <BlurFade delay={Math.min(index * 0.04, 0.3)}>
-      <motion.div
-        onClick={handleTap}
-        whileTap={{ scale: 0.97 }}
-        transition={{ duration: 0.15, ease: SWIFT_EASE }}
-        className={wrapperClass}
-      >
-        <div
-          ref={imgWrapperRef}
-          className="relative aspect-[4/3] w-full overflow-hidden"
-          style={{ boxShadow: CARD_SHADOW, border: "1px solid rgba(0,0,0,0.05)", background: "#F7F6F4", borderRadius: MORPH_RADIUS_PX, opacity: isMorphing ? 0 : 1, transition: "opacity 0ms ease" }}
-        >
-          <div className="absolute inset-0 overflow-hidden">
-            <img
-              ref={imgRef}
-              src={place.coverImage}
-              alt={place.name}
-              loading="lazy"
-              onLoad={() => setImgLoaded(true)}
-              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${imgLoaded ? "opacity-100" : "opacity-0"}`}
-            />
-            {!imgLoaded && <div className="absolute inset-0 skeleton-shimmer" />}
-          </div>
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); toggleFavorite(place.id); haptics.light(); }}
-            className="absolute right-2.5 top-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/15 backdrop-blur-md transition-all active:scale-90"
-            aria-label={isFav ? "Verwijder favoriet" : "Voeg toe aan favorieten"}
-          >
-            <Heart className={`h-4 w-4 transition-all ${isFav ? "fill-white text-white" : "text-white"}`} strokeWidth={2.5} />
-          </button>
-        </div>
-        <div className="mt-1 px-0.5 leading-tight">
-          <p className="truncate text-[0.875rem] font-semibold text-neutral-700">{place.shortName}</p>
-          <p className="mt-0.5 text-[0.8125rem] text-neutral-400">
-            {place.neighborhood}
-            {distance !== null && <span className="text-neutral-300"> · {distance} km</span>}
-          </p>
-          <div className="mt-0.5 flex items-center gap-1.5">
-            <span className="text-[0.8125rem] text-neutral-400 capitalize">{place.type.toLowerCase()}</span>
-            <span className="text-neutral-300">·</span>
-            <Star className="h-3 w-3 fill-neutral-400 text-neutral-400" />
-            <span className="text-[0.8125rem] font-normal text-neutral-400">{place.rating.toFixed(1)}</span>
-          </div>
-        </div>
-      </motion.div>
-    </BlurFade>
-  );
 }
 
 function SeeAllButton({ places: seePlaces, onClick }: { places: Place[]; onClick: () => void }) {
@@ -234,7 +124,7 @@ export function HomeView() {
 
   return (
     <div className="min-h-screen pb-4">
-      <header className="sticky top-0 z-30 backdrop-blur-2xl transition-shadow duration-300" style={{ background: "#F7F6F4", boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.06)" : "none", borderBottom: scrolled ? "1px solid rgba(0,0,0,0.04)" : "1px solid transparent" }}>
+      <header className="sticky top-0 z-30 glass-strong transition-shadow duration-300" style={{ boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.06)" : "none", borderBottom: scrolled ? "1px solid rgba(0,0,0,0.04)" : "1px solid transparent" }}>
         <div className="px-4 pt-safe-lg pb-3">
           <motion.button type="button" onClick={() => { goSearch(); haptics.selection(); }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.15, ease: SWIFT_EASE }} className="flex w-full items-center justify-center rounded-full px-4 py-3 text-left" style={{ boxShadow: SEARCH_SHADOW, background: "#F7F6F4" }}>
             <Search className="h-[1rem] w-[1rem] text-neutral-500" strokeWidth={2.2} />
@@ -253,7 +143,7 @@ export function HomeView() {
             <button type="button" onClick={() => { goMap(); haptics.selection(); }} className="flex items-center gap-1 rounded-full px-3 py-1.5 text-[0.75rem] font-semibold text-neutral-700" style={{ boxShadow: CARD_SHADOW, border: "1px solid rgba(0,0,0,0.05)", background: "#F7F6F4" }}><MapIcon className="h-3 w-3" /> Kaart</button>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {filteredFeed.map((place, i) => (<AirbnbCard key={place.id} place={place} index={i} userCoords={userCoords} variant="grid" sectionId="filtered" />))}
+            {filteredFeed.map((place, i) => (<MorphCard key={place.id} place={place} index={i} userCoords={userCoords} variant="boxed-grid" sectionId="filtered" />))}
           </div>
         </div>
       ) : (
@@ -280,7 +170,7 @@ function Section({ title, places: sectionPlaces, onSeeAll, userCoords, sectionId
         </div>
       </BlurFade>
       <div className="no-scrollbar flex gap-3 overflow-x-auto px-4 pb-1">
-        {sectionPlaces.slice(0, 8).map((place, i) => (<AirbnbCard key={place.id} place={place} index={i} userCoords={userCoords} sectionId={sectionId} />))}
+        {sectionPlaces.slice(0, 8).map((place, i) => (<MorphCard key={place.id} place={place} index={i} userCoords={userCoords} variant="rail" sectionId={sectionId} />))}
         <SeeAllButton places={seeAllPlaces} onClick={onSeeAll} />
       </div>
     </section>

@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { useAppStore } from "@/store/app-store";
 import { places } from "@/lib/places-data";
 import { categories } from "@/lib/categories-data";
-import { PlaceCard } from "./PlaceCard";
+import { MorphCard } from "./MorphCard";
 import type { CategoryId } from "@/lib/types";
 
 // De originele aanrader-lijst — iconische Cascais plekken die je aan iedereen aanraadt
@@ -116,7 +116,7 @@ export function RecommendedView() {
       <section className="mt-4 px-4">
         <div className="grid grid-cols-2 gap-2.5">
           {filtered.map((p, i) => (
-            <PlaceCard key={p.id} place={p} variant="named" index={i} sectionId="recommended" />
+            <MorphCard key={p.id} place={p} variant="named" index={i} sectionId="recommended" />
           ))}
         </div>
       </section>

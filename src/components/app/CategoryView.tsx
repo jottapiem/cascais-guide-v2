@@ -5,7 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppStore } from "@/store/app-store";
 import { getCategory, filterByCategory } from "@/lib/categories-data";
-import { PlaceCard } from "./PlaceCard";
+import { MorphCard } from "./MorphCard";
 
 export function CategoryView() {
   const categoryId = useAppStore((s) => s.selectedCategory);
@@ -49,7 +49,7 @@ export function CategoryView() {
       {/* 3-koloms Instagram grid — alleen foto's */}
       <div className="grid grid-cols-3 gap-[2px]">
         {list.map((p, i) => (
-          <PlaceCard key={p.id} place={p} variant="masonry" index={i} sectionId={`category-${categoryId}`} />
+          <MorphCard key={p.id} place={p} variant="masonry" index={i} sectionId={`category-${categoryId}`} />
         ))}
       </div>
 

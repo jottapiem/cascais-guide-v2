@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useAppStore } from "@/store/app-store";
 import { places } from "@/lib/places-data";
 import { RECOMMENDED_IDS } from "./RecommendedView";
-import { PlaceCard } from "./PlaceCard";
+import { MorphCard } from "./MorphCard";
 
 export function FavoritesView() {
   const goBack = useAppStore((s) => s.goBack);
@@ -129,7 +129,7 @@ export function FavoritesView() {
           /* Uniforme 3-koloms grid — zelfde als ExploreView en CategoryView */
           <div className="grid grid-cols-3 gap-[2px]">
             {favPlaces.map((p, i) => (
-              <PlaceCard key={p.id} place={p} variant="masonry" index={i} />
+              <MorphCard key={p.id} place={p} variant="masonry" index={i} sectionId="favorites" />
             ))}
           </div>
         )}

@@ -10,14 +10,10 @@ import {
 import { useAppStore } from "@/store/app-store";
 import { getPlace, places } from "@/lib/places-data";
 import { LAYER_COLORS, socialScore } from "@/lib/categories-data";
-import { PlaceCard } from "./PlaceCard";
+import { MorphCard } from "./MorphCard";
 import { MORPH_RADIUS_ALL, MORPH_RADIUS_SHEET } from "@/lib/morph-config";
 import type { Audience } from "@/lib/types";
 
-const MORPH_EASE = [0.22, 1, 0.36, 1] as const;
-const SHEET_EASE = [0.16, 1, 0.3, 1] as const;
-const MORPH_DURATION = 0.48;
-const MORPH_TRANSITION = { duration: MORPH_DURATION, ease: MORPH_EASE };
 const OPACITY_DELAY = 0.05;
 const OPACITY_DURATION = 0.3;
 // Hero is aspect-[4/3] binnen een max-w-md (28rem) container — sheet-top volgt exact
@@ -37,10 +33,11 @@ const TIME_LABEL: Record<string, string> = {
   Night: "Nacht",
 };
 
-// ── DetailOverlay — Shared Layout Shell ──
-// FRAME (layoutId) morft van kaart → hero; content-img krijgt bare `layout` zodat
-// Framer's projection engine 'm automatisch corrigeert tegen de FRAME-scale (geen vervorming).
-// Sheet is apart, slide-up met y: 100% → 0. Overlay/buttons fade in na morph.
+// ── DetailOverlay — resting state of the shared-element morph ──
+// No layoutId/projection here — the actual morph is TransitionLayer's imperative FLIP
+// clone. This component only renders the *resting* hero + sheet, at the exact pixel
+// position the clone finishes at, and toggles its own opacity in lockstep with
+// morphPhase so the hand-off between "clone" and "real content" is invisible.
 export function DetailOverlay({ placeId, sectionId }: { placeId: string; sectionId: string }) {
   useEffect(() => {
     // Lock body scroll tijdens detail view
@@ -49,7 +46,6 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
   }, []);
   const place = getPlace(placeId);
   const goBack = useAppStore((s) => s.goBack);
-  const clearMorph = useAppStore((s) => s.clearMorph);
   const setMorphPhase = useAppStore((s) => s.setMorphPhase);
   const morphPlace = useAppStore((s) => s.morphPlace);
   const morphPhase = useAppStore((s) => s.morphPhase);
@@ -103,24 +99,20 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
 
       </motion.div>
 
-      {/* ── SHEET — snelle fade-in (150ms, geen delay) ── */}
+      {/* ── SHEET — settles up into place a beat after the photo arrives, so it reads
+          as a continuation of the morph rather than content appearing on top of it.
+          Reverse is instant (0 duration): the FLIP clone in TransitionLayer visually
+          owns the sheet during reverse, this real one just needs to get out of the way. ── */}
       <motion.div
-        initial={{ opacity: 1 }}
-        animate={{ opacity: exiting ? 0 : 1 }}
+        initial={{ y: 14, opacity: 0 }}
+        animate={{ y: 0, opacity: exiting ? 0 : 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: exiting ? 0 : 0 }}
+        transition={exiting ? { duration: 0 } : { type: "spring", stiffness: 340, damping: 32 }}
         className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md bg-[#F7F6F4] overflow-hidden shadow-[0_-8px_24px_rgba(0,0,0,0.08)]"
         style={{ top: "calc(" + HERO_HEIGHT_CSS + " - 3rem)", borderRadius: MORPH_RADIUS_SHEET }}
       >
         <div ref={sheetRef} className="h-full overflow-y-auto overflow-x-hidden">
-          {/* Content — fade in na morph */}
-          <motion.div
-            initial={{ opacity: 1 }}
-            animate={{ opacity: exiting ? 0 : 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: exiting ? 0 : 0 }}
-            className="px-4 pb-28 pt-6"
-          >
+          <div className="px-4 pb-28 pt-6">
             {/* TITEL — bovenaan, gecentreerd (NIET op foto) */}
             <div className="text-center">
               <h1 className="text-[1.875rem] font-bold leading-[1.05] tracking-[-0.025em] text-foreground">{place.name}</h1>
@@ -224,13 +216,13 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
                 <div className="no-scrollbar flex gap-2.5 overflow-x-auto pb-1.5 -mx-4 px-4">
                   {related.map((p, i) => (
                     <div key={p.id} className="w-36 shrink-0">
-                      <PlaceCard place={p} variant="wide" index={i} sectionId="related" />
+                      <MorphCard place={p} variant="wide" index={i} sectionId="related" />
                     </div>
                   ))}
                 </div>
               </div>
             )}
-          </motion.div>
+          </div>
         </div>
       </motion.div>
 

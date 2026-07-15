@@ -33,7 +33,7 @@ export function AppShell() {
   const [baseView, setBaseView] = useState<View>(view);
   if (!isOverlay && view !== baseView) setBaseView(view);
 
-  const NAV_VIEWS: View[] = ["home", "favorites", "map", "trips", "packing"];
+  const NAV_VIEWS: View[] = ["home", "explore", "favorites", "map", "trips", "packing"];
   const showNav = NAV_VIEWS.includes(baseView);
   const isDetail = view === "detail" && selectedPlaceId;
 
@@ -66,16 +66,17 @@ export function AppShell() {
         {/* TRANSITION LAYER - Must be here to render the morphing image */}
         <TransitionLayer />
 
-        {/* DETAIL OVERLAY */}
-        <AnimatePresence mode="sync">
-          {isDetail && (
-            <DetailView
-              key={`detail-${selectedPlaceId}`}
-              placeId={selectedPlaceId}
-              sectionId={selectedSectionId || "default"}
-            />
-          )}
-        </AnimatePresence>
+        {/* DETAIL OVERLAY — no AnimatePresence here: DetailOverlay renders through a
+            portal, not a motion element, so AnimatePresence had no exit animation to
+            run and was dead weight. Its mount/entrance and unmount/exit are both
+            driven directly by morphPhase inside DetailView + TransitionLayer instead. */}
+        {isDetail && (
+          <DetailView
+            key={`detail-${selectedPlaceId}`}
+            placeId={selectedPlaceId}
+            sectionId={selectedSectionId || "default"}
+          />
+        )}
 
         {/* SEARCH / RECOMMENDED OVERLAYS */}
         <AnimatePresence>

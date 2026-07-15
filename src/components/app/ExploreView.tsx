@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppStore } from "@/store/app-store";
 import { exploreFeed, categories } from "@/lib/categories-data";
-import { PlaceCard } from "./PlaceCard";
+import { MorphCard } from "./MorphCard";
 import type { CategoryId, Place } from "@/lib/types";
 
 const PAGE = 18;
@@ -142,7 +142,7 @@ export function ExploreView() {
       {/* 3-koloms grid met uniforme vierkante tiles — geen masonry (geen glitch) */}
       <div className="grid grid-cols-3 gap-[2px]">
         {visible.map((p, i) => (
-          <PlaceCard key={`${p.id}-${i}`} place={p} variant="masonry" index={i} sectionId="explore" />
+          <MorphCard key={`${p.id}-${i}`} place={p} variant="masonry" index={i} sectionId="explore" />
         ))}
         {loading && Array.from({ length: 6 }).map((_, i) => <Skeleton key={`sk-${i}`} />)}
       </div>

@@ -1,20 +1,19 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Calendar, Compass } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { places } from "@/lib/places-data";
+import { MorphCard } from "./MorphCard";
 
 export function TripsView() {
   const goExplore = useAppStore((s) => s.goExplore);
-  const goDetail = useAppStore((s) => s.goDetail);
   const favorites = useAppStore((s) => s.favorites);
 
   const favPlaces = places.filter((p) => favorites.includes(p.id));
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 border-b border-border/40 bg-background/90 backdrop-blur-2xl pt-safe-lg">
+      <header className="sticky top-0 z-30 glass-strong pt-safe-lg">
         <div className="px-4 py-4">
           <h1 className="text-[24px] font-bold tracking-tight">Trips</h1>
           <p className="text-[13px] text-muted-foreground">Jouw opgeslagen plekken</p>
@@ -27,23 +26,7 @@ export function TripsView() {
             <h2 className="mb-3 text-[16px] font-bold">Wishlist ({favPlaces.length})</h2>
             <div className="space-y-3">
               {favPlaces.map((place, i) => (
-                <motion.button
-                  key={place.id}
-                  onClick={() => goDetail(place.id)}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                  className="flex w-full items-center gap-3 rounded-2xl bg-card p-3 text-left shadow-sm ring-1 ring-border/40"
-                >
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl">
-                    <img src={place.coverImage} alt={place.name} className="h-full w-full object-cover" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[14px] font-semibold">{place.name}</p>
-                    <p className="truncate text-[12px] text-muted-foreground">{place.neighborhood} · {place.vibe}</p>
-                    <p className="mt-1 text-[11px] text-muted-foreground">Beste tijd: {place.besteTijd}</p>
-                  </div>
-                </motion.button>
+                <MorphCard key={place.id} place={place} variant="row" index={i} sectionId="trips" showFav={false} />
               ))}
             </div>
             <div className="mt-6 rounded-2xl bg-secondary/50 p-4 text-center">

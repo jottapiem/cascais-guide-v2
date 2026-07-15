@@ -20,7 +20,7 @@ interface AppState {
   rootView: View;
   selectedPlaceId: string | null;
   selectedSectionId: string | null;
-  morphPlace: { id: string; cardInstanceId: string; coverImage: string; sectionId: string; origin: { left: number; top: number; width: number; height: number } } | null;
+  morphPlace: { id: string; cardInstanceId: string; coverImage: string; sectionId: string; radius: number; origin: { left: number; top: number; width: number; height: number } } | null;
   morphPhase: "idle" | "forward" | "reverse";
   selectedCategory: CategoryId | null;
   recommendedCat: CategoryId | "all";
@@ -53,9 +53,16 @@ interface AppState {
   goProfile: () => void;
   setRecommendedCat: (c: CategoryId | "all") => void;
   goBack: () => void;
-  setMorphPlace: (place: { id: string; cardInstanceId: string; coverImage: string; sectionId: string; origin: { left: number; top: number; width: number; height: number } }) => void;
+  setMorphPlace: (place: { id: string; cardInstanceId: string; coverImage: string; sectionId: string; radius: number; origin: { left: number; top: number; width: number; height: number } }) => void;
   setMorphPhase: (phase: "idle" | "forward" | "reverse") => void;
   clearMorph: () => void;
+  // Atomic completions for the two ends of the morph — a single set() call each, so
+  // there's no frame where `view` has changed but `morphPlace`/`morphPhase` haven't
+  // (or vice versa). Previously the reverse path used flushSync(goBack) followed by a
+  // separate clearMorph() call, which forced two distinct renders with a real gap
+  // between them — the most likely source of the reported hero flicker on back nav.
+  finishMorphForward: () => void;
+  finishMorphReverse: () => void;
 
   toggleFavorite: (id: string) => void;
   isFavorite: (id: string) => boolean;
@@ -152,6 +159,29 @@ export const useAppStore = create<AppState>()(
       setMorphPlace: (place) => set({ morphPlace: place, morphPhase: "forward" }),
       setMorphPhase: (phase) => set({ morphPhase: phase }),
       clearMorph: () => set({ morphPlace: null, morphPhase: "idle" }),
+      finishMorphForward: () => {
+        const place = get().morphPlace;
+        if (!place) return;
+        set({
+          view: "detail",
+          selectedPlaceId: place.id,
+          selectedSectionId: place.sectionId,
+          history: pushHistory(get()),
+          morphPhase: "idle",
+        });
+      },
+      finishMorphReverse: () => {
+        const hist = get().history;
+        const prev = hist.length ? hist[hist.length - 1] : "home";
+        const nextRoot = ROOT_VIEWS.includes(prev) ? prev : get().rootView;
+        set({
+          view: prev,
+          rootView: nextRoot,
+          history: hist.length ? hist.slice(0, -1) : [],
+          morphPlace: null,
+          morphPhase: "idle",
+        });
+      },
 
       toggleFavorite: (id) =>
         set((state) => ({

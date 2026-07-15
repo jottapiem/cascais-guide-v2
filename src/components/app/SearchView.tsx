@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search as SearchIcon, X, ArrowLeft, ChevronRight } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { search, POPULAR_SEARCHES } from "@/lib/search-engine";
-import { PlaceCard } from "./PlaceCard";
+import { MorphCard } from "./MorphCard";
 
 export function SearchView() {
   const goBack = useAppStore((s) => s.goBack);
@@ -101,7 +101,7 @@ export function SearchView() {
               className="grid grid-cols-2 gap-2.5"
             >
               {results.map((r, i) => (
-                <PlaceCard key={r.place.id} place={r.place} variant="grid" index={i} sectionId="search" />
+                <MorphCard key={r.place.id} place={r.place} variant="grid" index={i} sectionId="search" />
               ))}
             </motion.div>
           </AnimatePresence>

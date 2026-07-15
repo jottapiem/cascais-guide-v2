@@ -26,7 +26,7 @@ export function ProfileView() {
 
   return (
     <div className="min-h-screen pb-6">
-      <header className="sticky top-0 z-30 border-b border-border/40 bg-background/90 backdrop-blur-2xl pt-safe-lg">
+      <header className="sticky top-0 z-30 border-b border-border/40 glass-strong pt-safe-lg">
         <div className="px-4 py-4"><h1 className="text-[24px] font-bold tracking-tight">Profiel</h1></div>
       </header>
       <div className="px-4 pt-6">

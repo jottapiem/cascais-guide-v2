@@ -42,9 +42,54 @@ export const MORPH_SPRING = { type: "spring" as const, stiffness: 400, damping: 
 export const SHEET_FADE_END = 0.78;
 export const SCRIM_FADE_END = 0.9;
 
+// Reduced-motion fallback: the global CSS `prefers-reduced-motion` rule (globals.css)
+// forces CSS transition/animation durations to ~0, but it can't reach this spring
+// because it's driven imperatively by Framer Motion's RAF loop, not a CSS transition.
+// TransitionLayer checks `matchMedia` itself and swaps to this near-critically-damped,
+// fast-settling spring instead of skipping the morph outright — an instant jump-cut
+// between a small card and a full hero is a worse experience than a very quick settle.
+export const MORPH_SPRING_REDUCED = { type: "spring" as const, stiffness: 1000, damping: 70, mass: 1 };
+
+// ─── Shape vs. motion completion (T1) ────────────────────────────────────────
+// Ground-truth observation: the sheet's shape-extension (aspect-ratio match) finishes
+// well before the position/scale morph does — around 17–50% of the way through, while
+// the image is still only ~50% of the way to its final position. Framer's spring
+// `progress` (0→1) doesn't map to a fixed ms timeline the way a duration-based
+// animation would, so T1 is expressed here as a progress fraction rather than a ms
+// offset. 0.55 sits in the observed range and reads correctly against this spring's
+// particular stiffness/damping — tune if the spring config above ever changes.
+export const MORPH_RADIUS_SNAP_PROGRESS = 0.55;
+export const MORPH_CHROME_FADE_START = 0.55;
+
+// ─── Hold phase (T2 → T3) + crossfade ───────────────────────────────────────
+// The reference observation ties this hold to content-load time (Airbnb fetches the
+// detail page over the network). This app's place data is bundled and local — there
+// is no load to wait on — so this is a fixed, tuned placeholder purely for perceptual
+// pacing/craft, not a functional wait. Flagged as a deliberate deviation, not an
+// oversight: see summary notes.
+export const MORPH_HOLD_MS = 220;
+// T3: E4 (this clone) and E7 (its spinner) fade out the instant E9 (the real content
+// sheet) fades in — they're literally the same fading DOM subtree here, so that
+// simultaneity falls out of the architecture for free rather than needing separate
+// choreography. This constant is that crossfade's duration.
+export const MORPH_CROSSFADE_MS = 260;
+
+// E10: bottom bar rise, explicitly unspecified by the observation. Independent,
+// translateY-only, not tied to any opacity fade.
+export const BOTTOM_BAR_RISE_MS = 340;
+
+// E3: card title/subtitle fade-out on tap.
+export const CARD_TEXT_FADE_MS = 70;
+
 // ─── Easing curves (shared) ─────────────────────────────────────────────────
 export const SWIFT_EASE = [0.22, 1, 0.36, 1] as const;
 
 // ─── Scrim (static blur, opacity-only animation) ────────────────────────────
+// Two constant-blur layers cross-faded by progress fake a continuously *increasing*
+// blur without ever animating `backdrop-filter` itself (documented Chromium jank —
+// see coding-standards.md). Replaces the single-layer scrim; SCRIM_BLUR_PX/SCRIM_TINT
+// stay as the "heavy" layer so nothing else importing them needs to change.
 export const SCRIM_BLUR_PX = 24;
+export const SCRIM_BLUR_LIGHT_PX = 10;
+export const SCRIM_LIGHT_FADE_END = 0.45;
 export const SCRIM_TINT = "oklch(0.16 0.012 230 / 0.10)";

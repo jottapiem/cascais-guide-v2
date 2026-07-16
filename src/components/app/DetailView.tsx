@@ -11,7 +11,7 @@ import { useAppStore } from "@/store/app-store";
 import { getPlace, places } from "@/lib/places-data";
 import { LAYER_COLORS, socialScore } from "@/lib/categories-data";
 import { MorphCard } from "./MorphCard";
-import { MORPH_RADIUS_HERO_ALL, MORPH_RADIUS_HERO_SHEET, HERO_HEIGHT_CSS, SHEET_OVERLAP_REM } from "@/lib/morph-config";
+import { MORPH_RADIUS_HERO_ALL, MORPH_RADIUS_HERO_SHEET, HERO_HEIGHT_CSS, SHEET_OVERLAP_REM, BOTTOM_BAR_RISE_MS } from "@/lib/morph-config";
 import type { Audience } from "@/lib/types";
 
 const OPACITY_DELAY = 0.05;
@@ -104,10 +104,10 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
           Reverse is instant (0 duration): the FLIP clone in TransitionLayer visually
           owns the sheet during reverse, this real one just needs to get out of the way. ── */}
       <motion.div
-        initial={{ y: 14, opacity: 0 }}
-        animate={{ y: 0, opacity: exiting ? 0 : 1 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: exiting ? 0 : 1 }}
         exit={{ opacity: 0 }}
-        transition={exiting ? { duration: 0 } : { type: "spring", stiffness: 340, damping: 32 }}
+        transition={exiting ? { duration: 0 } : { duration: 0.26, ease: "easeOut" }}
         className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md bg-[#F7F6F4] overflow-hidden shadow-[0_-8px_24px_rgba(0,0,0,0.08)]"
         style={{ top: "calc(" + HERO_HEIGHT_CSS + " - " + SHEET_OVERLAP_REM + ")", borderRadius: MORPH_RADIUS_HERO_SHEET }}
       >
@@ -269,10 +269,14 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
 
       {/* ── STICKY MAPS BUTTON ── */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: (exiting || morphPhase !== "idle") ? 0 : 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: (exiting || morphPhase !== "idle") ? 0 : OPACITY_DURATION, delay: (exiting || morphPhase !== "idle") ? 0 : (morphPlace ? OPACITY_DELAY : 0), ease: "linear" }}
+        initial={{ y: "100%" }}
+        animate={{ y: (exiting || morphPhase !== "idle") ? "100%" : 0 }}
+        exit={{ y: "100%" }}
+        transition={{
+          duration: (exiting || morphPhase !== "idle") ? 0 : BOTTOM_BAR_RISE_MS / 1000,
+          delay: (exiting || morphPhase !== "idle") ? 0 : (morphPlace ? OPACITY_DELAY : 0),
+          ease: "easeOut",
+        }}
         className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md glass-strong px-4 pt-3 pb-safe hairline-t"
       >
         <a href={place.mapLink} target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-[0.9375rem] font-bold tracking-tight text-primary-foreground shadow-float transition-transform active:scale-[0.97]">

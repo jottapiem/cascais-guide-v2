@@ -5,7 +5,7 @@ import { Heart, Star } from "lucide-react";
 import type { Place } from "@/lib/types";
 import { useAppStore } from "@/store/app-store";
 import { haptics, staggerDelay } from "@/lib/premium";
-import { MORPH_RADIUS_PX, CARD_WIDTH_CSS, SWIFT_EASE } from "@/lib/morph-config";
+import { MORPH_RADIUS_PX, CARD_WIDTH_CSS, SWIFT_EASE, CARD_TEXT_FADE_MS } from "@/lib/morph-config";
 import { BlurFade } from "@/components/magicui";
 import { PlaceImage } from "./PlaceImage";
 
@@ -191,7 +191,10 @@ export const MorphCard = memo(function MorphCard({
                 `h-4 w-4 transition-all ${isFav ? "fill-white text-white" : "text-white"}`
               )}
           </div>
-          <div className="mt-1 px-0.5 leading-tight">
+          <div
+            className="mt-1 px-0.5 leading-tight"
+            style={{ opacity: isMorphing ? 0 : 1, transition: `opacity ${CARD_TEXT_FADE_MS}ms linear` }}
+          >
             <p className="truncate text-[0.875rem] font-semibold text-neutral-700">{place.shortName}</p>
             <p className="mt-0.5 text-[0.8125rem] text-neutral-400">
               {place.neighborhood}

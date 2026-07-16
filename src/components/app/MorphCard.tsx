@@ -5,11 +5,11 @@ import { Heart, Star } from "lucide-react";
 import type { Place } from "@/lib/types";
 import { useAppStore } from "@/store/app-store";
 import { haptics, staggerDelay } from "@/lib/premium";
-import { MORPH_RADIUS_PX } from "@/lib/morph-config";
+import { MORPH_RADIUS_PX, CARD_WIDTH_CSS, SWIFT_EASE } from "@/lib/morph-config";
 import { BlurFade } from "@/components/magicui";
 import { PlaceImage } from "./PlaceImage";
 
-const SWIFT_EASE = [0.22, 1, 0.36, 1] as const;
+// SWIFT_EASE imported from morph-config.
 const CARD_SHADOW =
   "0 1px 2px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 0 0.5px rgba(0,0,0,0.03)";
 
@@ -158,13 +158,13 @@ export const MorphCard = memo(function MorphCard({
 
   // --- RICH: rail (Home horizontal rails) / boxed-grid (Home category-filtered grid) ---
   if (rich) {
-    const wrapperClass = variant === "rail" ? "w-64 shrink-0 cursor-pointer text-left" : "w-full cursor-pointer text-left";
+    const wrapperClass = variant === "rail" ? "shrink-0 cursor-pointer text-left" : "w-full cursor-pointer text-left";
     return (
       <BlurFade delay={Math.min(index * 0.04, 0.3)}>
-        <motion.div onClick={handleTap} whileTap={{ scale: 0.97 }} transition={{ duration: 0.15, ease: SWIFT_EASE }} className={wrapperClass}>
+        <motion.div onClick={handleTap} whileTap={{ scale: 0.97 }} transition={{ duration: 0.15, ease: SWIFT_EASE }} className={wrapperClass} style={variant === "rail" ? { width: CARD_WIDTH_CSS } : undefined}>
           <div
             ref={imgWrapperRef}
-            className="relative aspect-[4/3] w-full overflow-hidden"
+            className="relative aspect-square w-full overflow-hidden"
             style={{
               boxShadow: CARD_SHADOW,
               border: "1px solid rgba(0,0,0,0.05)",

@@ -54,7 +54,7 @@ export function TransitionLayer() {
     const radius = mix(g.startRadius, MORPH_RADIUS_HERO_PX, t);
 
     el.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
-    el.style.borderRadius = `${radius}px`;
+    el.style.clipPath = `inset(0 round ${radius}px)`;
 
     // Sheet: fades in/out as a function of progress, finishing shortly before the
     // transform itself arrives (SHEET_FADE_END < 1) so it reads as "attached to the
@@ -63,13 +63,7 @@ export function TransitionLayer() {
 
     // Scrim: real depth — both opacity AND blur radius ramp with movement, instead of
     // a flat dark overlay snapping in.
-    if (scrimRef.current) {
-      const s = clamp01(t / SCRIM_FADE_END);
-      scrimRef.current.style.opacity = String(s);
-      const blurPx = (s * 24).toFixed(1);
-      scrimRef.current.style.backdropFilter = `blur(${blurPx}px)`;
-      scrimRef.current.style.setProperty("-webkit-backdrop-filter", `blur(${blurPx}px)`);
-    }
+    if (scrimRef.current) scrimRef.current.style.opacity = String(clamp01(t / SCRIM_FADE_END));
   };
 
   useLayoutEffect(() => {
@@ -150,15 +144,15 @@ export function TransitionLayer() {
           zIndex: 95, // above the Search/Recommended full-screen overlays (z-90) — cards
           // inside those views can trigger the morph too, and the clone must win.
           overflow: "hidden",
-          willChange: "transform, border-radius",
+          willChange: "transform, opacity",
           pointerEvents: "none",
           display: "flex",
           flexDirection: "column",
           opacity: morphPhase === "idle" ? 0 : 1,
-          transition: morphPhase === "idle" ? "opacity 500ms ease-out" : "none",
+          transition: morphPhase === "idle" ? "opacity 500ms ease-out 100ms" : "none",
         }}
       >
-        <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", overflow: "hidden", borderRadius: `${MORPH_RADIUS_HERO_PX}px`, zIndex: 2 }}>
+        <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: `${MORPH_RADIUS_HERO_PX}px`, zIndex: 2 }}>
           <PlaceImage src={morphPlace.coverImage} alt="" />
         </div>
         <div
@@ -167,6 +161,7 @@ export function TransitionLayer() {
             flex: 1,
             background: "#F7F6F4",
             borderRadius: MORPH_RADIUS_HERO_SHEET,
+            boxShadow: "0px -8px 24px 0px rgba(0,0,0,0.08)",
             marginTop: `-${SHEET_OVERLAP_PX}px`,
             zIndex: 3,
             opacity: 0,

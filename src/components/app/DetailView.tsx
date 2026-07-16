@@ -11,14 +11,14 @@ import { useAppStore } from "@/store/app-store";
 import { getPlace, places } from "@/lib/places-data";
 import { LAYER_COLORS, socialScore } from "@/lib/categories-data";
 import { MorphCard } from "./MorphCard";
-import { MORPH_RADIUS_HERO_ALL, MORPH_RADIUS_HERO_SHEET } from "@/lib/morph-config";
+import { MORPH_RADIUS_HERO_ALL, MORPH_RADIUS_HERO_SHEET, HERO_HEIGHT_CSS, SHEET_OVERLAP_REM } from "@/lib/morph-config";
 import type { Audience } from "@/lib/types";
 
 const OPACITY_DELAY = 0.05;
 const OPACITY_DURATION = 0.3;
 // Hero is aspect-[4/3] binnen een max-w-md (28rem) container — sheet-top volgt exact
 // de werkelijk gerenderde hero-hoogte i.p.v. een losse vh-gok die op smalle telefoons afwijkt.
-const HERO_HEIGHT_CSS = "calc(min(28rem, 100vw) * 0.75)";  // foto hoogte = sheet top (4:3)
+// HERO_HEIGHT_CSS imported from morph-config — 1:1 square hero.
 
 const AUDIENCE_LABEL: Record<Audience, string> = {
   vrienden: "Vrienden",
@@ -88,7 +88,7 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
         {/* FRAME — layoutId morph target, clipt naar 4:3, zelfde key als de kaart-frame */}
         <div
           style={{ borderRadius: MORPH_RADIUS_HERO_ALL, opacity: exiting ? 0 : (!morphPlace || morphPhase === "idle" ? 1 : 0), transition: "opacity 0ms ease" }}
-          className="relative aspect-[4/3] w-full overflow-hidden"
+          className="relative aspect-square w-full overflow-hidden"
         >
           <img
             src={place.coverImage}
@@ -109,7 +109,7 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
         exit={{ opacity: 0 }}
         transition={exiting ? { duration: 0 } : { type: "spring", stiffness: 340, damping: 32 }}
         className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md bg-[#F7F6F4] overflow-hidden shadow-[0_-8px_24px_rgba(0,0,0,0.08)]"
-        style={{ top: "calc(" + HERO_HEIGHT_CSS + " - 3rem)", borderRadius: MORPH_RADIUS_HERO_SHEET }}
+        style={{ top: "calc(" + HERO_HEIGHT_CSS + " - " + SHEET_OVERLAP_REM + ")", borderRadius: MORPH_RADIUS_HERO_SHEET }}
       >
         <div ref={sheetRef} className="h-full overflow-y-auto overflow-x-hidden">
           <div className="px-4 pb-28 pt-6">

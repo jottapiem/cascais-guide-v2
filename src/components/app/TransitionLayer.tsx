@@ -107,7 +107,7 @@ export function TransitionLayer() {
     // behavior: hold at the source radius, then hard-snap (no easing) to 0 once the
     // shape-extension threshold passes, since the bottom edge is what tucks under the
     // sheet and 0 is structurally correct there regardless of edge-to-edge-ness.
-    const topRadius = mix(g.startRadius, MORPH_RADIUS_HERO_PX, t);
+    const topRadius = g.startRadius;
     const bottomRadius = t < MORPH_RADIUS_SNAP_PROGRESS ? g.startRadius : 0;
 
     el.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
@@ -255,14 +255,12 @@ export function TransitionLayer() {
         <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: `${MORPH_RADIUS_HERO_PX}px`, zIndex: 2 }}>
           <PlaceImage src={morphPlace.coverImage} alt="" />
 
-          {/* Chrome: back button / type badge / favorite button / spinner — E6/E7/E8.
-              Deliberately the SAME markup+positioning as DetailOverlay's real header
-              buttons (see DetailView.tsx) so the T3 hand-off is a pixel-aligned swap,
-              not a visible pop. pointer-events: none — these are decorative during the
-              morph; the real, interactive buttons take over the instant DetailOverlay
-              mounts underneath. No floating title text here: this app's resting design
-              has no header-bar title (the place name lives in the sheet), so E6 is
-              represented by the type badge rather than inventing new title text. */}
+          {/* Chrome: back button / type badge / favorite button / spinner / floating
+              title — E6/E7/E8. Deliberately the SAME markup+positioning as
+              DetailOverlay's real header buttons (see DetailView.tsx) so the T3
+              hand-off is a pixel-aligned swap, not a visible pop. pointer-events:
+              none — these are decorative during the morph; the real, interactive
+              buttons take over the instant DetailOverlay mounts underneath. */}
           <div ref={chromeRef} className="pointer-events-none absolute inset-0 z-10" style={{ opacity: 0 }}>
             <div style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.5rem)" }} className="absolute left-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-xl">
               <ChevronLeft className="h-5 w-5" strokeWidth={2.6} />
@@ -274,6 +272,19 @@ export function TransitionLayer() {
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-xl">
                 <Heart className={`h-[1.125rem] w-[1.125rem] ${isFav ? "fill-accent text-accent" : "text-white"}`} strokeWidth={2.4} />
               </span>
+            </div>
+            {/* E6 — floating place name. Fades in T1->T2 with the rest of the chrome.
+                Positioned at the bottom-left of the hero image with a gradient backdrop
+                for readability. At T3 this crossfades out with the clone; DetailView's
+                matching floating title (same position/font) crossfades in. */}
+            <div className="absolute inset-x-0 bottom-0 z-10 p-4">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 to-transparent" />
+              <p className="relative text-[1.5rem] font-bold leading-tight tracking-[-0.02em] text-white drop-shadow-sm">
+                {place?.shortName ?? place?.name ?? ""}
+              </p>
+              <p className="relative mt-0.5 flex items-center gap-1.5 text-[0.8125rem] font-medium text-white/85">
+                {place?.neighborhood ?? ""}
+              </p>
             </div>
             {/* E7 — continuous spin loop, independent of this wrapper's own opacity
                 state (the CSS animation keeps running even while opacity is 0). */}

@@ -95,6 +95,19 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
             alt={place.name}
             className="absolute inset-0 h-full w-full object-cover"
           />
+
+          {/* E6 — floating place name (resting state). Pixel-matched to the chrome
+              overlay in TransitionLayer so the T3 crossfade is seamless. Inherits
+              the parent's opacity (visible at rest, hidden during morph/reverse). */}
+          <div className="absolute inset-x-0 bottom-0 z-10 p-4">
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 to-transparent" />
+            <p className="relative text-[1.5rem] font-bold leading-tight tracking-[-0.02em] text-white drop-shadow-sm">
+              {place.shortName}
+            </p>
+            <p className="relative mt-0.5 flex items-center gap-1.5 text-[0.8125rem] font-medium text-white/85">
+              {place.neighborhood}
+            </p>
+          </div>
         </div>
 
       </motion.div>

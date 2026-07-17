@@ -39,7 +39,7 @@ export const HERO_HEIGHT_CSS = `min(${APP_CONTAINER_REM}rem, 100vw)`;
 export const MORPH_DURATION_MS = 480;
 export const MORPH_DURATION_S = MORPH_DURATION_MS / 1000;
 export const MORPH_SPRING = { type: "spring" as const, stiffness: 400, damping: 40, mass: 1 };
-export const SHEET_FADE_END = 0.78;
+export const SHEET_FADE_END = 0.5;
 export const SCRIM_FADE_END = 0.9;
 
 // Reduced-motion fallback: the global CSS `prefers-reduced-motion` rule (globals.css)
@@ -56,10 +56,10 @@ export const MORPH_SPRING_REDUCED = { type: "spring" as const, stiffness: 1000, 
 // the image is still only ~50% of the way to its final position. Framer's spring
 // `progress` (0→1) doesn't map to a fixed ms timeline the way a duration-based
 // animation would, so T1 is expressed here as a progress fraction rather than a ms
-// offset. 0.55 sits in the observed range and reads correctly against this spring's
+// offset. 0.4 sits in the observed range (17-50%) and reads correctly against this
 // particular stiffness/damping — tune if the spring config above ever changes.
-export const MORPH_RADIUS_SNAP_PROGRESS = 0.55;
-export const MORPH_CHROME_FADE_START = 0.55;
+export const MORPH_RADIUS_SNAP_PROGRESS = 0.4;
+export const MORPH_CHROME_FADE_START = 0.4;
 
 // ─── Hold phase (T2 → T3) + crossfade ───────────────────────────────────────
 // The reference observation ties this hold to content-load time (Airbnb fetches the
@@ -89,7 +89,7 @@ export const SWIFT_EASE = [0.22, 1, 0.36, 1] as const;
 // blur without ever animating `backdrop-filter` itself (documented Chromium jank —
 // see coding-standards.md). Replaces the single-layer scrim; SCRIM_BLUR_PX/SCRIM_TINT
 // stay as the "heavy" layer so nothing else importing them needs to change.
-export const SCRIM_BLUR_PX = 24;
+export const SCRIM_BLUR_PX = 28;
 export const SCRIM_BLUR_LIGHT_PX = 10;
 export const SCRIM_LIGHT_FADE_END = 0.45;
 export const SCRIM_TINT = "oklch(0.16 0.012 230 / 0.10)";

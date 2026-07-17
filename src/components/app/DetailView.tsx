@@ -50,6 +50,14 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
   const morphPlace = useAppStore((s) => s.morphPlace);
   const morphPhase = useAppStore((s) => s.morphPhase);
   const exiting = morphPhase === "reverse";
+  // Ground-truth observation: "T3 ... is also when the page becomes interactive." The
+  // real back/favorite buttons below are invisible (opacity 0) but were previously
+  // still `pointer-events-auto` the whole time — a tap landing on their screen
+  // position during the forward morph or the T2->T3 hold could trigger handleBack()
+  // before the page was meant to respond at all. Gate hit-testing on the same
+  // condition that already gates their opacity, so "invisible" and "untappable" can't
+  // drift apart.
+  const interactive = !exiting && morphPhase === "idle";
 
   // Back = trigger reverse morph (TransitionLayer animeert terug)
   const handleBack = () => {
@@ -95,19 +103,6 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
             alt={place.name}
             className="absolute inset-0 h-full w-full object-cover"
           />
-
-          {/* E6 — floating place name (resting state). Pixel-matched to the chrome
-              overlay in TransitionLayer so the T3 crossfade is seamless. Inherits
-              the parent's opacity (visible at rest, hidden during morph/reverse). */}
-          <div className="absolute inset-x-0 bottom-0 z-10 p-4">
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 to-transparent" />
-            <p className="relative text-[1.5rem] font-bold leading-tight tracking-[-0.02em] text-white drop-shadow-sm">
-              {place.shortName}
-            </p>
-            <p className="relative mt-0.5 flex items-center gap-1.5 text-[0.8125rem] font-medium text-white/85">
-              {place.neighborhood}
-            </p>
-          </div>
         </div>
 
       </motion.div>
@@ -250,12 +245,12 @@ export function DetailOverlay({ placeId, sectionId }: { placeId: string; section
         <button
           type="button"
           onClick={handleBack}
-          style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.5rem)" }} className="absolute left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-xl transition-all hover:bg-white/25 active:scale-90 pointer-events-auto"
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.5rem)" }} className={`absolute left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-xl transition-all hover:bg-white/25 active:scale-90 ${interactive ? "pointer-events-auto" : "pointer-events-none"}`}
           aria-label="Terug"
         >
           <ChevronLeft className="h-5 w-5" strokeWidth={2.6} />
         </button>
-        <div style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.5rem)" }} className="absolute right-4 z-10 flex items-center gap-2 pointer-events-auto">
+        <div style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.5rem)" }} className={`absolute right-4 z-10 flex items-center gap-2 ${interactive ? "pointer-events-auto" : "pointer-events-none"}`}>
           <span className="rounded-full bg-white/15 px-3 py-1.5 text-[0.6875rem] font-bold uppercase tracking-wider text-white ring-1 ring-white/25 backdrop-blur-xl">
             {place.type}
           </span>

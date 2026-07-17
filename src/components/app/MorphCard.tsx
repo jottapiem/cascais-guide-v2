@@ -136,7 +136,10 @@ export const MorphCard = memo(function MorphCard({
             />
             {!imgLoaded && <div className="absolute inset-0 skeleton-shimmer" />}
           </div>
-          <div className="min-w-0 flex-1">
+          <div
+            className="min-w-0 flex-1"
+            style={{ opacity: isMorphing ? 0 : 1, transition: `opacity ${CARD_TEXT_FADE_MS}ms linear` }}
+          >
             <p className="truncate text-[14px] font-semibold">{place.name}</p>
             <p className="truncate text-[12px] text-muted-foreground">
               {place.neighborhood} · {place.vibe}

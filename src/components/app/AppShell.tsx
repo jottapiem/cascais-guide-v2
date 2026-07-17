@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAppStore } from "@/store/app-store";
 import { BottomNav } from "./BottomNav";
@@ -29,6 +29,10 @@ export function AppShell() {
   const selectedCategory = useAppStore((s) => s.selectedCategory);
   const morphPhase = useAppStore((s) => s.morphPhase);
 
+  // Passed to TransitionLayer so it can scale <main> imperatively in lockstep with the
+  // spring (E11 background recede) — see BASE_VIEW_RECEDE_SCALE in morph-config.ts.
+  const baseViewRef = useRef<HTMLElement>(null);
+
   const isOverlay = OVERLAY_VIEWS.includes(view);
   const [baseView, setBaseView] = useState<View>(view);
   if (!isOverlay && view !== baseView) setBaseView(view);
@@ -40,8 +44,10 @@ export function AppShell() {
   return (
     <div className="min-h-screen bg-background sm:bg-neutral-200/60 dark:bg-neutral-950">
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col bg-background sm:shadow-xl-premium sm:border-x border-border/40">
-        {/* BASE VIEW */}
-        <main className="flex-1">
+        {/* BASE VIEW — plain <main>, not Framer-controlled, so TransitionLayer can
+            imperatively scale it (E11 background recede) without fighting Framer's own
+            style writes on the AnimatePresence child below. See baseViewRef. */}
+        <main ref={baseViewRef} className="flex-1" style={{ transformOrigin: "center center" }}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={baseView === "category" ? `category-${selectedCategory}` : baseView}
@@ -64,7 +70,7 @@ export function AppShell() {
         </main>
 
         {/* TRANSITION LAYER - Must be here to render the morphing image */}
-        <TransitionLayer />
+        <TransitionLayer baseViewRef={baseViewRef} />
 
         {/* DETAIL OVERLAY — no AnimatePresence here: DetailOverlay renders through a
             portal, not a motion element, so AnimatePresence had no exit animation to

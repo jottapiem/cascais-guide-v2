@@ -20,6 +20,7 @@ import {
   SCRIM_BLUR_PX,
   SCRIM_BLUR_LIGHT_PX,
   SHEET_OVERLAP_PX,
+  BASE_VIEW_RECEDE_SCALE,
 } from "@/lib/morph-config";
 import { PlaceImage } from "./PlaceImage";
 
@@ -38,14 +39,21 @@ interface Geometry {
   startRadius: number;
 }
 
+interface TransitionLayerProps {
+  // Ref to the base-view element (AppShell's <main>) that should recede/scale during
+  // the morph — see BASE_VIEW_RECEDE_SCALE in morph-config.ts for why this is a prop
+  // (imperative DOM write from here) rather than AppShell animating its own element.
+  baseViewRef?: React.RefObject<HTMLElement | null>;
+}
+
 // Everything the morph animates — position, scale, per-corner radius, sheet opacity,
-// chrome (title-bar chrome) opacity, scrim blur — is derived from ONE spring-driven
-// `progress` value (0 = resting at the card, 1 = resting at the hero), computed in
-// applyFrame(). There's no separate "forward" vs "reverse" visual logic: both
-// directions just animate the same progress value toward a different target, which is
-// what makes interrupting mid-flight (fast re-tap, quick back-then-forward) continue
-// smoothly from the live position instead of snapping — a plain re-render-driven
-// approach can't do that without jank.
+// chrome (title-bar chrome) opacity, scrim blur, background recede — is derived from
+// ONE spring-driven `progress` value (0 = resting at the card, 1 = resting at the
+// hero), computed in applyFrame(). There's no separate "forward" vs "reverse" visual
+// logic: both directions just animate the same progress value toward a different
+// target, which is what makes interrupting mid-flight (fast re-tap, quick
+// back-then-forward) continue smoothly from the live position instead of snapping — a
+// plain re-render-driven approach can't do that without jank.
 //
 // Sequencing model (see docs/transition-notes.md for the full write-up):
 //   progress 0                          MORPH_RADIUS_SNAP_PROGRESS        progress 1        +MORPH_HOLD_MS
@@ -55,7 +63,7 @@ interface Geometry {
 // rest of this clone are the SAME fading subtree, so "spinner fades out at the same
 // instant the sheet crossfades into real content" doesn't need separate choreography —
 // it's one opacity transition on one container.
-export function TransitionLayer() {
+export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
   const morphPlace = useAppStore((s) => s.morphPlace);
   const morphPhase = useAppStore((s) => s.morphPhase);
   const finishMorphForward = useAppStore((s) => s.finishMorphForward);
@@ -107,7 +115,7 @@ export function TransitionLayer() {
     // behavior: hold at the source radius, then hard-snap (no easing) to 0 once the
     // shape-extension threshold passes, since the bottom edge is what tucks under the
     // sheet and 0 is structurally correct there regardless of edge-to-edge-ness.
-    const topRadius = g.startRadius;
+    const topRadius = mix(g.startRadius, MORPH_RADIUS_HERO_PX, t);
     const bottomRadius = t < MORPH_RADIUS_SNAP_PROGRESS ? g.startRadius : 0;
 
     el.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
@@ -127,10 +135,16 @@ export function TransitionLayer() {
 
     // Scrim: two constant-blur layers cross-faded by progress fake a continuously
     // *increasing* blur without ever animating `backdrop-filter` itself (Chromium
-    // interpolates that janky — see coding-standards.md). Deliberately NOT scaling the
-    // base view here — that was the documented cause of a previous "zoom-out" bug.
+    // interpolates that janky — see coding-standards.md).
     if (scrimLightRef.current) scrimLightRef.current.style.opacity = String(clamp01(t / SCRIM_LIGHT_FADE_END));
     if (scrimHeavyRef.current) scrimHeavyRef.current.style.opacity = String(clamp01(t / SCRIM_FADE_END));
+
+    // Background recede (E11 — scale half): the base view scales down in the same
+    // window as everything else here. See BASE_VIEW_RECEDE_SCALE in morph-config.ts
+    // for why this scales <main> specifically and not an ancestor of this clone.
+    if (baseViewRef?.current) {
+      baseViewRef.current.style.transform = `scale(${mix(1, BASE_VIEW_RECEDE_SCALE, t)})`;
+    }
   };
 
   useLayoutEffect(() => {
@@ -139,7 +153,29 @@ export function TransitionLayer() {
       holdTimeoutRef.current = null;
     }
     if (!morphPlace || !containerRef.current) return;
-    if (morphPhase === "idle") return; // resting — visibility is handled by the opacity below
+    if (morphPhase === "idle") {
+      // Resting at the detail page. Nothing here should still be visible on a
+      // phone-width viewport (DetailOverlay is opaque edge-to-edge), but the scrim is
+      // a position:fixed, full-viewport layer — on wider (sm:) breakpoints where the
+      // app shell sits in a centered max-w-md column with visible margins either side,
+      // an un-cleared scrim would keep blurring those margins for as long as the
+      // detail page stays open. Fade it out over the same duration as the clone's own
+      // crossfade so it doesn't read as a separate, mistimed event. willChange is
+      // dropped once things are static — nothing more is scheduled to change here
+      // until the next forward/reverse run resets it below.
+      if (scrimLightRef.current) {
+        scrimLightRef.current.style.transition = `opacity ${MORPH_CROSSFADE_MS}ms ease-out`;
+        scrimLightRef.current.style.opacity = "0";
+      }
+      if (scrimHeavyRef.current) {
+        scrimHeavyRef.current.style.transition = `opacity ${MORPH_CROSSFADE_MS}ms ease-out`;
+        scrimHeavyRef.current.style.opacity = "0";
+      }
+      if (baseViewRef?.current) baseViewRef.current.style.willChange = "auto";
+      return;
+    }
+
+    controlsRef.current?.stop();
 
     const origin = morphPlace.origin;
     const vw = window.innerWidth;
@@ -148,13 +184,60 @@ export function TransitionLayer() {
     const heroContainerHeight = heroWidth * (19.5 / 9);
     const startContainerHeight = origin.width * (19.5 / 9);
 
-    geometryRef.current = {
-      originLeft: origin.left - heroLeft,
-      originTop: origin.top,
-      scaleX: origin.width / heroWidth,
-      scaleY: startContainerHeight / heroContainerHeight,
-      startRadius: morphPlace.radius,
-    };
+    const isFreshTarget = morphPlace.cardInstanceId !== cardInstanceRef.current;
+    const prevGeometry = geometryRef.current;
+    const t0 = progressRef.current;
+    const restingAtHero = t0 >= 0.999;
+
+    // Two different re-target scenarios need different handling:
+    //  - Resting at the hero (t0 basically 1) and a DIFFERENT card is tapped — e.g. a
+    //    related-place card from an already-open detail page. The clone should visibly
+    //    fly from THAT card's real on-screen position, so geometry uses its real rect
+    //    and progress resets to 0 (existing, tested behavior).
+    //  - Genuinely mid-flight (0 < t0 < ~1) and a DIFFERENT card is tapped — e.g. a
+    //    fast tap on two different cards in a row. Snapping to the new card's real
+    //    rect here would make the clone teleport, because geometry changes but
+    //    progress doesn't reset — animate(t0, 1, ...) against fresh geometry is not a
+    //    no-op like the resting case, it's a jump the instant the next spring frame
+    //    runs. Instead, retarget smoothly from wherever the clone currently sits —
+    //    computed with the same mix() applyFrame already uses each frame — since the
+    //    target (the hero) is identical either way, only the *origin* needs to change.
+    //    Top-corner radius carries over continuously this way; a retarget landing
+    //    after the bottom-radius snap threshold can still show a brief bottom-corner
+    //    correction — a narrow, sub-300ms edge case judged an acceptable trade-off
+    //    against fully modeling both corners independently through a retarget.
+    const midFlightRetarget = morphPhase === "forward" && isFreshTarget && !!prevGeometry && t0 > 0 && !restingAtHero;
+
+    if (midFlightRetarget && prevGeometry) {
+      geometryRef.current = {
+        originLeft: mix(prevGeometry.originLeft, 0, t0),
+        originTop: mix(prevGeometry.originTop, 0, t0),
+        scaleX: mix(prevGeometry.scaleX, 1, t0),
+        scaleY: mix(prevGeometry.scaleY, 1, t0),
+        startRadius: mix(prevGeometry.startRadius, MORPH_RADIUS_HERO_PX, t0),
+      };
+      progressRef.current = 0;
+    } else {
+      geometryRef.current = {
+        originLeft: origin.left - heroLeft,
+        originTop: origin.top,
+        scaleX: origin.width / heroWidth,
+        scaleY: startContainerHeight / heroContainerHeight,
+        startRadius: morphPlace.radius,
+      };
+      if (morphPhase === "forward" && isFreshTarget && restingAtHero) {
+        progressRef.current = 0;
+      }
+    }
+    cardInstanceRef.current = morphPlace.cardInstanceId;
+
+    // A fresh forward/reverse run is about to drive opacity per-frame via applyFrame —
+    // clear any CSS transition the idle branch above may have left on the scrim so
+    // those imperative writes aren't fighting a lingering 260ms fade (which would make
+    // the scrim visibly lag a frame or more behind the spring).
+    if (scrimLightRef.current) scrimLightRef.current.style.transition = "none";
+    if (scrimHeavyRef.current) scrimHeavyRef.current.style.transition = "none";
+    if (baseViewRef?.current) baseViewRef.current.style.willChange = "transform";
 
     const el = containerRef.current;
     el.style.width = `${heroWidth}px`;
@@ -163,22 +246,8 @@ export function TransitionLayer() {
     el.style.top = "0px";
     el.style.transformOrigin = "top left";
 
-    controlsRef.current?.stop();
-
-    // A forward morph that starts while progress is already resting at 1 (hero) is a
-    // NEW journey targeting a different card — e.g. tapping a related-place card from
-    // an already-open detail page — not a redirect of an in-flight one. Without this
-    // check, animate(1, 1, ...) against the new geometry is a no-op and the clone never
-    // visually leaves the hero position for the new card's origin. Genuine in-flight
-    // interruptions (0 < progress < 1) are untouched and still redirect smoothly.
-    const isFreshTarget = morphPlace.cardInstanceId !== cardInstanceRef.current;
-    if (morphPhase === "forward" && isFreshTarget && progressRef.current >= 0.999) {
-      progressRef.current = 0;
-    }
-    cardInstanceRef.current = morphPlace.cardInstanceId;
-
     if (morphPhase === "forward") {
-      if (progressRef.current === 0) applyFrame(0); // first open: snap to the card frame, no animation
+      if (progressRef.current === 0) applyFrame(0); // first open / retarget: snap to the start frame, no pop
       controlsRef.current = animate(progressRef.current, 1, {
         ...spring,
         onUpdate: (v) => {
@@ -221,13 +290,19 @@ export function TransitionLayer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [morphPlace, morphPhase]);
 
-  // Reset once the morph is fully cleared so the next open starts fresh at the card.
+  // Reset once the morph is fully cleared so the next open starts fresh at the card —
+  // and so the base view can't ever be left stuck mid-recede if this unmounts (or
+  // morphPlace clears) before a reverse run's onComplete had a chance to settle it.
   useEffect(() => {
     if (!morphPlace) {
       progressRef.current = 0;
       cardInstanceRef.current = null;
+      if (baseViewRef?.current) {
+        baseViewRef.current.style.transform = "";
+        baseViewRef.current.style.willChange = "auto";
+      }
     }
-  }, [morphPlace]);
+  }, [morphPlace, baseViewRef]);
 
   if (!morphPlace) return null;
 
@@ -255,12 +330,14 @@ export function TransitionLayer() {
         <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: `${MORPH_RADIUS_HERO_PX}px`, zIndex: 2 }}>
           <PlaceImage src={morphPlace.coverImage} alt="" />
 
-          {/* Chrome: back button / type badge / favorite button / spinner / floating
-              title — E6/E7/E8. Deliberately the SAME markup+positioning as
-              DetailOverlay's real header buttons (see DetailView.tsx) so the T3
-              hand-off is a pixel-aligned swap, not a visible pop. pointer-events:
-              none — these are decorative during the morph; the real, interactive
-              buttons take over the instant DetailOverlay mounts underneath. */}
+          {/* Chrome: back button / type badge / favorite button / spinner — E6/E7/E8.
+              Deliberately the SAME markup+positioning as DetailOverlay's real header
+              buttons (see DetailView.tsx) so the T3 hand-off is a pixel-aligned swap,
+              not a visible pop. pointer-events: none — these are decorative during the
+              morph; the real, interactive buttons take over the instant DetailOverlay
+              mounts underneath. No floating title text here: this app's resting design
+              has no header-bar title (the place name lives in the sheet), so E6 is
+              represented by the type badge rather than inventing new title text. */}
           <div ref={chromeRef} className="pointer-events-none absolute inset-0 z-10" style={{ opacity: 0 }}>
             <div style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.5rem)" }} className="absolute left-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-xl">
               <ChevronLeft className="h-5 w-5" strokeWidth={2.6} />
@@ -272,19 +349,6 @@ export function TransitionLayer() {
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-xl">
                 <Heart className={`h-[1.125rem] w-[1.125rem] ${isFav ? "fill-accent text-accent" : "text-white"}`} strokeWidth={2.4} />
               </span>
-            </div>
-            {/* E6 — floating place name. Fades in T1->T2 with the rest of the chrome.
-                Positioned at the bottom-left of the hero image with a gradient backdrop
-                for readability. At T3 this crossfades out with the clone; DetailView's
-                matching floating title (same position/font) crossfades in. */}
-            <div className="absolute inset-x-0 bottom-0 z-10 p-4">
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 to-transparent" />
-              <p className="relative text-[1.5rem] font-bold leading-tight tracking-[-0.02em] text-white drop-shadow-sm">
-                {place?.shortName ?? place?.name ?? ""}
-              </p>
-              <p className="relative mt-0.5 flex items-center gap-1.5 text-[0.8125rem] font-medium text-white/85">
-                {place?.neighborhood ?? ""}
-              </p>
             </div>
             {/* E7 — continuous spin loop, independent of this wrapper's own opacity
                 state (the CSS animation keeps running even while opacity is 0). */}

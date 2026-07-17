@@ -60,7 +60,7 @@ a UI element the design doesn't otherwise have, not recreating an existing one. 
 represented by the type badge (which does live in the header, in both the morph chrome
 and the real `DetailOverlay`) rather than new text.
 
-## Background layer: blur, deliberately no scale
+## Background layer: blur — see follow-up pass below for the scale half
 
 `.ai/coding-standards.md` documents that scaling the live base view during the morph
 was the cause of a previously-shipped "zoom-out" bug. The observation's E11 calls for
@@ -68,9 +68,10 @@ scale + blur together. Built blur only — two constant-blur layers (`SCRIM_BLUR
 /`SCRIM_BLUR_PX`) cross-faded by progress, which reads as *increasingly* blurred without
 ever animating `backdrop-filter` itself (also documented as janky in Chromium; opacity
 on constant-blur layers is the existing established pattern, just now with two layers
-instead of one so the amount visibly increases rather than jumping in one step). If the
-recede/depth cue still feels too flat without any scale, that's a real trade-off to
-revisit deliberately — not something to silently re-add.
+instead of one so the amount visibly increases rather than jumping in one step).
+
+*(Superseded below — the scale half was explicitly requested and has now been added
+back in, with the DOM-structure reasoning for why it's safe this time.)*
 
 ## Hold phase (T2→T3) and the loading spinner
 
@@ -114,6 +115,9 @@ forward morph targets a *different* card instance while already resting at 1; ge
 in-flight interruptions (0 < progress < 1) are untouched and still redirect smoothly,
 which was already correct before this change.
 
+*(See follow-up pass below — the "mid-flight, not resting" version of this same
+scenario was still unhandled and has now been fixed too.)*
+
 ## Reduced motion
 
 `.ai/coding-standards.md`'s existing global CSS rule
@@ -145,3 +149,115 @@ trigger → interruption/cleanup paths).
   from a text observation — if that footage is available, the two values most worth
   checking against it are the `0.55` shape/chrome threshold and how "steep" the spring's
   actual deceleration reads compared to the real thing.
+
+## Follow-up pass — static-review fixes, before any on-device tuning
+
+This pass didn't touch anything that needs eyes to tune (`MORPH_HOLD_MS`,
+`BOTTOM_BAR_RISE_MS`, `MORPH_RADIUS_SNAP_PROGRESS`, the scrim blur/fade values) — those
+are still exactly as the previous pass left them, waiting on a real look. What follows
+came from re-reading the code against the observation, not from watching it run.
+
+**Fixed:**
+
+1. **E3 fade-out missing on the `row` variant.** `rich` (rail/boxed-grid) already faded
+   its title/subtitle out over `CARD_TEXT_FADE_MS` on tap; `row` (Trips) didn't — the
+   image cut to opacity 0 instantly while the text sitting next to it stayed fully
+   visible, so tapping a trip card would show the photo vanish while the name/subtitle
+   kept floating there. Now uses the same `CARD_TEXT_FADE_MS` fade as `rich`.
+
+2. **Real back/favorite buttons were tappable while invisible.** `DetailOverlay`'s
+   buttons fade in via opacity, but `pointer-events-auto` was unconditional — the
+   invisible buttons still received taps during the forward morph and the T2→T3 hold.
+   The observation is explicit that T3 is "also when the page becomes interactive,"
+   implying it isn't before. Added an `interactive` flag
+   (`!exiting && morphPhase === "idle"`) gating hit-testing the same way opacity was
+   already gated.
+
+3. **Sheet opacity finishing too late relative to the shape threshold.**
+   `SHEET_FADE_END` was `0.78` — on this spring (critically damped: stiffness 400 /
+   damping 40 / mass 1, damping ratio exactly 1), progress 0.78 sits close to full
+   settle, not "shortly after" the `0.55` shape/radius-snap threshold the way T1→T1b
+   describes it. Brought down to `0.62`.
+
+## Follow-up pass — background recede (E11 scale), explicitly requested back in
+
+The earlier pass left the scale half of E11 out, citing a previously-shipped
+"zoom-out bug" from scaling the live base view. That decision has been explicitly
+overridden — the recede/zoom effect is wanted regardless. Re-investigated why the old
+attempt broke and built it to avoid the same failure mode rather than just re-adding
+the old code:
+
+**Most likely cause of the original bug:** a CSS `transform` on an element creates a
+new *containing block* for every `position: fixed` descendant inside it. If the scale
+was previously applied to an ancestor that also contained this clone's own
+`position: fixed` elements (or, worse, `DetailOverlay`'s, before it was moved behind a
+`createPortal`), every fixed-positioned piece of this whole system would have started
+tracking that scaled ancestor's box instead of the viewport — explaining a "zoom-out"
+class of bug (things sized/positioned as if the viewport had shrunk).
+
+**Why this is structurally safe now:** `DetailOverlay` already renders through
+`createPortal(..., document.body)` — fully outside `AppShell`'s tree, immune to
+anything scaled inside it. `TransitionLayer`'s own `position: fixed` elements are
+rendered as **siblings** of `<main>` in `AppShell`, not descendants of it. So scaling
+only `<main>` (the base view) cannot become a containing block for anything this system
+needs fixed-to-viewport — checked this explicitly before writing any code, not assumed.
+
+**Implementation:** `AppShell` holds a `baseViewRef` (on `<main>`, a plain element, not
+Framer-controlled — Framer only touches the `motion.div` *inside* it, so there's no
+fight between Framer's own style writes and this imperative one) and passes it to
+`<TransitionLayer baseViewRef={baseViewRef} />`. `applyFrame()` sets
+`main.style.transform = scale(mix(1, BASE_VIEW_RECEDE_SCALE, t))` alongside everything
+else it already drives from the same `t` — same T0→T2 window as the blur, per the
+observation. `BASE_VIEW_RECEDE_SCALE = 0.93` in `morph-config.ts` — a conservative
+starting guess, not a measured one. `will-change: transform` is toggled on only while a
+forward/reverse run is active and cleared once things are static (idle, or fully
+cleared), rather than left on `<main>` permanently.
+
+Two things this could not verify without eyes on a device: whether 0.93 is the right
+amount of recede (too subtle / too aggressive), and whether the edges revealed by the
+shrink read cleanly — `<main>`'s parent already shares the same `bg-background` color,
+so the reveal *should* be seamless rather than showing a mismatched color, but that's
+reasoned from the CSS, not observed.
+
+## Follow-up pass — mid-flight card re-target
+
+The earlier "regression check" fix only covered tapping a different card while
+*resting* at the hero (progress ≈ 1). It didn't cover tapping a different card while a
+morph was genuinely still *mid-flight* (0 < progress < 1) — e.g. a fast tap on two
+different cards in a row. Confirmed this is actually reachable: `MorphCard.handleTap`
+calls `setMorphPlace` unconditionally, nothing in the store or any list view blocks
+taps on other cards while a morph is in flight, and this pattern shows up in several
+places (Home rails, Explore/Category/Favorites/Search grids, Trips rows, and the
+related-places strip *inside* `DetailOverlay` itself).
+
+Previously, that scenario would recompute geometry for the new card but leave
+`progress` wherever it was — the next spring frame would then render the new card's
+origin mixed with the *old* progress value, an instant visible jump. Fixed by
+detecting this specific case (`isFreshTarget` while `0 < progress < ~1`, distinct from
+the already-handled "resting at hero" case) and retargeting from wherever the clone
+currently sits — computed with the exact same `mix()` `applyFrame` already uses every
+frame — instead of the new card's real DOM rect, then resetting progress to 0 to
+restart the spring cleanly from there. Top-corner radius carries over this way too
+(interpolated the same way); a retarget landing after the bottom-radius snap threshold
+can still show a brief bottom-corner correction — a narrow, sub-300ms edge case judged
+an acceptable trade-off against fully modeling both corners independently through a
+retarget.
+
+## Follow-up pass — scrim left blurring past T3 on wide viewports
+
+The scrim's opacity is only ever written inside `applyFrame`, which stops running once
+`morphPhase` is `"idle"` — so whatever opacity it was left at (fully blurred) persisted
+for as long as the detail page stayed open. Invisible on phone-width viewports
+(`DetailOverlay` is opaque edge-to-edge there), but the scrim is `position: fixed;
+inset: 0` — full viewport — while `AppShell`'s `sm:` styles put the app in a centered
+`max-w-md` column with visible margins on wider screens. On those, the scrim would keep
+blurring the margins for as long as the detail page stayed open. Now fades to 0 over
+`MORPH_CROSSFADE_MS` the moment `morphPhase` reaches `"idle"`, and the CSS `transition`
+that fade needs is reset back to `none` at the start of the next forward/reverse run so
+it can't fight the per-frame imperative writes.
+
+**Still not verified — same caveat as before:** no on-device pass on any of this
+follow-up work either. Specifically worth checking: does `0.93` read as the right
+amount of background recede, does the mid-flight retarget actually read smooth on a
+fast double-tap (hard to trigger deliberately even with eyes on it), and does the wider
+`sm:` breakpoint layout look correct with the scrim now clearing on idle.

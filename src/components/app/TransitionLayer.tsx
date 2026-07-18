@@ -74,6 +74,7 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
   const isFav = morphPlace ? favorites.includes(morphPlace.id) : false;
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const photoRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const scrimLightRef = useRef<HTMLDivElement>(null);
   const scrimHeavyRef = useRef<HTMLDivElement>(null);
@@ -119,7 +120,13 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
     const bottomRadius = t < MORPH_RADIUS_SNAP_PROGRESS ? g.startRadius : 0;
 
     el.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
-    el.style.clipPath = `inset(0 round ${topRadius}px ${topRadius}px ${bottomRadius}px ${bottomRadius}px)`;
+
+    // Clip-path on the PHOTO WRAPPER only — not the container. This way the photo
+    // gets the sharp bottom corners (snapping to 0 at T1) while the sheet below
+    // keeps its own Apple-style borderRadius (MORPH_RADIUS_HERO_SHEET) untouched.
+    if (photoRef.current) {
+      photoRef.current.style.clipPath = `inset(0 round ${topRadius}px ${topRadius}px ${bottomRadius}px ${bottomRadius}px)`;
+    }
 
     // Sheet: fades in as a function of progress, finishing shortly before the
     // transform itself arrives (SHEET_FADE_END < 1) so it reads as "attached to the
@@ -318,7 +325,7 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
           position: "fixed",
           zIndex: 95, // above the Search/Recommended full-screen overlays (z-90) — cards
           // inside those views can trigger the morph too, and the clone must win.
-          overflow: "hidden",
+          overflow: "visible", // sheet must NOT be clipped — only the photo gets clip-path
           willChange: "transform, opacity",
           pointerEvents: "none",
           display: "flex",
@@ -327,7 +334,7 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
           transition: crossfadeTransition,
         }}
       >
-        <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: `${MORPH_RADIUS_HERO_PX}px`, zIndex: 2 }}>
+        <div ref={photoRef} style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: `${MORPH_RADIUS_HERO_PX}px`, zIndex: 2 }}>
           <PlaceImage src={morphPlace.coverImage} alt="" />
 
           {/* Chrome: back button / type badge / favorite button / spinner — E6/E7/E8.

@@ -1,8 +1,8 @@
 # SPEC.md — De reimagining (Fase 3, wacht op akkoord)
 
-> **Status:** concept ter goedkeuring. Zodra jij dit goedkeurt (of aanpast) is
-> dit de permanente source of truth. Vanaf dan bouwen we alleen op basis van
-> `SPEC.md` + `PROGRESS.md` + de nieuwe codebase — niet meer op het origineel.
+> **Status: GOEDGEKEURD** (met één amendement — Bags blijft hoofdpijler, zie §4).
+> Dit is nu de permanente source of truth. Vanaf hier bouwen we alleen op basis
+> van `SPEC.md` + `PROGRESS.md` + de nieuwe codebase — niet meer op het origineel.
 >
 > **Werkmap:** `reimagined/` binnen deze repo, branch
 > `claude/cascais-guide-reimagine-mzs19a`. Het origineel blijft onaangeroerd.
@@ -20,7 +20,8 @@ zien — maar laat hem **uitgroeien tot een levende reis-companion**:
 1. **Hij past zich aan waar je bent of heen gaat.** Cascais is het handgemaakte
    vlaggenschip; elke andere bestemming wordt automatisch samengesteld uit open
    data. Zo blijft de curatie-kwaliteit thuis, maar werkt de app overal.
-2. **Hij helpt je écht op reis** — niet alleen dromen, maar plannen en inpakken.
+2. **Hij helpt je écht op reis** — plannen én inpakken, met de **beste inpak- &
+   baggage-tracker die er is** (een van de hoofdpijlers, niet een bijzaak).
 3. **Je beleeft hem samen** — verbind je familie/reisgezelschap, deel plekken en
    synchroniseer trips.
 
@@ -70,23 +71,50 @@ Legenda: **[K]** behouden uit origineel · **[W]** gewijzigd · **[N]** nieuw
   vanavond 20:41, helder — dit zijn de 3 beste spots."
 
 ### Pijler 2 — Plan & Adapt
-- **[W]** In plaats van de Bags/Packing-app: een **lichte Trip-planner** —
-  sleep opgeslagen plekken in een dag, krijg een logische volgorde/route, deel hem.
-- **[W]** **Slimme inpak-helper**, gegenereerd uit *bestemming + datums + weer +
-  gekozen activiteiten*. Behoudt het écht nuttige van de oude module, zonder de
-  bloat (geen gewicht/verzekering/personen-logistiek).
+- **[W]** **Trip-/dagplanner:** sleep opgeslagen plekken in een dag, krijg een
+  logische volgorde/route, deel hem.
 - **[N]** **Bestemming-adaptieve gidsen:** voor niet-vlaggenschip-bestemmingen
   bouwt de app automatisch een gids uit open data (zie §6). Duidelijk gelabeld als
-  auto-content; de eigenaar kan een bestemming later "adopteren" en handmatig
-  aankleden.
+  auto-content; de eigenaar kan een bestemming later "adopteren" en aankleden.
 - **[N]** **Deelbare publieke plek-/bestemmingspagina's** met mooie OG-preview
   (link delen ⇒ ziet er uit als een app-kaartje). Verzoent "publieke versie" +
   "een plek kunnen delen".
 
-### Pijler 3 — Together (Fase 3, zie §7)
+### Pijler 3 — Pack (Bags) — **kernfeature, best-in-class**
+> Op nadrukkelijk verzoek behouden en **verheven tot hoofdpijler**. De stelling
+> die we omarmen: geen enkele app helpt je écht goed met *inpakken én
+> baggage-tracking* — dáár maken we het verschil. We houden de bags-first
+> structuur en gewicht-tracking uit het origineel, snoeien wat afleidt, en voegen
+> slimme, nieuwe features toe.
+
+**Behouden uit origineel [K]**
+- **Bags-first:** meerdere tassen (carry-on, checked, personal, toiletry, worn),
+  items toewijzen aan een tas, per-tas afvinken.
+- **Gewicht-tracking** per tas vs. limiet, met overgewicht-waarschuwing.
+- **Templates & "staples"** (je vaste "altijd mee"-items), prioriteiten
+  (must/nice/optional), rule-based auto-classificatie van items (gratis).
+
+**Slimme innovaties [N]**
+- **Context-gegenereerde lijst:** stelt items voor uit *bestemming + datums +
+  weersvoorspelling (Open-Meteo) + geplande activiteiten (uit de planner) +
+  reisduur + wie er meegaat.* ("5 dagen Cascais, 24° zonnig, strand + hike + 1
+  chic diner → dit heb je nodig.")
+- **Weer-getriggerde bijstelling:** forecast slaat om naar regen → stel regenjas voor.
+- **Packing-mode:** gefocuste "nu inpakken"-modus met grote checkboxes,
+  voortgangsring en haptics; categorie voor categorie.
+- **Baggage journey-tracker:** simpele status per tas (ingepakt → in de auto →
+  ingecheckt → band → thuis) — de "waar is mijn tas"-flow die apps missen.
+- **QR-bagagelabel:** printbaar QR-label per tas dat naar de (privé) inhoudslijst
+  + een contact linkt — voor terugvinden bij verlies.
+- **Retour-check:** omgekeerde checklist na de reis ("is alles weer mee terug?").
+- **Groep-inpakken** (met Pijler 4): gedeelde items splitsen ("wie neemt de
+  zonnebrand?"), dubbels vermijden, toewijzen aan personen.
+- **Offline-first:** werkt volledig in het vliegtuig zonder signaal.
+
+### Pijler 4 — Together (Fase 3+, zie §7)
 - **[N]** Verbind je **familie/reisgezelschap**: gedeelde trips, gedeelde
-  opgeslagen plekken, zie wie wat toevoegde. Near-realtime sync via een **gratis**
-  backend.
+  opgeslagen plekken, **gedeelde inpaklijsten**, zie wie wat toevoegde/inpakte.
+  Near-realtime sync via een **gratis** backend.
 
 ### Cross-cutting
 - **[N]** **Meertalig** (NL/EN/PT), auto-detectie + handmatige switch.
@@ -95,15 +123,19 @@ Legenda: **[K]** behouden uit origineel · **[W]** gewijzigd · **[N]** nieuw
 
 ---
 
-## 4. De Bags/Packing-beslissing (expliciet)
+## 4. De Bags/Packing-beslissing (herzien — **behouden & verheven**)
 
-De oude module was knap maar was een **tweede, losstaande app** die de balans
-verstoorde. Ik **schrap de logistiek-suite** (gewicht, waarde, verzekering,
-personen-toewijzing, smart-view-matrix) en **behoud alleen de reis-praktische
-kern** — "wat moet ik meenemen?" — heruitgevonden als een **contextuele
-inpak-helper** die volgt uit je trip (bestemming, weer, activiteiten). Dit dient
-"echt gebruik" zonder de app opnieuw uit balans te trekken. *Als jij vindt dat de
-diepe packing-features onmisbaar zijn, is dit hét moment om dat te zeggen.*
+Eigenaar heeft besloten: **Bags blijft, als hoofdpijler.** De onderbouwing die we
+delen: er is een echt gat in de markt — geen app helpt je écht goed met inpakken +
+baggage-tracking — en er is volop ruimte voor slimme features (§3, Pijler 3).
+
+De balans-zorg uit mijn eerste voorstel los ik níet op door te schrappen, maar
+door **integratie**: Bags is geen losse tweede app meer, maar een coherente pijler
+die *voortbouwt op de rest* — de planner voedt de inpaklijst (activiteiten), het
+weer voedt hem (Open-Meteo), en de familie-sync maakt hem sociaal (groep-inpakken).
+Zo wordt de oude "scope-creep" juist een **onderscheidend, samenhangend geheel**.
+Wat wél sneuvelt is pure bloat zonder verhaal (bv. verzekerings-waarde per item);
+alles wat de inpak-/tracking-ervaring echt beter maakt, blijft en groeit.
 
 ---
 
@@ -229,11 +261,14 @@ gratis, statisch en zonder afhankelijkheden. Bij Fase 3 kiezen we (dan pas):
 - **Fase 1 — Discover (vlaggenschip).** Home-discovery, plek-detail met de
   signature View-Transitions-transitie, kaart, zoeken, favorieten (lokaal),
   weer-bewuste accenten. **Dit is het kloppend hart — hier gaat de meeste zorg heen.**
-- **Fase 2 — Plan & Adapt.** Trip-/dagplanner, slimme inpak-helper,
-  bestemming-adaptieve open-data-gidsen, deelbare publieke pagina's + OG.
+- **Fase 2 — Plan & Pack.** Trip-/dagplanner **+ de Bags-pijler** (bags-first,
+  gewicht-tracking, templates/staples, context-gegenereerde lijst, packing-mode).
+  Bestemming-adaptieve open-data-gidsen + deelbare publieke pagina's + OG.
   *Nog steeds geen verplichte backend (lokaal + deel-links).*
 - **Fase 3 — Together (vereist akkoord + gratis backend).** Auth + familie-groepen
-  + sync + gedeelde trips/plekken. Hier kiezen we Supabase vs Firebase.
+  + sync + **gedeelde trips/plekken/inpaklijsten** + groep-inpakken. Hier kiezen we
+  Supabase vs Firebase. Geavanceerde baggage-tracking (journey-status, QR-label,
+  retour-check) landt hier bovenop.
 - **Fase 4 — Polish.** **Foto-overhaul** (jouw genoemde volgende stap), performance,
   toegankelijkheid, diepere i18n-content.
 
@@ -293,14 +328,14 @@ reimagined/
 
 ---
 
-## 10. Wat ik van jou nodig heb (akkoord-punten)
+## 10. Akkoord-status (afgerond)
 
-1. **Concept & het "vlaggenschip + open-data-overal"-model** (§1, §3, §6) — akkoord?
-2. **Bags → lichte trip-planner + inpak-helper** (§4) — akkoord, of wil je meer?
-3. **Design-richting "Farol / Editorial Atlas / inkt + goud"** (§5) — akkoord, of
-   bijsturen (naam, accentkleur, motief)?
-4. **Tech-stack** (§6) — carte blanche gegeven; iets waar je toch iets van vindt?
-5. **Backend uitstellen tot Fase 3** (Supabase vs. Firebase dan beslissen) — akkoord?
-6. **Hosting = Vercel Hobby** als default — akkoord?
+1. **Concept & "vlaggenschip + open-data-overal"-model** (§1, §3, §6) — ✅ akkoord.
+2. **Bags** — ✅ **behouden als hoofdpijler** (§3 Pijler 3, §4). *Amendement t.o.v.
+   mijn eerste voorstel.*
+3. **Design-richting "Farol / Editorial Atlas / inkt + goud"** (§5) — ✅ akkoord.
+4. **Tech-stack** (§6) — ✅ carte blanche.
+5. **Backend uitstellen tot Fase 3** (Supabase vs. Firebase dan) — ✅ akkoord.
+6. **Hosting = Vercel Hobby** — ✅ akkoord.
 
-Zodra jij ja zegt (of dit aanpast), bevries ik deze SPEC en start ik met **Fase 0**.
+**SPEC bevroren.** Volgende: **Fase 0** bouwen.

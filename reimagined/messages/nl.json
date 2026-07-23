@@ -1,0 +1,237 @@
+{
+  "meta": {
+    "title": "Farol",
+    "titleTemplate": "%s · Farol",
+    "description": "Jouw gids, waar je ook heen gaat. Ontdek plekken, plan je dagen en pak slim in."
+  },
+  "common": {
+    "loading": "Even laden…",
+    "error": "Er ging iets mis",
+    "errorBody": "We konden dit niet ophalen. Controleer je verbinding en probeer het opnieuw.",
+    "retry": "Opnieuw proberen",
+    "close": "Sluiten",
+    "save": "Bewaren",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "done": "Klaar"
+  },
+  "nav": {
+    "label": "Hoofdnavigatie",
+    "skipToContent": "Direct naar de inhoud",
+    "brand": {
+      "name": "Farol",
+      "tagline": "Jouw gids, waar je ook heen gaat",
+      "home": "Naar het begin"
+    },
+    "discover": "Ontdek",
+    "plan": "Plan",
+    "bags": "Tassen",
+    "theme": {
+      "label": "Weergave",
+      "light": "Licht",
+      "dark": "Donker",
+      "system": "Systeem",
+      "toggle": "Wissel tussen licht en donker"
+    },
+    "language": {
+      "label": "Taal",
+      "select": "Kies je taal",
+      "nl": "Nederlands",
+      "en": "English",
+      "pt": "Português"
+    }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Jouw baken onderweg",
+      "heading": "{destination}, zoals iemand die er woont het je laat zien",
+      "lede": "Geen lijstje van het internet, maar plekken waar we zelf komen — met het mooiste licht van de dag, de rustigste uren en de tips die je anders alleen aan de bar hoort.",
+      "action": "Bekijk alle plekken"
+    },
+    "rails": {
+      "signature": {
+        "title": "Het hart van {destination}",
+        "subtitle": "Begin hier als je maar één dag hebt"
+      },
+      "nearby": {
+        "title": "Bij je in de buurt",
+        "subtitle": "Op loopafstand van waar je nu staat"
+      },
+      "goldenHour": {
+        "title": "Voor het gouden uur",
+        "subtitle": "Zon laag, kleuren op hun mooist"
+      },
+      "quiet": {
+        "title": "Zonder de drukte",
+        "subtitle": "Plekken waar je nog ruimte hebt"
+      },
+      "shoreline": {
+        "title": "Aan zee",
+        "subtitle": "Stranden, baaien en zwemplekken"
+      },
+      "tables": {
+        "title": "Aan tafel",
+        "subtitle": "Waar we zelf gaan eten"
+      },
+      "vistas": {
+        "title": "Ver kijken",
+        "subtitle": "Uitzichten die de klim waard zijn"
+      },
+      "wild": {
+        "title": "De wilde kant",
+        "subtitle": "Duinen, kliffen en paden zonder hek"
+      },
+      "culture": {
+        "title": "Verhalen en markten",
+        "subtitle": "Musea, paleizen en het geroezemoes ertussen"
+      },
+      "afterdark": {
+        "title": "Na donker",
+        "subtitle": "Late tafels, muziek en een laatste glas"
+      }
+    },
+    "seeAll": "Alles bekijken",
+    "seeAllInSection": "Alles bekijken in {section}",
+    "placeCount": "{count, plural, =0 {geen plekken} one {# plek} other {# plekken}}",
+    "empty": {
+      "feed": {
+        "title": "Hier is nog niets te zien",
+        "body": "Deze bestemming is nog niet aangekleed. Kies er een andere, of kom later terug — we vullen hem plek voor plek.",
+        "action": "Kies een andere bestemming"
+      },
+      "rail": {
+        "title": "Niets in deze rij",
+        "body": "Er past nu even niets in deze selectie."
+      }
+    }
+  },
+  "place": {
+    "back": "Terug",
+    "backToOverview": "Terug naar het overzicht",
+    "area": "Gebied",
+    "tags": "Kenmerken",
+    "activities": "Te doen",
+    "gallery": "Foto's",
+    "photoCredit": "Foto: {credit}",
+    "save": "Bewaren",
+    "saved": "Bewaard",
+    "share": "Delen",
+    "insider": {
+      "title": "Insidertips",
+      "subtitle": "Wat je van een local hoort, niet uit een reisgids"
+    },
+    "map": {
+      "title": "Op de kaart",
+      "open": "Route hierheen",
+      "coords": "{lat}, {lng}"
+    },
+    "bestLight": {
+      "label": "Beste licht",
+      "values": {
+        "dawn": "Eerste licht",
+        "midday": "Midden op de dag",
+        "goldenhour": "Gouden uur",
+        "afterdark": "Na zonsondergang"
+      },
+      "hints": {
+        "dawn": "Voordat de rest wakker is",
+        "midday": "Fel, helder en het water op zijn blauwst",
+        "goldenhour": "Het laatste uur voor zonsondergang",
+        "afterdark": "Als de lampen aangaan"
+      }
+    },
+    "busyness": {
+      "label": "Drukte",
+      "aria": "Drukte {value} van 5",
+      "levels": {
+        "1": "Vrijwel voor jezelf",
+        "2": "Rustig",
+        "3": "Gezellig",
+        "4": "Druk",
+        "5": "Schouder aan schouder"
+      }
+    },
+    "kinds": {
+      "beach": "Strand",
+      "table": "Eten",
+      "vista": "Uitzicht",
+      "wild": "Natuur",
+      "culture": "Cultuur",
+      "afterdark": "Nachtleven",
+      "market": "Markt",
+      "water": "Op het water"
+    }
+  },
+  "bags": {
+    "title": "Tassen",
+    "lede": "Elke tas apart: wat erin gaat, wat het weegt en wat er nog mist.",
+    "new": "Nieuwe tas",
+    "itemCount": "{count, plural, =0 {geen items} one {# item} other {# items}}",
+    "form": {
+      "name": "Naam",
+      "namePlaceholder": "Bijvoorbeeld: rugzak van Anna",
+      "type": "Soort tas",
+      "limit": "Gewichtslimiet in kilo"
+    },
+    "types": {
+      "carryOn": "Handbagage",
+      "checked": "Ruimbagage",
+      "personal": "Persoonlijk item",
+      "toiletry": "Toilettas",
+      "worn": "Wat je aanhebt"
+    },
+    "typeHints": {
+      "carryOn": "Gaat met je mee de cabine in",
+      "checked": "Gaat op de band",
+      "personal": "Past onder de stoel voor je",
+      "toiletry": "Vloeistoffen en verzorging",
+      "worn": "Telt niet mee voor je limiet"
+    },
+    "weight": {
+      "label": "Gewicht",
+      "limit": "Limiet",
+      "value": "{kg} kg",
+      "ofLimit": "{current} van {limit} kg",
+      "remaining": "Nog {kg} kg over",
+      "over": "{kg} kg te zwaar",
+      "noLimit": "Geen limiet"
+    },
+    "packed": "Ingepakt",
+    "packedCount": "{packed} van {total} ingepakt",
+    "packingMode": {
+      "label": "Inpakmodus",
+      "start": "Begin met inpakken",
+      "exit": "Inpakmodus sluiten",
+      "progress": "{packed} van {total}",
+      "done": {
+        "title": "Alles zit erin",
+        "body": "Deze tas is compleet. Wegen en bij de deur zetten maar."
+      }
+    },
+    "empty": {
+      "title": "Nog geen tassen",
+      "body": "Maak je eerste tas aan — handbagage, ruimbagage of gewoon je toilettas — en vul hem stap voor stap.",
+      "action": "Nieuwe tas"
+    },
+    "emptyBag": {
+      "title": "Deze tas is nog leeg",
+      "body": "Zet erin wat mee moet. Wij houden het gewicht bij."
+    },
+    "soonNote": "Dit wordt een van de hoofdonderdelen van Farol: de slimste manier om in te pakken en je bagage te volgen. We bouwen hem nu, stap voor stap."
+  },
+  "notFound": {
+    "eyebrow": "Uit koers",
+    "title": "Deze plek staat niet op de kaart",
+    "body": "De pagina die je zocht bestaat niet (meer). Misschien is de link oud, of hebben we hem verplaatst.",
+    "action": "Terug naar Ontdek"
+  },
+  "soon": {
+    "badge": "In aanbouw",
+    "note": "Dit onderdeel bouwen we nu. Kom binnenkort terug."
+  },
+  "plan": {
+    "title": "Plan je dagen",
+    "lede": "Straks stel je hier per dag een route samen uit de plekken die je bewaart — met het beste licht, de rustigste uren en het weer erbij."
+  }
+}

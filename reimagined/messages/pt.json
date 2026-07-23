@@ -1,0 +1,237 @@
+{
+  "meta": {
+    "title": "Farol",
+    "titleTemplate": "%s · Farol",
+    "description": "O teu guia, para onde quer que vás. Descobre lugares, planeia os teus dias e faz as malas com inteligência."
+  },
+  "common": {
+    "loading": "Um momento…",
+    "error": "Algo correu mal",
+    "errorBody": "Não conseguimos carregar isto. Verifica a ligação e tenta outra vez.",
+    "retry": "Tentar outra vez",
+    "close": "Fechar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "done": "Concluído"
+  },
+  "nav": {
+    "label": "Navegação principal",
+    "skipToContent": "Ir para o conteúdo",
+    "brand": {
+      "name": "Farol",
+      "tagline": "O teu guia, para onde quer que vás",
+      "home": "Voltar ao início"
+    },
+    "discover": "Descobrir",
+    "plan": "Planear",
+    "bags": "Malas",
+    "theme": {
+      "label": "Aspeto",
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema",
+      "toggle": "Alternar entre claro e escuro"
+    },
+    "language": {
+      "label": "Idioma",
+      "select": "Escolhe o teu idioma",
+      "nl": "Nederlands",
+      "en": "English",
+      "pt": "Português"
+    }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "O teu farol em viagem",
+      "heading": "{destination}, como te mostraria quem lá vive",
+      "lede": "Não é mais uma lista da internet, são sítios onde andamos mesmo — com a melhor luz do dia, as horas mais calmas e as dicas que normalmente só se ouvem ao balcão.",
+      "action": "Ver todos os sítios"
+    },
+    "rails": {
+      "signature": {
+        "title": "O coração de {destination}",
+        "subtitle": "Começa por aqui se só tens um dia"
+      },
+      "nearby": {
+        "title": "Perto de ti",
+        "subtitle": "A pé, a partir de onde estás"
+      },
+      "goldenHour": {
+        "title": "Antes da hora dourada",
+        "subtitle": "Sol baixo, cores no seu melhor"
+      },
+      "quiet": {
+        "title": "Longe da confusão",
+        "subtitle": "Sítios onde ainda tens espaço"
+      },
+      "shoreline": {
+        "title": "À beira-mar",
+        "subtitle": "Praias, enseadas e sítios para nadar"
+      },
+      "tables": {
+        "title": "À mesa",
+        "subtitle": "Onde nós próprios comemos"
+      },
+      "vistas": {
+        "title": "Vistas largas",
+        "subtitle": "Miradouros que compensam a subida"
+      },
+      "wild": {
+        "title": "O lado selvagem",
+        "subtitle": "Dunas, falésias e trilhos sem guarda-corpo"
+      },
+      "culture": {
+        "title": "Histórias e mercados",
+        "subtitle": "Museus, palácios e o burburinho pelo meio"
+      },
+      "afterdark": {
+        "title": "Depois de escurecer",
+        "subtitle": "Mesas tardias, música e o último copo"
+      }
+    },
+    "seeAll": "Ver tudo",
+    "seeAllInSection": "Ver tudo em {section}",
+    "placeCount": "{count, plural, =0 {sem sítios} one {# sítio} other {# sítios}}",
+    "empty": {
+      "feed": {
+        "title": "Ainda não há nada por aqui",
+        "body": "Este destino ainda não está preenchido. Escolhe outro ou volta mais tarde — vamos enchendo sítio a sítio.",
+        "action": "Escolher outro destino"
+      },
+      "rail": {
+        "title": "Nada nesta linha",
+        "body": "De momento não há nada que encaixe nesta seleção."
+      }
+    }
+  },
+  "place": {
+    "back": "Voltar",
+    "backToOverview": "Voltar à lista",
+    "area": "Zona",
+    "tags": "Bom saber",
+    "activities": "Para fazer",
+    "gallery": "Fotografias",
+    "photoCredit": "Foto: {credit}",
+    "save": "Guardar",
+    "saved": "Guardado",
+    "share": "Partilhar",
+    "insider": {
+      "title": "Dicas de quem conhece",
+      "subtitle": "O que se ouve a um local, não num guia de viagens"
+    },
+    "map": {
+      "title": "No mapa",
+      "open": "Como chegar",
+      "coords": "{lat}, {lng}"
+    },
+    "bestLight": {
+      "label": "Melhor luz",
+      "values": {
+        "dawn": "Primeira luz",
+        "midday": "A meio do dia",
+        "goldenhour": "Hora dourada",
+        "afterdark": "Depois do pôr do sol"
+      },
+      "hints": {
+        "dawn": "Antes de os outros acordarem",
+        "midday": "Forte, nítida e o mar no azul mais intenso",
+        "goldenhour": "A última hora antes do pôr do sol",
+        "afterdark": "Quando as luzes se acendem"
+      }
+    },
+    "busyness": {
+      "label": "Movimento",
+      "aria": "Movimento {value} em 5",
+      "levels": {
+        "1": "Praticamente só para ti",
+        "2": "Calmo",
+        "3": "Animado",
+        "4": "Movimentado",
+        "5": "Ombro com ombro"
+      }
+    },
+    "kinds": {
+      "beach": "Praia",
+      "table": "Comer",
+      "vista": "Miradouro",
+      "wild": "Natureza",
+      "culture": "Cultura",
+      "afterdark": "Noite",
+      "market": "Mercado",
+      "water": "Na água"
+    }
+  },
+  "bags": {
+    "title": "Malas",
+    "lede": "Uma mala de cada vez: o que entra, quanto pesa e o que ainda falta.",
+    "new": "Nova mala",
+    "itemCount": "{count, plural, =0 {sem artigos} one {# artigo} other {# artigos}}",
+    "form": {
+      "name": "Nome",
+      "namePlaceholder": "Por exemplo: mochila da Ana",
+      "type": "Tipo de mala",
+      "limit": "Limite de peso em quilos"
+    },
+    "types": {
+      "carryOn": "Bagagem de mão",
+      "checked": "Bagagem de porão",
+      "personal": "Item pessoal",
+      "toiletry": "Nécessaire",
+      "worn": "O que levas vestido"
+    },
+    "typeHints": {
+      "carryOn": "Vai contigo para a cabina",
+      "checked": "Vai para o tapete",
+      "personal": "Cabe debaixo do banco da frente",
+      "toiletry": "Líquidos e higiene",
+      "worn": "Não conta para o limite"
+    },
+    "weight": {
+      "label": "Peso",
+      "limit": "Limite",
+      "value": "{kg} kg",
+      "ofLimit": "{current} de {limit} kg",
+      "remaining": "Ainda tens {kg} kg",
+      "over": "{kg} kg a mais",
+      "noLimit": "Sem limite"
+    },
+    "packed": "Arrumado",
+    "packedCount": "{packed} de {total} arrumados",
+    "packingMode": {
+      "label": "Modo de arrumar",
+      "start": "Começar a arrumar",
+      "exit": "Sair do modo de arrumar",
+      "progress": "{packed} de {total}",
+      "done": {
+        "title": "Está tudo lá dentro",
+        "body": "Esta mala está completa. Pesa-a e deixa-a junto à porta."
+      }
+    },
+    "empty": {
+      "title": "Ainda não há malas",
+      "body": "Cria a tua primeira mala — de mão, de porão ou só a nécessaire — e vai enchendo passo a passo.",
+      "action": "Nova mala"
+    },
+    "emptyBag": {
+      "title": "Esta mala ainda está vazia",
+      "body": "Põe lá o que tem de ir. Nós tratamos do peso."
+    },
+    "soonNote": "Vai ser uma das funcionalidades principais do Farol: a forma mais inteligente de fazer as malas e de seguir a bagagem. Estamos a construí-la agora, passo a passo."
+  },
+  "notFound": {
+    "eyebrow": "Fora de rota",
+    "title": "Este sítio não está no mapa",
+    "body": "A página que procuravas já não existe. O link pode estar velho ou mudámo-lo de sítio.",
+    "action": "Voltar a Descobrir"
+  },
+  "soon": {
+    "badge": "Em construção",
+    "note": "Estamos a construir esta parte. Volta em breve."
+  },
+  "plan": {
+    "title": "Planeia os teus dias",
+    "lede": "Em breve montas aqui um percurso dia a dia com os sítios que guardas — com a melhor luz, as horas mais calmas e o tempo incluído."
+  }
+}

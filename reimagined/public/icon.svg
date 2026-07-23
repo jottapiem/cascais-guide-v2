@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Farol">
+  <defs>
+    <linearGradient id="beamL" gradientUnits="userSpaceOnUse" x1="226" y1="0" x2="96" y2="0">
+      <stop offset="0" stop-color="#f2b04a" stop-opacity="0.55" />
+      <stop offset="1" stop-color="#f2b04a" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient id="beamR" gradientUnits="userSpaceOnUse" x1="286" y1="0" x2="416" y2="0">
+      <stop offset="0" stop-color="#f2b04a" stop-opacity="0.55" />
+      <stop offset="1" stop-color="#f2b04a" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="#080f16" />
+  <path d="M226 186 L96 138 L96 234 Z" fill="url(#beamL)" />
+  <path d="M286 186 L416 138 L416 234 Z" fill="url(#beamR)" />
+  <path d="M231 216 L281 216 L302 384 L210 384 Z" fill="#e9e7e1" />
+  <rect x="200" y="204" width="112" height="16" rx="8" fill="#e9e7e1" />
+  <rect x="186" y="384" width="140" height="20" rx="10" fill="#e9e7e1" />
+  <circle cx="256" cy="180" r="32" fill="#f2b04a" />
+</svg>

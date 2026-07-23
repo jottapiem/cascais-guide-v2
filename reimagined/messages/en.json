@@ -1,0 +1,237 @@
+{
+  "meta": {
+    "title": "Farol",
+    "titleTemplate": "%s · Farol",
+    "description": "Your guide, wherever you go. Discover places, plan your days and pack smart."
+  },
+  "common": {
+    "loading": "One moment…",
+    "error": "Something went wrong",
+    "errorBody": "We couldn't load this. Check your connection and try again.",
+    "retry": "Try again",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "done": "Done"
+  },
+  "nav": {
+    "label": "Main navigation",
+    "skipToContent": "Skip to content",
+    "brand": {
+      "name": "Farol",
+      "tagline": "Your guide, wherever you go",
+      "home": "Back to the start"
+    },
+    "discover": "Discover",
+    "plan": "Plan",
+    "bags": "Bags",
+    "theme": {
+      "label": "Appearance",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "toggle": "Switch between light and dark"
+    },
+    "language": {
+      "label": "Language",
+      "select": "Choose your language",
+      "nl": "Nederlands",
+      "en": "English",
+      "pt": "Português"
+    }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Your beacon on the road",
+      "heading": "{destination}, the way someone who lives there would show you",
+      "lede": "Not another list from the internet, but places we go ourselves — with the best light of the day, the quietest hours, and the tips you'd otherwise only pick up at the bar.",
+      "action": "See every place"
+    },
+    "rails": {
+      "signature": {
+        "title": "The heart of {destination}",
+        "subtitle": "Start here if you only have one day"
+      },
+      "nearby": {
+        "title": "Close to you",
+        "subtitle": "Within walking distance of where you are"
+      },
+      "goldenHour": {
+        "title": "Before golden hour",
+        "subtitle": "Low sun, colours at their best"
+      },
+      "quiet": {
+        "title": "Away from the crowds",
+        "subtitle": "Places where you still have room"
+      },
+      "shoreline": {
+        "title": "By the sea",
+        "subtitle": "Beaches, coves and places to swim"
+      },
+      "tables": {
+        "title": "At the table",
+        "subtitle": "Where we eat ourselves"
+      },
+      "vistas": {
+        "title": "Long views",
+        "subtitle": "Viewpoints worth the climb"
+      },
+      "wild": {
+        "title": "The wild side",
+        "subtitle": "Dunes, cliffs and paths without railings"
+      },
+      "culture": {
+        "title": "Stories and markets",
+        "subtitle": "Museums, palaces and the buzz in between"
+      },
+      "afterdark": {
+        "title": "After dark",
+        "subtitle": "Late tables, music and one last glass"
+      }
+    },
+    "seeAll": "See all",
+    "seeAllInSection": "See everything in {section}",
+    "placeCount": "{count, plural, =0 {no places} one {# place} other {# places}}",
+    "empty": {
+      "feed": {
+        "title": "Nothing here yet",
+        "body": "This destination hasn't been filled in yet. Pick another one, or come back later — we add it place by place.",
+        "action": "Pick another destination"
+      },
+      "rail": {
+        "title": "Nothing in this row",
+        "body": "Nothing fits this selection right now."
+      }
+    }
+  },
+  "place": {
+    "back": "Back",
+    "backToOverview": "Back to the overview",
+    "area": "Area",
+    "tags": "Good to know",
+    "activities": "Things to do",
+    "gallery": "Photos",
+    "photoCredit": "Photo: {credit}",
+    "save": "Save",
+    "saved": "Saved",
+    "share": "Share",
+    "insider": {
+      "title": "Insider notes",
+      "subtitle": "What you hear from a local, not from a guidebook"
+    },
+    "map": {
+      "title": "On the map",
+      "open": "Directions",
+      "coords": "{lat}, {lng}"
+    },
+    "bestLight": {
+      "label": "Best light",
+      "values": {
+        "dawn": "First light",
+        "midday": "Middle of the day",
+        "goldenhour": "Golden hour",
+        "afterdark": "After sunset"
+      },
+      "hints": {
+        "dawn": "Before everyone else is up",
+        "midday": "Bright, sharp and the water at its bluest",
+        "goldenhour": "The last hour before sunset",
+        "afterdark": "When the lights come on"
+      }
+    },
+    "busyness": {
+      "label": "Crowds",
+      "aria": "Crowds {value} out of 5",
+      "levels": {
+        "1": "Practically yours alone",
+        "2": "Quiet",
+        "3": "Lively",
+        "4": "Busy",
+        "5": "Shoulder to shoulder"
+      }
+    },
+    "kinds": {
+      "beach": "Beach",
+      "table": "Food",
+      "vista": "Viewpoint",
+      "wild": "Nature",
+      "culture": "Culture",
+      "afterdark": "Nightlife",
+      "market": "Market",
+      "water": "On the water"
+    }
+  },
+  "bags": {
+    "title": "Bags",
+    "lede": "One bag at a time: what goes in, what it weighs and what's still missing.",
+    "new": "New bag",
+    "itemCount": "{count, plural, =0 {no items} one {# item} other {# items}}",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "For example: Anna's backpack",
+      "type": "Type of bag",
+      "limit": "Weight limit in kilos"
+    },
+    "types": {
+      "carryOn": "Carry-on",
+      "checked": "Checked bag",
+      "personal": "Personal item",
+      "toiletry": "Toiletry bag",
+      "worn": "What you're wearing"
+    },
+    "typeHints": {
+      "carryOn": "Comes into the cabin with you",
+      "checked": "Goes onto the belt",
+      "personal": "Fits under the seat in front of you",
+      "toiletry": "Liquids and toiletries",
+      "worn": "Doesn't count towards your limit"
+    },
+    "weight": {
+      "label": "Weight",
+      "limit": "Limit",
+      "value": "{kg} kg",
+      "ofLimit": "{current} of {limit} kg",
+      "remaining": "{kg} kg to spare",
+      "over": "{kg} kg over",
+      "noLimit": "No limit"
+    },
+    "packed": "Packed",
+    "packedCount": "{packed} of {total} packed",
+    "packingMode": {
+      "label": "Packing mode",
+      "start": "Start packing",
+      "exit": "Leave packing mode",
+      "progress": "{packed} of {total}",
+      "done": {
+        "title": "Everything's in",
+        "body": "This bag is complete. Weigh it and park it by the door."
+      }
+    },
+    "empty": {
+      "title": "No bags yet",
+      "body": "Create your first bag — carry-on, checked or just your toiletry bag — and fill it step by step.",
+      "action": "New bag"
+    },
+    "emptyBag": {
+      "title": "This bag is still empty",
+      "body": "Put in what needs to come along. We'll keep track of the weight."
+    },
+    "soonNote": "This is set to be one of Farol's main features: the smartest way to pack and to keep track of your baggage. We're building it now, step by step."
+  },
+  "notFound": {
+    "eyebrow": "Off course",
+    "title": "This place isn't on the map",
+    "body": "The page you were looking for doesn't exist any more. The link may be old, or we moved it.",
+    "action": "Back to Discover"
+  },
+  "soon": {
+    "badge": "In the works",
+    "note": "We're building this part now. Check back soon."
+  },
+  "plan": {
+    "title": "Plan your days",
+    "lede": "Soon you'll build a day-by-day route here from the places you save — with the best light, the quietest hours and the weather folded in."
+  }
+}

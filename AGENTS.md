@@ -1,7 +1,14 @@
 # Cascais Guide V2 — Agent Context
 
+> Dit bestand beschrijft de repo **zoals die is**, niet zoals die bedoeld was.
+> Waar werkelijkheid en bedoeling uit elkaar lopen staat dat expliciet onder
+> "Bekende afwijkingen". Vertrouw geen padverwijzing in dit bestand die daar
+> als openstaand gemarkeerd staat — controleer eerst of het pad bestaat.
+
 ## Wat is dit project?
-Een privé travel discovery web app voor vrienden en familie, gefocust op Cascais (Portugal) en omgeving: Guincho, Sintra, Lisboa, Belém en day trips. Mobile-first, volledig in het Nederlands, ontworpen als een native iOS-app gevoel in de browser.
+Een privé travel discovery web app voor vrienden en familie, gefocust op Cascais
+(Portugal) en omgeving: Guincho, Sintra, Lisboa, Belém en day trips. Mobile-first,
+volledig in het Nederlands, ontworpen als een native iOS-app gevoel in de browser.
 
 ## Regels die altijd gelden
 - GEEN betaalde APIs of APIs die een creditcard vereisen
@@ -11,29 +18,45 @@ Een privé travel discovery web app voor vrienden en familie, gefocust op Cascai
 - De app is privé — niet voor openbaar gebruik
 
 ## Tech Stack
-- Framework: Next.js 16 (App Router, geen Turbopack)
-- Language: TypeScript (strict mode, geen `any`)
-- Styling: Tailwind CSS + shadcn/ui
-- State: Zustand
+- Framework: Next.js 16.2.9 (App Router, geen Turbopack)
+- Language: TypeScript 5 (strict mode, geen `any`)
+- Styling: Tailwind CSS v4 + shadcn/ui
+- State: Zustand 5 (persisted, `skipHydration: true`)
+- Animatie: Framer Motion 12 + een eigen FLIP-morph engine
 - Maps: Leaflet + react-leaflet (SSR uitgeschakeld voor MapCanvas)
+- Tests: Vitest
 - Package manager: npm
 
-## Folder structuur
+## Folder structuur — feitelijk
+```
 src/
-  app/           # Next.js App Router pages + API routes
+  app/            # App Router pages + API routes (api/packing/import)
   components/
-    app/         # Feature components (HomeView, ExploreView etc.)
-    ui/          # shadcn/ui components
-  hooks/         # use- prefix
-  lib/           # types, data loading, utilities
-  store/         # Zustand stores
+    app/          # Feature components (AppShell, HomeView, ExploreView, …)
+    ui/           # shadcn/ui primitives
+    magicui/      # losse effect-componenten
+  lib/            # types, data, utilities, morph-config
+  store/          # app-store.ts — één Zustand store
 content/
-  places/        # één .json per plek
-  photos/        # één photo-metadata .json per plek
-public/
-  photos/        # <place-id>/cover.jpg, explore-1.jpg, gallery-1.jpg etc.
-scripts/         # validate-places, validate-photos, photos:check
-.ai/             # context voor Claude (architect) en agent (engineer)
+  places/         # 25 × .json — AANWEZIG MAAR NIET AANGESLOTEN, zie afwijkingen
+docs/             # transition-notes.md — logboek van de morph-rebuild
+public/           # alleen Next.js svg's
+.ai/              # coding-standards, product, tech-stack, ui-rules
+```
+
+Bestaat **niet** (ondanks eerdere documentatie): `src/hooks/`, `scripts/`,
+`content/photos/`, `public/photos/`.
+
+## Bekende afwijkingen — actief werk, niet stilzwijgend "oplossen"
+1. **De data-laag is hardcoded.** Alle plekken staan in `src/lib/places-data.ts`
+   (761 regels). De 25 JSON-bestanden in `content/places/` worden door niets
+   geïmporteerd. Eigenaar: agent `content-layer`.
+2. **Foto's komen van het netwerk.** `src/lib/images-v2.ts` bouwt Unsplash-URLs.
+   Dat botst met de harde regel "alle content werkt zonder netwerk". Er zijn geen
+   lokale foto's. Eigenaar: agent `content-layer`.
+3. **De morph is nooit visueel geverifieerd.** `docs/transition-notes.md` somt
+   precies op welke constanten getunede plaatshouders zijn. Eigenaar: agent
+   `morph-verify`. Verander die waarden niet zonder ze te hebben gezien.
 
 ## Design system
 - iOS 26 / Apple HIG stijl
@@ -44,24 +67,41 @@ scripts/         # validate-places, validate-photos, photos:check
 - SwiftUI ease curves: cubic-bezier(0.22, 1, 0.36, 1)
 - Mobile-first, max 2 klikken tot informatie
 
-## Shared-element morph radius — ENKELE SOURCE OF TRUTH
-De border-radius voor alle shared-element transitie elementen staat in
-`src/lib/morph-config.ts` (`MORPH_RADIUS_PX = 28`). Deze waarde wordt gebruikt door:
-1. **AirbnbCard** (HomeView.tsx) — kaart image wrapper
-2. **TransitionLayer** (TransitionLayer.tsx) — morphing container + image + sheet
-3. **DetailView** (DetailView.tsx) — hero frame + sheet
-Alles importeert uit `morph-config.ts`. Wijzig de waarde daar, nergens anders.
+## Shared-element morph — ENKELE SOURCE OF TRUTH
+Alle geometrie, radii en timing van de kaart→detail transitie staan in
+`src/lib/morph-config.ts`. Niets daarvan hoort ergens anders hardcoded te staan.
 
+De radius is **proportioneel**, niet één vast getal: `MORPH_RADIUS_RATIO = 0.1094`
+schaalt mee met de breedte van elk oppervlak. Daaruit volgt `MORPH_RADIUS_PX = 20`
+(kaart, 180px breed) en `MORPH_RADIUS_HERO_PX = 49` (hero, 448px breed).
 
-## Foto conventie
-public/photos/<place-id>/cover.jpg       # hoofdfoto, detail hero
-public/photos/<place-id>/explore-1.jpg   # social media stijl, explore grid
-public/photos/<place-id>/gallery-1.jpg   # extra gallerij foto's
-Metadata in content/photos/<place-id>.json
+Consumenten:
+1. **MorphCard** (`MorphCard.tsx`) — kaart-image wrapper, legt de tap-origin vast
+2. **TransitionLayer** (`TransitionLayer.tsx`) — de spring-engine + morphende clone
+3. **DetailView** (`DetailView.tsx`) — hero frame + sheet in ruststand
+4. **AppShell** (`AppShell.tsx`) — levert `baseViewRef` voor de background-recede
 
-## Wie beheert wat
-- Claude (architect): geeft instructies, reviewt code, beslist architectuur
-- Gemini CLI (engineer): voert instructies uit, schrijft en wijzigt bestanden
-- Mens (uitvoerder): voert commando's uit, plakt resultaten terug naar Claude
+## Beeld-contract — BEVROREN
+`src/components/app/PlaceImage.tsx` is een ruwe `<img>` met `forwardRef`, bewust
+géén `next/image`. De morph-engine kloont dat element byte-voor-byte en meet zijn
+`getBoundingClientRect()`. Wie de src-herkomst verandert mag het elementtype, de
+ref-doorgifte en de `absolute inset-0 object-cover` styling niet aanraken.
+
+## Verificatie
+```
+npx tsc --noEmit          # types
+npx eslint src            # lint
+npm test                  # vitest
+npm run dev               # dev server op :3000
+```
+Statisch schoon is geen bewijs dat iets wérkt. Zie `.ai/coding-standards.md` en de
+verificatie-eis in de CLAUDE.md van je eigen worktree.
+
+## Werkwijze
+Dit project wordt gebouwd door meerdere Claude Code agents die elk in een eigen
+git worktree en een eigen chat werken. Ze kunnen niet met elkaar praten — de mens
+is het enige kanaal, en `ORCHESTRATION_LOG.md` in de repo-root is het gedeelde
+geheugen. Werk je in een worktree, lees dan eerst je eigen `SPEC.md` en
+`CLAUDE.md`.
 
 ## Antwoord altijd in het Nederlands tenzij het om code gaat.

@@ -409,16 +409,19 @@ export const useAppStore = create<AppState>()(
       skipHydration: true,
       version: 2,
       migrate: (persistedState: unknown, version: number) => {
+        // Persisted v1 items predate several fields, so they're read as loose records
+        // and back-filled below — never as `any` (see .ai/coding-standards.md).
+        type LegacyPackingItem = Partial<PackingItem> & Record<string, unknown>;
         const s = (persistedState ?? {}) as {
-          packingItems?: any[];
-          bags?: any[];
-          people?: any[];
-          bagTemplates?: any[];
+          packingItems?: LegacyPackingItem[];
+          bags?: Bag[];
+          people?: Person[];
+          bagTemplates?: BagTemplate[];
           favorites?: string[];
           savedCollections?: Situation[];
         };
         if (version < 2 && Array.isArray(s.packingItems)) {
-          s.packingItems = s.packingItems.map((it: any) => ({
+          s.packingItems = s.packingItems.map((it: LegacyPackingItem) => ({
             ...it,
             packedCount: it.packedCount ?? (it.packed ? 1 : 0),
             qty: it.qty ?? 1,

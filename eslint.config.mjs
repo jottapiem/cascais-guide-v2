@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // macOS AppleDouble sidecars. This repo lives on a non-HFS volume, so every
+    // write spawns a `._name` twin next to the real file. They're binary, they're
+    // already gitignored, and eslint would otherwise fail on "Invalid character".
+    "**/._*",
   ]),
 ]);
 

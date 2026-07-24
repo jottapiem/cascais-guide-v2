@@ -41,3 +41,14 @@ yarn-error.log*
 next-env.d.ts
 ._*
 *.bak
+
+# Per-worktree agent context — never merged back into main.
+# Each agent worktree carries its own copy; see ORCHESTRATION_LOG.md.
+/SPEC.md
+/PROGRESS.md
+/CLAUDE.local.md
+
+# Local tooling config. .claude/launch.json differs per worktree (each dev server
+# needs its own port), so tracking it would guarantee merge conflicts.
+.claude/
+.claude-flow/

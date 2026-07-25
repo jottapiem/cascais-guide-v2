@@ -101,13 +101,60 @@ van de 25 ids verschillen** (`boca-do-inferno` vs `bocainferno`, `farol-santa-ma
 zonder migratie wist stilzwijgend de favorieten van elke gebruiker. Twee agents die
 tegelijk aan dezelfde migratieketen sleutelen zou dat risico verdubbelen.
 
-### Openstaand bij de mens
+---
 
-**Wie levert de foto's?** De harde regel "alle content werkt zonder netwerk" kan niet
-volledig worden waargemaakt: er zijn nul lokale foto's en content-layer kan die niet
-verzinnen. Die agent bouwt daarom de volledige pijplijn plus een lokale fallback, zodat
-bestanden neerzetten in `public/photos/<id>/` genoeg is. De echte foto's en hun licentie
-zijn een menselijke beslissing.
+## 2026-07-25 — Fotostrategie beslist + opruiming
+
+### Fotoherkomst: hybride
+
+De mens overwoog alle 25 foto's te genereren met referentiebeelden, in één stijl per
+categorie. Ingebracht bezwaar: dit is een discovery-app waarin mensen naar een foto
+kijken en er vervolgens heen rijden. Bij herkenbare plekken (Palácio da Pena, Cabo da
+Roca, Boca do Inferno …) haalt referentiegestuurde generatie de sfeer maar niet het
+gebouw — het resultaat belooft stilzwijgend iets anders dan er staat.
+
+**Besluit:** echte foto's (Wikimedia Commons CC of eigen) verplicht voor tien
+herkenbare landmarks; gegenereerd beeld toegestaan voor generieke plekken,
+fallback-placeholder, categorie-headers en lege toestanden. Visuele samenhang komt uit
+uniforme nabewerking (1:1-uitsnede + één grade per categorie), niet uit de bron.
+
+Doorgevoerd in `SPEC.md` en `PROGRESS.md` van content-layer, met drie afdwingbare eisen:
+`PhotoSource` krijgt `"generated"`, `validate-photos` faalt als een landmark een
+gegenereerd beeld heeft, en de validator rapporteert per plek de herkomst.
+
+Onderbouwing dat dit past bij wat er al stond: `types.ts:169` had al
+`PhotoSource = "instagram" | "own" | "pexels" | "unsplash" | "wikimedia" | "web"` en
+`PhotoPermission` met licentiewaarden — herkomst en rechten waren al doordacht, alleen
+nooit gebruikt. Er was geen waarde voor gegenereerd beeld; die wordt nu toegevoegd.
+
+### Opruiming (commits `ab725f3`, `110a366`)
+
+Elk doelwit eerst gecontroleerd, niet blind verwijderd:
+
+| Doelwit | Bevinding | Actie |
+|---|---|---|
+| `morph-engine-rebuild` | 0 vóór main, 6 achter | verwijderd |
+| `agents/nextjs-console-error-fix{,-82d76c58}` + hun worktrees | 0 vóór, 47 achter; branchtip wás de merge-base | verwijderd |
+| `reimagined/` | alleen build-artefacten, untracked | verwijderd |
+| `animation_conflicts.txt` | kale bestandslijst zonder uitleg, verwees naar niet-bestaande `.bak`-bestanden | verwijderd |
+| `stash@{0}` | **géén afval** — zie hieronder | bewaard als branch |
+
+**De stash bleek echt werk.** 180 toevoegingen / 140 verwijderingen in `HomeView.tsx`:
+een onafgemaakte vervanging van `@iconify/react` door Lucide-icons. `HomeView.tsx:5` is
+de laatste plek in de codebase waar iconify nog binnenkomt, terwijl `AGENTS.md` zegt
+"uitsluitend Lucide React icons". Niet toepasbaar zoals hij is — hij is gebouwd op
+`AirbnbCard`, dat sindsdien `MorphCard` is geworden. Bewaard als
+`archive/homeview-iconify-wip` in plaats van gedropt.
+
+### Onopgeloste losse eindjes
+
+1. **`HomeView.tsx` importeert nog `@iconify/react`** — schendt de eigen projectregel.
+   `HomeView` valt in niemands terrein: het is de grootste consument van `MorphCard`
+   maar geen animatiebestand. Bewust **niet** toegewezen aan morph-verify; dat zou een
+   refactor in een verificatiediff mengen. Backlog voor na de merges.
+2. **`origin/morph-engine-rebuild` bestaat nog op de remote.** Alleen de lokale branch
+   is verwijderd. Een remote branch weggooien is niet lokaal terug te draaien — vraagt
+   apart akkoord.
 
 ### Worktrees aangemaakt en geverifieerd
 

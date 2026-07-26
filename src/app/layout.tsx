@@ -13,6 +13,15 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Cascais — Travel Discovery",
   description: "Ontdek Cascais als een local. Stranden, food, sunset spots, events en hidden gems in één visuele app.",
+  // Hard project rule (AGENTS.md): this app is private, for friends and family only.
+  // It must never be indexed. `nocache` and `noimageindex` matter as much as `noindex`
+  // here — the place photos are the part most likely to leak into an image search.
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: { index: false, follow: false, noimageindex: true },
+  },
 };
 
 export const viewport: Viewport = {

@@ -89,13 +89,35 @@ ref-doorgifte en de `absolute inset-0 object-cover` styling niet aanraken.
 
 ## Verificatie
 ```
-npx tsc --noEmit          # types
-npx eslint src            # lint
+npm run typecheck         # tsc --noEmit
 npm test                  # vitest
-npm run dev               # dev server op :3000
+npm run lint              # eslint src
+npm run verify            # alle drie, lint als laatste
+npm run e2e               # playwright, echte browser (WebKit, iPhone-viewport)
+npm run dev               # dev server
 ```
+
+`npm run verify` faalt op dit moment met exitcode 1, en dat hoort zo: er staan twee
+eslint-errors open in `BagsView.tsx`. Lint draait daarom als laatste, zodat typecheck
+en tests altijd hun uitslag geven. De poort gaat op groen zodra `agents/bags-features`
+landt.
+
+`npm run e2e` is de merge-gate: hij loopt de kritieke route (home → kaart → morph →
+detail → terug) in een echte browser, controleert dat élke foto daadwerkelijk laadt, en
+dwingt `noindex` af. Draai hem na élke merge, niet alleen aan het eind — hij bestaat om
+breuk te vangen die precies op de grens tussen twee agent-domeinen ontstaat.
+
 Statisch schoon is geen bewijs dat iets wérkt. Zie `.ai/coding-standards.md` en de
 verificatie-eis in de CLAUDE.md van je eigen worktree.
+
+### Valkuilen die je gaat tegenkomen
+- **Één dev-server per directory.** Next 16 weigert een tweede dev-server voor dezelfde
+  map, ongeacht de poort. Worktrees zijn aparte mappen, dus die kunnen wel naast elkaar.
+- **`.next` raakt corrupt bij hard afbreken.** Symptoom: `Failed to open database /
+  Loading persistence directory failed`. Oplossing: `rm -rf .next`.
+- **AppleDouble-bestanden.** Deze repo staat op een non-HFS volume: elke schrijfactie
+  maakt een binaire `._naam`-tweeling. eslint, tsconfig, vitest en playwright negeren
+  die inmiddels alle vier expliciet. Loopt een nieuwe tool erop stuk, dat is de oorzaak.
 
 ## Werkwijze
 Dit project wordt gebouwd door meerdere Claude Code agents die elk in een eigen

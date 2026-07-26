@@ -52,3 +52,12 @@ next-env.d.ts
 # needs its own port), so tracking it would guarantee merge conflicts.
 .claude/
 .claude-flow/
+
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+
+# Browser measurement output from the morph verification. Evidence worth keeping on
+# disk, but two of these traces are 24 MB and 31 MB — they do not belong in history.
+/morph-verify-shots/

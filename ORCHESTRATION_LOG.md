@@ -257,6 +257,35 @@ Eenmalig acceptabel als meetbewijs, maar dit is geen gewoonte die drie agents la
 volgehouden moet worden — bij een volgende ronde: downschalen zoals de negen kleine
 shots (620px), of gitignoren zoals `morph-verify-shots/`.
 
+#### Onverwacht: `origin/main` liep één commit voor
+
+Bij het pushen bleek GitHub een commit te hebben die lokaal ontbrak: `29e75e5`
+"clip-path on photo only, sheet keeps Apple-style radius", handmatig gemaakt op 18 juli
+en pas later gepusht. Hij zat in `TransitionLayer.tsx` — hetzelfde bestand dat
+morph-verify had herschreven.
+
+Ze zijn niet te combineren. Beide gebruiken de clip-path, voor verschillende doelen:
+
+| | mechanisme |
+|---|---|
+| `29e75e5` | container `overflow: visible`, clip-path alléén op de foto-wrapper |
+| morph-verify | clip-path op de container; de **bottom-inset** daarvan stuurt de sheet-expansie aan |
+
+**Gekozen voor morph-verify**, om twee redenen. Ten eerste sloopt `overflow: visible`
+de bottom-inset en daarmee de hele uitgroei van de sheet, die apart gemeten en getest is.
+Ten tweede bestaat het probleem dat `29e75e5` oploste niet meer: `MORPH_RADIUS_HERO_SHEET`
+is `49px 49px 0 0`, de sheet heeft zijn onderste hoeken al vierkant, dus de container-clip
+kan daar niets meer beschadigen.
+
+**Kuil die hier bijna toesloeg:** git meldde maar één conflict — de clip-path-regel. De
+rest van `29e75e5` (`photoRef` + `overflow: visible`) was al zonder waarschuwing
+toegepast, want die regels waren aan onze kant niet aangeraakt. Een conflict oplossen is
+dus níet hetzelfde als de merge beoordelen. Opgelost met `git checkout --ours` op het
+hele bestand. Poort daarna opnieuw gedraaid: typecheck schoon, 58/58, e2e 5/5.
+
+**Terugdraaien kan** als de juli-fix visueel tóch beter was: `git show 29e75e5` heeft het
+volledige patroon.
+
 **Nog te doen, in deze volgorde:** `agents/bags-features` (sluit de twee lint-errors,
 dus daarna staat `npm run verify` op groen), dan `agents/content-layer`. Bij die laatste
 komt het aangekondigde conflict op `AGENTS.md` en `package.json` — handmatig samenvoegen,

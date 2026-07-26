@@ -40,6 +40,9 @@ src/
 content/
   places/         # 25 × .json — AANWEZIG MAAR NIET AANGESLOTEN, zie afwijkingen
 docs/             # transition-notes.md — logboek van de morph-rebuild
+  morph-verify/   # meetbewijs achter de morph-verificatie (traces + vóór-screenshots)
+tests/
+  morph/          # 54 tests op morph-config, geometrie en de spec-tijdlijn
 public/           # alleen Next.js svg's
 .ai/              # coding-standards, product, tech-stack, ui-rules
 ```
@@ -54,9 +57,13 @@ Bestaat **niet** (ondanks eerdere documentatie): `src/hooks/`, `scripts/`,
 2. **Foto's komen van het netwerk.** `src/lib/images-v2.ts` bouwt Unsplash-URLs.
    Dat botst met de harde regel "alle content werkt zonder netwerk". Er zijn geen
    lokale foto's. Eigenaar: agent `content-layer`.
-3. **De morph is nooit visueel geverifieerd.** `docs/transition-notes.md` somt
-   precies op welke constanten getunede plaatshouders zijn. Eigenaar: agent
-   `morph-verify`. Verander die waarden niet zonder ze te hebben gezien.
+3. ~~**De morph is nooit visueel geverifieerd.**~~ **GESLOTEN 2026-07-26** door agent
+   `morph-verify`. De constanten zijn geen plaatshouders meer: elke waarde is
+   frame-voor-frame in een echte browser gemeten en waar nodig gecorrigeerd. Het
+   bewijsmateriaal staat in `docs/morph-verify/` — lees eerst de README daar, want
+   negen van de PNG's zijn de **vóór**-situatie en geen plaatje van de huidige build.
+   Wie hierna een morph-constante wijzigt, hoort dat met een meting te onderbouwen,
+   niet op gevoel.
 
 ## Design system
 - iOS 26 / Apple HIG stijl

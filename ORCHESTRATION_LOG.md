@@ -219,4 +219,45 @@ _Nog geen._
 
 ## Merges
 
-_Nog geen._
+### 1 van 3 — `agents/morph-verify` → `main`, 2026-07-26
+
+Drie commits, samengevoegd met `--no-ff` zodat het domein als één blok herkenbaar blijft.
+**Geen conflicten** — de agent zat in `src/lib/morph-config.ts`, de drie morph-componenten
+en een nieuwe `tests/morph/`; `main` had sinds het aftakpunt alleen de e2e-opzet aangeraakt.
+
+Poort na de merge, alle vier gedraaid:
+
+| check | uitslag |
+|---|---|
+| `npm run typecheck` | schoon |
+| `npm test` | **58/58** (was 4 — de agent schreef er 54 bij) |
+| `npm run lint` | 22 problemen, 2 errors, 20 warnings — **identiek aan de beginstand** |
+| `npm run e2e` | **5/5** in WebKit, iPhone-formaat |
+
+De twee lint-errors staan nog steeds in `BagsView.tsx` en zijn van `bags-features`.
+Morph-verify heeft er niets bij gebracht: dat is de reden dat we de beginstand hebben
+gemeten voordat er iemand begon.
+
+**Afwijking 3 in `AGENTS.md` is hiermee gesloten.** De morph-constanten zijn geen
+getunede plaatshouders meer. Dat is nu vastgelegd waar de volgende agent het leest.
+
+**Val niet in deze kuil bij het lezen van het bewijs:** negen van de PNG's in
+`docs/morph-verify/` zijn de **vóór**-situatie, expres bewaard om verschil te kunnen
+aantonen. `02d-…-hold-chrome-spinner.png` toont een spinner die daarna juist verwijderd
+is. De README in die map zegt het ook, maar het is precies het soort ding dat iemand
+verkeerd citeert.
+
+**Post-change is met metingen aangetoond, niet met screenshots.** De DevTools-verbinding
+die PNG's naar schijf kon schrijven viel halverwege weg; `traces/post-change-verification.json`
+dekt in plaats daarvan de hold-verwijdering, de origin-rect-correctie, de hit-test-gate,
+dark mode, het `sm:`-breekpunt en de opruiming na terug.
+
+**Kost 30 MB aan geschiedenis.** De `spec-pass/`-screenshots zijn 1,5–2,3 MB per stuk.
+Eenmalig acceptabel als meetbewijs, maar dit is geen gewoonte die drie agents lang
+volgehouden moet worden — bij een volgende ronde: downschalen zoals de negen kleine
+shots (620px), of gitignoren zoals `morph-verify-shots/`.
+
+**Nog te doen, in deze volgorde:** `agents/bags-features` (sluit de twee lint-errors,
+dus daarna staat `npm run verify` op groen), dan `agents/content-layer`. Bij die laatste
+komt het aangekondigde conflict op `AGENTS.md` en `package.json` — handmatig samenvoegen,
+beide kanten moeten overleven. Draai `npm run e2e` na élke merge.

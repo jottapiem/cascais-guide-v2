@@ -74,18 +74,32 @@ describe("retargetGeometry", () => {
   const prev: MorphGeometry = { originLeft: -120, originTop: 480, scaleX: 0.4, scaleY: 0.4, startRadius: 20 };
   const heroRadius = 49;
 
-  // This is the whole point of the function: restarting the spring from 0 against
-  // the returned geometry must put the clone exactly where it already is, so the
-  // retarget is invisible.
-  it("produces a geometry whose t=0 frame equals the previous geometry at the current progress", () => {
-    for (const t0 of [0.05, 0.25, 0.5, 0.83, 0.99]) {
-      const next = retargetGeometry(prev, t0, heroRadius);
-      expect(next.originLeft).toBeCloseTo(mix(prev.originLeft, 0, t0), 10);
-      expect(next.originTop).toBeCloseTo(mix(prev.originTop, 0, t0), 10);
-      expect(next.scaleX).toBeCloseTo(mix(prev.scaleX, 1, t0), 10);
-      expect(next.scaleY).toBeCloseTo(mix(prev.scaleY, 1, t0), 10);
-      expect(next.startRadius).toBeCloseTo(mix(prev.startRadius, heroRadius, t0), 10);
-    }
+  // Expectations here are hand-computed, NOT produced by calling mix() again: an
+  // expected value routed through the same helper as the implementation would pass no
+  // matter how retargetGeometry was rewritten, as long as it still used mix().
+  //
+  // prev = {originLeft: -120, originTop: 480, scaleX: 0.4, scaleY: 0.4, startRadius: 20},
+  // heroRadius 49. At progress 0.25:
+  //   originLeft  -120 + (0 - -120) * 0.25   = -90
+  //   originTop    480 + (0 - 480) * 0.25    =  360
+  //   scaleX       0.4 + (1 - 0.4) * 0.25    =  0.55
+  //   startRadius   20 + (49 - 20) * 0.25    =  27.25
+  it("hands the spring a start box equal to where the clone already is", () => {
+    const next = retargetGeometry(prev, 0.25, heroRadius);
+    expect(next.originLeft).toBeCloseTo(-90, 10);
+    expect(next.originTop).toBeCloseTo(360, 10);
+    expect(next.scaleX).toBeCloseTo(0.55, 10);
+    expect(next.scaleY).toBeCloseTo(0.55, 10);
+    expect(next.startRadius).toBeCloseTo(27.25, 10);
+  });
+
+  // At progress 0.8: -120 -> -24, 480 -> 96, 0.4 -> 0.88, 20 -> 43.2
+  it("stays continuous late in the flight too", () => {
+    const next = retargetGeometry(prev, 0.8, heroRadius);
+    expect(next.originLeft).toBeCloseTo(-24, 10);
+    expect(next.originTop).toBeCloseTo(96, 10);
+    expect(next.scaleX).toBeCloseTo(0.88, 10);
+    expect(next.startRadius).toBeCloseTo(43.2, 10);
   });
 
   it("is a no-op at progress 0", () => {
@@ -131,14 +145,29 @@ describe("unscaleRectAroundCenter", () => {
     expect(recovered.height).toBeCloseTo(layout.height, 6);
   });
 
-  it("recovers the real card width from the two numbers actually measured in the browser", () => {
-    // Card #2 in the Home rail, tapped 300ms into a forward morph. Chrome reported
-    // width 144.9 while <main> stood at scale(0.934072); the card's real layout
-    // width is 155.1. Both numbers come from that run and neither is derived from
-    // the other, so this is a real check rather than a restatement of the formula.
-    const measuredWhileReceding = { left: 184, top: 227.8, width: 144.9, height: 144.9 };
-    const corrected = unscaleRectAroundCenter(measuredWhileReceding, center, 0.934072);
-    expect(corrected.width).toBeCloseTo(155.1, 1);
+  // Every number below was read out of the live DOM in ONE frame, 300ms into a real
+  // forward morph (Chrome, dev server, card #2 of the Home rail). Nothing here is
+  // derived from the implementation, and both axes are asserted — the y-axis is where
+  // the original 41px error lived, so a width-only check would miss the actual bug.
+  //   <main>            inline scale(0.932783), computed matrix.a 0.932783
+  //                     visual rect left 200.49 top -196.84 w 416.02 h 1503.18
+  //                     -> centre (408.50, 554.75); layout offsetWidth 446, height 1612
+  //   card, at rest     left 393.05  top  -64.00  w 179.55
+  //   card, mid-recede  left 394.09  top  -22.41  w 167.49   (off by +41.59 / -12.06)
+  it("recovers a real card rect measured through a real recede, on both axes", () => {
+    const measured = { left: 394.09, top: -22.41, width: 167.49, height: 167.49 };
+    const corrected = unscaleRectAroundCenter(measured, { x: 408.5, y: 554.75 }, 0.932783);
+    expect(corrected.left).toBeCloseTo(393.05, 1);
+    expect(corrected.top).toBeCloseTo(-64.0, 1);
+    expect(corrected.width).toBeCloseTo(179.55, 1);
+  });
+
+  it("is what stands between the stored origin and a 41px landing error", () => {
+    // Same frame, without the correction: this is what used to be stored, and what the
+    // reverse morph then flew the photo back to.
+    const measured = { left: 394.09, top: -22.41, width: 167.49, height: 167.49 };
+    expect(measured.top - -64.0).toBeCloseTo(41.59, 1);
+    expect(measured.width - 179.55).toBeCloseTo(-12.06, 1);
   });
 
   it("leaves a rect that was never inside the receding base view alone", () => {

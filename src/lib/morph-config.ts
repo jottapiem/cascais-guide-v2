@@ -111,12 +111,13 @@ export function springDampingRatio(spring: { stiffness: number; damping: number;
 }
 
 // Exponential decay rate of the slowest term, in 1/s — bigger settles sooner.
-// At or below critical damping that is the natural frequency; above it, the
-// slow root dominates and extra damping actively *slows* the settle down.
+// Under- and critically damped springs decay inside an e^(-zeta*omega0*t) envelope;
+// past critical damping the slow real root takes over and extra damping actively
+// *slows* the settle down. Both branches agree at zeta = 1, as they must.
 export function springSettleRate(spring: { stiffness: number; damping: number; mass: number }): number {
   const omega0 = Math.sqrt(spring.stiffness / spring.mass);
   const zeta = springDampingRatio(spring);
-  return zeta <= 1 ? omega0 : omega0 * (zeta - Math.sqrt(zeta * zeta - 1));
+  return zeta <= 1 ? zeta * omega0 : omega0 * (zeta - Math.sqrt(zeta * zeta - 1));
 }
 
 // ─── Sheet overlap ──────────────────────────────────────────────────────────
@@ -190,10 +191,11 @@ export const MORPH_CHROME_FADE_START = 0.55;
 // place at 0 so the T2 -> T3 hand-off keeps its own well-tested code path and the
 // hold can be dialled back up without restructuring anything.
 export const MORPH_HOLD_MS = 0;
-// T3: E4 (this clone) and E7 (its spinner) fade out the instant E9 (the real content
-// sheet) fades in — they're literally the same fading DOM subtree here, so that
-// simultaneity falls out of the architecture for free rather than needing separate
-// choreography. This constant is that crossfade's duration.
+// T3: E4 (this clone) fades out the instant E9 (the real content sheet) fades in —
+// literally the same fading DOM subtree here, so that simultaneity falls out of the
+// architecture for free rather than needing separate choreography. (E7, the spinner
+// this sentence used to also cover, no longer exists — see MORPH_HOLD_MS above.)
+// This constant is that crossfade's duration; measured 243ms in Chrome.
 export const MORPH_CROSSFADE_MS = 260;
 
 // E10: bottom bar rise, explicitly unspecified by the observation. Independent,

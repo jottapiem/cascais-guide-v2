@@ -24,20 +24,35 @@ import {
 // radius from its own width. A hardcoded 20 or 49 anywhere would silently break
 // that relationship, which is exactly what these numbers exist to prevent.
 describe("proportional corner-radius system", () => {
-  it("derives the card radius from the ratio and the 180px card width", () => {
-    expect(MORPH_RADIUS_PX).toBe(Math.round(180 * MORPH_RADIUS_RATIO));
+  // Deliberately literal, not `Math.round(180 * MORPH_RADIUS_RATIO)`: repeating the
+  // implementation's own expression cannot fail unless both files are edited together.
+  // These are the two numbers the rest of the design system is drawn against.
+  it("puts the card radius at 20px and the hero radius at 49px", () => {
     expect(MORPH_RADIUS_PX).toBe(20);
-  });
-
-  it("derives the hero radius from the ratio and the app container width", () => {
-    expect(MORPH_RADIUS_HERO_PX).toBe(Math.round(APP_CONTAINER_PX * MORPH_RADIUS_RATIO));
     expect(MORPH_RADIUS_HERO_PX).toBe(49);
   });
 
-  it("keeps card and hero radii on the same ratio, within rounding", () => {
+  it("keeps the ratio itself at the documented anchor", () => {
+    expect(MORPH_RADIUS_RATIO).toBeCloseTo(0.1094, 6);
+    expect(APP_CONTAINER_PX).toBe(448);
+  });
+
+  it("keeps card and hero radii on the same ratio at their DESIGN widths", () => {
     const cardRatio = MORPH_RADIUS_PX / 180;
     const heroRatio = MORPH_RADIUS_HERO_PX / APP_CONTAINER_PX;
     expect(Math.abs(cardRatio - heroRatio)).toBeLessThan(0.002);
+  });
+
+  // Recorded, not celebrated: the "proportional" claim holds at the design widths only.
+  // 180px is the rail card at a 448px container; on the 393px phone this pass actually
+  // ran on, the measured card is 155.11px (traces/trace-forward-2.json, geom.cardW), so
+  // the shipped 20px is ratio 0.129 there — the card radius is in practice a constant,
+  // not a proportion. Asserted so the discrepancy cannot quietly widen.
+  it("does not actually stay proportional at the real 393px card width", () => {
+    const measuredCardWidthOn393 = 155.11;
+    const realRatio = MORPH_RADIUS_PX / measuredCardWidthOn393;
+    expect(realRatio).toBeGreaterThan(MORPH_RADIUS_RATIO);
+    expect(realRatio).toBeCloseTo(0.129, 3);
   });
 
   it("composes every radius shorthand from those two numbers only", () => {

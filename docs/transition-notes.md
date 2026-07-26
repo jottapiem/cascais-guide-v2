@@ -283,6 +283,13 @@ amount of background recede, does the mid-flight retarget actually read smooth o
 fast double-tap (hard to trigger deliberately even with eyes on it), and does the wider
 `sm:` breakpoint layout look correct with the scrim now clearing on idle.
 
+> **Superseded 2026-07-25 (on-device pass):** all three were checked. 0.93 reads as
+> recession rather than zoom-out; the fast double-tap retargets smoothly (largest frame
+> step 26.8px against a natural ~20px next-frame delta); and the `sm:` layout is correct,
+> with both scrim layers measured back at opacity 0 once the page is idle. What the pass
+> *did* find here is that this same recede corrupts any card rect measured while it runs
+> — see item 3 of "On-device verification pass" below.
+
 ## On-device verification pass — 2026-07-25, agent `morph-verify`
 
 The morph was finally run and watched: Chrome, `next dev` on :3001, 393x852 at dpr3

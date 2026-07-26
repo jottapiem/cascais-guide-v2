@@ -3,7 +3,6 @@
  "note": "Summary extracted from the raw Chrome trace; the raw event dump (25-31MB) was discarded.",
  "window": "last 2.6s of the trace = the morph",
  "renderedFrames": 312,
- "fps": 120.0,
  "frameGapMs": {
   "min": 0.1,
   "p50": 2.0,
@@ -13,5 +12,8 @@
  "gapsOver20ms": 1,
  "gapsOver33ms": 0,
  "longTasksOver30msInWindow": [],
- "clsObservedByDevTools": 0.0
+ "clsObservedByDevTools": 0.0,
+ "metric": "count of Chrome 'AnimationFrame::Render' events and the intervals between them",
+ "notAFrameRate": "renderedFrames/window is NOT a presented-frame rate: there can be more than one AnimationFrame::Render per vsync, which is why p50 sits well under 8.3ms. Treat the gap distribution as the signal (no interval over ~20ms = no stall), and take the 60Hz cadence from the rAF trace in trace-forward-2.json.",
+ "rawTraceDiscarded": "yes - 31MB/25MB of raw events removed after extraction; these numbers cannot be re-derived from this repo."
 }

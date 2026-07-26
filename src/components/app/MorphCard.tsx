@@ -22,18 +22,35 @@ import { PlaceImage } from "./PlaceImage";
 // lower than it really is, and the reverse morph later flies the photo back to that
 // wrong box: measured 40.8px too low and 10.2px too narrow after a re-tap 300ms in.
 //
-// offsetWidth is the untransformed layout width, so their ratio is exactly the scale
-// currently applied to the base view. Cards that are not inside <main> at all — the
-// related-places strip lives in DetailOverlay's portal — find no ancestor and are left
-// untouched, which is correct: nothing scales them.
+// The scale is read straight off the computed transform matrix rather than inferred
+// from `boundingRect.width / offsetWidth`: offsetWidth is integer-rounded, so at a
+// fractional viewport width (browser zoom, some HiDPI setups) that ratio is a hair off
+// 1 even at rest, and the no-op path below would then apply a spurious correction to
+// every single tap. The matrix is exact, so "no morph in flight" really is a no-op.
+//
+// Cards that are not inside <main> at all — the related-places strip lives in
+// DetailOverlay's portal — find no ancestor and are left untouched, which is correct:
+// nothing scales them.
+//
+// Known limitation, pre-existing and deliberately not compensated: the tap-scale on the
+// card itself (`whileTap`) and BlurFade's own transforms are also folded into
+// getBoundingClientRect(). Only <main>'s recede is undone here, because that is the one
+// that is still running when the origin is stored.
 function layoutRectOf(el: HTMLElement): { left: number; top: number; width: number; height: number } {
   const rect = el.getBoundingClientRect();
   const base = el.closest("main");
-  if (!base || !base.offsetWidth) return rect;
-  const baseRect = base.getBoundingClientRect();
-  const scale = baseRect.width / base.offsetWidth;
+  if (!base) return rect;
+  // The untransformed case is the overwhelmingly common one (every first tap), so it is
+  // short-circuited on the string before DOMMatrixReadOnly ever sees it: Chrome happily
+  // parses "none" as the identity matrix, but that is not worth betting the primary code
+  // path on across engines — this app's e2e gate runs WebKit.
+  const transform = getComputedStyle(base).transform;
+  if (!transform || transform === "none") return rect;
+  const scale = new DOMMatrixReadOnly(transform).a;
+  if (!scale || scale === 1) return rect;
   // Scaling about `center center` leaves the centre itself fixed, so the visual box's
   // centre is also the layout centre — no need to know <main>'s untransformed position.
+  const baseRect = base.getBoundingClientRect();
   const center = { x: baseRect.left + baseRect.width / 2, y: baseRect.top + baseRect.height / 2 };
   return unscaleRectAroundCenter(rect, center, scale);
 }

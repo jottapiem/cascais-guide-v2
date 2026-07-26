@@ -1,0 +1,17 @@
+{
+ "label": "cpu4x",
+ "note": "Summary extracted from the raw Chrome trace; the raw event dump (25-31MB) was discarded.",
+ "window": "last 2.6s of the trace = the morph",
+ "renderedFrames": 312,
+ "fps": 120.0,
+ "frameGapMs": {
+  "min": 0.1,
+  "p50": 2.0,
+  "p90": 16.6,
+  "max": 20.2
+ },
+ "gapsOver20ms": 1,
+ "gapsOver33ms": 0,
+ "longTasksOver30msInWindow": [],
+ "clsObservedByDevTools": 0.0
+}

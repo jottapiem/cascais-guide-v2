@@ -44,7 +44,16 @@ Top corners: the observation says these *never change* from the source card's ra
 specifically so that if the photo ends up edge-to-edge, its corners match the physical
 device screen corners. That's the reasoning, not just the instruction — and it doesn't
 transfer, because this app's hero never goes edge-to-edge. It rests as a rounded card
-inset in a `max-w-md` column (`MORPH_RADIUS_HERO_PX`). Freezing the top corners here
+inset in a `max-w-md` column (`MORPH_RADIUS_HERO_PX`).
+
+> **Correction, 2026-07-25 (on-device pass):** "never goes edge-to-edge" is only true
+> above 448px. The hero is `min(100vw, 448px)` wide, so on any phone — 393px on an
+> iPhone 16 — it *is* edge-to-edge horizontally and its top corners sit in the physical
+> screen corners, which is the exact situation the observation's rule was written for.
+> The conclusion happens to survive anyway: the interpolated 49px lands close to a real
+> iPhone's ~47–55px corner radius, so the rounding reads as intentional rather than
+> under-rounded (screenshot `docs/morph-verify/03-detail-rest-light.png`). Keeping the
+> current behaviour, but the stated reason for it does not hold on the target device. Freezing the top corners here
 would just leave them under-rounded relative to their own resting design. So top
 corners keep interpolating to `MORPH_RADIUS_HERO_PX` throughout. Flagging this clearly
 because it's the one place code does something other than what the observation
@@ -74,6 +83,10 @@ instead of one so the amount visibly increases rather than jumping in one step).
 back in, with the DOM-structure reasoning for why it's safe this time.)*
 
 ## Hold phase (T2→T3) and the loading spinner
+
+> **Superseded 2026-07-25 (on-device pass):** it did not earn its keep. `MORPH_HOLD_MS`
+> is now 0 and the spinner has been removed from `TransitionLayer`. The section below
+> describes the state before that; see "On-device verification pass" at the end.
 
 The observation ties this hold to content-load time — Airbnb fetches the detail page
 over the network, and the hold is "however long that takes." This app's place data is
@@ -129,6 +142,14 @@ disabling the morph outright — an instant jump-cut between two very different 
 reads as more broken than a very quick, still-continuous settle.
 
 ## What was actually verified vs. eyeballed
+
+**Superseded 2026-07-25 by agent `morph-verify`.** Everything below the line was written
+before anyone had seen the morph run. It has now been run, measured frame by frame and
+screenshotted in Chrome — see the section "On-device verification pass" at the end of
+this file for what held up, what did not, and what changed as a result. The historical
+text is kept because it records what was assumed at the time.
+
+---
 
 Verified for real, in this sandbox: `tsc --noEmit` clean, `eslint` clean (no new
 warnings/errors beyond pre-existing ones on lines this change didn't touch), and the
@@ -261,3 +282,109 @@ follow-up work either. Specifically worth checking: does `0.93` read as the righ
 amount of background recede, does the mid-flight retarget actually read smooth on a
 fast double-tap (hard to trigger deliberately even with eyes on it), and does the wider
 `sm:` breakpoint layout look correct with the scrim now clearing on idle.
+
+## On-device verification pass — 2026-07-25, agent `morph-verify`
+
+The morph was finally run and watched: Chrome, `next dev` on :3001, 393x852 at dpr3
+(iPhone-class) plus a 1680px-wide pass for the `sm:` breakpoint. Method: a
+`requestAnimationFrame` wrapper installed *before* the app bundle evaluates (framer-motion
+captures `requestAnimationFrame` once at module-eval time, so a patch applied after load
+never sees the spring loop), sampling the actually-applied DOM styles every frame, plus
+the ability to freeze the spring on a chosen frame so mid-flight states could be
+screenshotted rather than guessed at. Harness kept at `docs/morph-verify/instrument.js`,
+raw per-frame traces under `docs/morph-verify/traces/`, screenshots alongside them.
+Progress is derived, never assumed: `t = (scaleX - s0) / (1 - s0)`.
+
+**The spring itself is healthy.** 29 animation frames over 468ms, inter-frame gaps
+15.9–17.4ms with zero gaps over 20ms; under 4x CPU throttling the worst frame gap was
+20.2ms with no long tasks in the window, and DevTools reported CLS 0.00. `MORPH_SPRING`
+is exactly critically damped (ratio 1.000) and the traces show no overshoot in either
+direction. It stays.
+
+**Confirmed against measurement, unchanged:** `MORPH_RADIUS_SNAP_PROGRESS` /
+`MORPH_CHROME_FADE_START` 0.55 (fires ~150ms into a ~480ms morph — 31% of elapsed time
+with the image 55% of the way there, inside the observed window), `SHEET_FADE_END` 0.62,
+`SCRIM_FADE_END` 0.9 and `SCRIM_LIGHT_FADE_END` 0.45 (both land exactly where specified,
+and the blur does read as increasing rather than stepping), `SCRIM_BLUR_PX` 24 /
+`SCRIM_BLUR_LIGHT_PX` 10, `MORPH_CROSSFADE_MS` 260 (measured 243–280ms),
+`BOTTOM_BAR_RISE_MS` 340 (measured ~331ms, translateY only, opacity stays 1),
+`CARD_TEXT_FADE_MS` 70 (measured ~70ms), `BASE_VIEW_RECEDE_SCALE` 0.93.
+
+**Changed, with the measurement that forced it:**
+
+1. `MORPH_HOLD_MS` 220 → **0**, and the E7 spinner is **removed** from `TransitionLayer`.
+   Seen: 220ms of an empty white sheet with a spinner turning over a photo that is
+   already decoded and on screen, on top of a ~560ms settle and a 260ms crossfade. It
+   reads as manufactured latency. Time from spring-settle to real content is now 28ms,
+   down from ~250ms. Removing the spinner also makes the clone's chrome an exact match
+   for `DetailOverlay`'s real header, which is what keeps the T3 hand-off from popping.
+
+2. `MORPH_SPRING_REDUCED` damping 70 → **63**. The old value made this spring *overdamped*
+   (ratio 1.107), which cancelled the higher stiffness completely: its slowest decay term
+   came out at 19.9998 1/s against the default spring's 20.0 — mathematically the same
+   settle. Measured in the browser: 400ms versus 450ms. The reduced-motion accommodation
+   was not accommodating. 63 restores critical damping (ratio 0.996) and a 31.6 1/s decay
+   rate, a genuine ~1.6x faster settle. `springSettleRate()` in `morph-config.ts` is what
+   the regression test asserts on.
+
+3. **`MorphCard` now stores tap origins in layout coordinates.** `getBoundingClientRect()`
+   reports the *visual* box, and E11 scales `<main>` during the morph — so tapping a
+   second card mid-morph stored a rect measured through the recede. Measured: a card
+   tapped 300ms in reported top 228.9 instead of 187 and width 137.1 instead of 147.1,
+   and the reverse morph then flew the photo back to that wrong box (40.8px too low,
+   10.2px too narrow). `unscaleRectAroundCenter()` undoes the ancestor scale; measured
+   again afterwards, the landing error is 0.1px. Cards outside `<main>` — the
+   related-places strip lives in `DetailOverlay`'s portal — find no ancestor and are
+   correctly left untouched.
+
+**The four never-tested scenarios, now tested:**
+
+- *Mid-flight retarget* (tap two different cards fast): works. Largest single-frame
+  movement at the retarget was 26.8px against a natural next-frame delta of ~20px — an
+  acceleration, not a teleport. The bottom-corner radius carries over at the interpolated
+  value (25.1px rather than the card's 20px) exactly as this file predicted.
+- *Resting retarget* (related card from an open detail page): navigates correctly, but
+  **starts with a visible jump** — see open issues below.
+- *Reduced motion*: the `matchMedia` swap and the hold-skip both fire correctly; the
+  spring itself was the problem, now fixed.
+- *`sm:` breakpoint*: verified at 1680px and 817px. Both scrim layers are full-viewport
+  and both are back to opacity 0 once the page is idle, `will-change` is released, and
+  the 448px overlay fully covers the receded 414.8px column so the shrunken base view
+  never peeks out. The cleanup fix works.
+
+Also checked: dark mode (reachable only through the profile toggle — `next-themes` runs
+with `enableSystem={false}`, so the OS setting does nothing), and the hit-testing gate.
+The gate works — mid-morph the back button computes to `pointer-events: none` and
+`document.elementFromPoint()` at its centre returns the clone's image instead. One
+correction to the note above, though: for the *initial* forward morph from a list view
+there is nothing to gate, because `DetailOverlay` only mounts at T3. The gate earns its
+keep on the reverse leg and on detail→related-card morphs, not on the first open.
+
+### Open, deliberately not changed here
+
+- **The bottom-radius snap is a visible pop.** The reasoning above ("the bottom edge
+  tucks under the sheet") does not hold in this app: at progress 0.55 the clone's bottom
+  edge is floating around 63% down the screen, so the hard 20px→0 snap happens on a free
+  edge in plain view (screenshots `02b`/`02c`). It only becomes a non-issue at rest,
+  where the container's bottom sits at/below the viewport edge. No *value* fixes this —
+  moving the threshold just moves the pop. `MORPH_RADIUS_SNAP_PROGRESS = 1` would hide it
+  (the corners would hold at the source radius and snap off-screen), and interpolating
+  the bottom corners like the top ones would remove it outright. Both change behaviour
+  this file explicitly documents as deliberate, so the call belongs to whoever owns that
+  decision, not to a verification pass.
+- **A morph launched from an open detail page skips its first ~13%.** Reproduced 3/3:
+  from Home the first animated frame lands at t≈0.01–0.08, from a related card at
+  t≈0.12–0.15 — a ~72px jump on the first painted frame. `applyFrame(0)` runs in the
+  layout effect but the next frame consumes a large (clamped ~40ms) first delta before
+  the browser paints. Fixing it means controlling Motion's frame clock; out of scope for
+  this pass.
+- **Back after a related-card navigation does not leave the detail page.** A → related B
+  → back plays the full reverse morph and then lands on B's detail page again, because
+  `finishMorphForward` pushes `"detail"` onto history and `finishMorphReverse` pops
+  straight back to it. A second back then exits. The fix lives in `app-store.ts`, which
+  is outside this agent's terrain — escalated rather than touched.
+- **`.morph-scrim` in `globals.css` has rotted.** Its comment claims the timing is kept
+  in sync with `MORPH_DURATION`/`MORPH_EASE` in `TransitionLayer`, and it still carries
+  an `.is-active` rule that nothing uses — opacity is driven imperatively per frame now,
+  and the inline `transition` overrides the 480ms one in the class. Harmless at runtime,
+  misleading to read. `globals.css` is shared ground, so it is reported, not edited.

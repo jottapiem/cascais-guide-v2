@@ -5,9 +5,38 @@ import { Heart, Star } from "lucide-react";
 import type { Place } from "@/lib/types";
 import { useAppStore } from "@/store/app-store";
 import { haptics, staggerDelay } from "@/lib/premium";
-import { MORPH_RADIUS_PX, CARD_WIDTH_CSS, SWIFT_EASE, CARD_TEXT_FADE_MS } from "@/lib/morph-config";
+import {
+  MORPH_RADIUS_PX,
+  CARD_WIDTH_CSS,
+  SWIFT_EASE,
+  CARD_TEXT_FADE_MS,
+  unscaleRectAroundCenter,
+} from "@/lib/morph-config";
 import { BlurFade } from "@/components/magicui";
 import { PlaceImage } from "./PlaceImage";
+
+// The tap origin must be stored in LAYOUT coordinates, but getBoundingClientRect()
+// reports the visual box — and while a morph is in flight, TransitionLayer is scaling
+// <main> (the E11 background recede) around its own centre. A card tapped during that
+// window (tap card A, change your mind, tap card B) therefore measures smaller and
+// lower than it really is, and the reverse morph later flies the photo back to that
+// wrong box: measured 40.8px too low and 10.2px too narrow after a re-tap 300ms in.
+//
+// offsetWidth is the untransformed layout width, so their ratio is exactly the scale
+// currently applied to the base view. Cards that are not inside <main> at all — the
+// related-places strip lives in DetailOverlay's portal — find no ancestor and are left
+// untouched, which is correct: nothing scales them.
+function layoutRectOf(el: HTMLElement): { left: number; top: number; width: number; height: number } {
+  const rect = el.getBoundingClientRect();
+  const base = el.closest("main");
+  if (!base || !base.offsetWidth) return rect;
+  const baseRect = base.getBoundingClientRect();
+  const scale = baseRect.width / base.offsetWidth;
+  // Scaling about `center center` leaves the centre itself fixed, so the visual box's
+  // centre is also the layout centre — no need to know <main>'s untransformed position.
+  const center = { x: baseRect.left + baseRect.width / 2, y: baseRect.top + baseRect.height / 2 };
+  return unscaleRectAroundCenter(rect, center, scale);
+}
 
 // SWIFT_EASE imported from morph-config.
 const CARD_SHADOW =
@@ -81,7 +110,7 @@ export const MorphCard = memo(function MorphCard({
   const handleTap = () => {
     const wrapper = imgWrapperRef.current;
     if (!wrapper) return;
-    const rect = wrapper.getBoundingClientRect();
+    const rect = layoutRectOf(wrapper);
     setMorphPlace({
       id: place.id,
       cardInstanceId,

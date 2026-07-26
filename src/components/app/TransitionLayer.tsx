@@ -2,7 +2,7 @@
 
 import { useRef, useLayoutEffect, useEffect, useMemo } from "react";
 import { animate, type AnimationPlaybackControls } from "framer-motion";
-import { ChevronLeft, Heart, Loader2 } from "lucide-react";
+import { ChevronLeft, Heart } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { getPlace } from "@/lib/places-data";
 import {
@@ -21,23 +21,13 @@ import {
   SCRIM_BLUR_LIGHT_PX,
   SHEET_OVERLAP_PX,
   BASE_VIEW_RECEDE_SCALE,
+  clamp01,
+  mix,
+  shouldRetargetMidFlight,
+  retargetGeometry,
+  type MorphGeometry,
 } from "@/lib/morph-config";
 import { PlaceImage } from "./PlaceImage";
-
-function clamp01(n: number): number {
-  return n < 0 ? 0 : n > 1 ? 1 : n;
-}
-function mix(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
-}
-
-interface Geometry {
-  originLeft: number; // relative to hero left
-  originTop: number; // relative to hero top (0)
-  scaleX: number;
-  scaleY: number;
-  startRadius: number;
-}
 
 interface TransitionLayerProps {
   // Ref to the base-view element (AppShell's <main>) that should recede/scale during
@@ -56,13 +46,15 @@ interface TransitionLayerProps {
 // plain re-render-driven approach can't do that without jank.
 //
 // Sequencing model (see docs/transition-notes.md for the full write-up):
-//   progress 0                          MORPH_RADIUS_SNAP_PROGRESS        progress 1        +MORPH_HOLD_MS
-//   |-- position/scale/opacity morph -->|-- bottom-radius snaps, chrome starts fading in -->|-- hold (spinner) --> crossfade into real content -->
+//   progress 0                          MORPH_RADIUS_SNAP_PROGRESS        progress 1     +MORPH_HOLD_MS (0)
+//   |-- position/scale/opacity morph -->|-- bottom-radius snaps, chrome starts fading in -->|-- crossfade into real content -->
 //
-// T3 (crossfade) falls out of the architecture for free: the chrome's spinner and the
-// rest of this clone are the SAME fading subtree, so "spinner fades out at the same
-// instant the sheet crossfades into real content" doesn't need separate choreography —
-// it's one opacity transition on one container.
+// T3 (crossfade) falls out of the architecture for free: this whole clone is ONE
+// fading subtree, so "the clone leaves at the same instant the real sheet arrives"
+// doesn't need separate choreography — it's one opacity transition on one container.
+// The hold between T2 and T3 is now 0: there is no content to wait for, and watching
+// it run showed the wait was the most conspicuous thing about the whole transition.
+// See MORPH_HOLD_MS in morph-config.ts.
 export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
   const morphPlace = useAppStore((s) => s.morphPlace);
   const morphPhase = useAppStore((s) => s.morphPhase);
@@ -80,7 +72,7 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
   const chromeRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(0);
   const controlsRef = useRef<AnimationPlaybackControls | null>(null);
-  const geometryRef = useRef<Geometry | null>(null);
+  const geometryRef = useRef<MorphGeometry | null>(null);
   const holdTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cardInstanceRef = useRef<string | null>(null);
 
@@ -126,9 +118,9 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
     // photo," not trailing it.
     if (sheetRef.current) sheetRef.current.style.opacity = String(clamp01(t / SHEET_FADE_END));
 
-    // Chrome (back button / type badge / favorite button / loading spinner): starts
-    // fading in once the shape-extension is basically done, finishing exactly when the
-    // position/scale morph lands — landing together is the point, not a coincidence.
+    // Chrome (back button / type badge / favorite button): starts fading in once the
+    // shape-extension is basically done, finishing exactly when the position/scale
+    // morph lands — landing together is the point, not a coincidence.
     if (chromeRef.current) {
       chromeRef.current.style.opacity = String(clamp01((t - MORPH_CHROME_FADE_START) / (1 - MORPH_CHROME_FADE_START)));
     }
@@ -206,16 +198,15 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
     //    after the bottom-radius snap threshold can still show a brief bottom-corner
     //    correction — a narrow, sub-300ms edge case judged an acceptable trade-off
     //    against fully modeling both corners independently through a retarget.
-    const midFlightRetarget = morphPhase === "forward" && isFreshTarget && !!prevGeometry && t0 > 0 && !restingAtHero;
+    const midFlightRetarget = shouldRetargetMidFlight({
+      phase: morphPhase,
+      isFreshTarget,
+      hasPreviousGeometry: !!prevGeometry,
+      progress: t0,
+    });
 
     if (midFlightRetarget && prevGeometry) {
-      geometryRef.current = {
-        originLeft: mix(prevGeometry.originLeft, 0, t0),
-        originTop: mix(prevGeometry.originTop, 0, t0),
-        scaleX: mix(prevGeometry.scaleX, 1, t0),
-        scaleY: mix(prevGeometry.scaleY, 1, t0),
-        startRadius: mix(prevGeometry.startRadius, MORPH_RADIUS_HERO_PX, t0),
-      };
+      geometryRef.current = retargetGeometry(prevGeometry, t0, MORPH_RADIUS_HERO_PX);
       progressRef.current = 0;
     } else {
       geometryRef.current = {
@@ -257,8 +248,9 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
         onComplete: () => {
           progressRef.current = 1;
           applyFrame(1);
-          // T2 reached. Hold (spinner keeps spinning via its own CSS animation,
-          // untouched by this JS) until T3, then hand off to the real content.
+          // T2 reached. Hand off to the real content. MORPH_HOLD_MS is 0, so this
+          // timeout only defers to the next macrotask — the hold's code path is kept
+          // intact so the pause can be reintroduced without restructuring anything.
           holdTimeoutRef.current = setTimeout(() => {
             holdTimeoutRef.current = null;
             finishMorphForward();
@@ -330,7 +322,7 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
         <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: `${MORPH_RADIUS_HERO_PX}px`, zIndex: 2 }}>
           <PlaceImage src={morphPlace.coverImage} alt="" />
 
-          {/* Chrome: back button / type badge / favorite button / spinner — E6/E7/E8.
+          {/* Chrome: back button / type badge / favorite button — E6/E8.
               Deliberately the SAME markup+positioning as DetailOverlay's real header
               buttons (see DetailView.tsx) so the T3 hand-off is a pixel-aligned swap,
               not a visible pop. pointer-events: none — these are decorative during the
@@ -350,11 +342,12 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
                 <Heart className={`h-[1.125rem] w-[1.125rem] ${isFav ? "fill-accent text-accent" : "text-white"}`} strokeWidth={2.4} />
               </span>
             </div>
-            {/* E7 — continuous spin loop, independent of this wrapper's own opacity
-                state (the CSS animation keeps running even while opacity is 0). */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="h-7 w-7 animate-spin text-white/90 drop-shadow" strokeWidth={2.4} />
-            </div>
+            {/* E7 (loading spinner) deliberately absent. The reference shows one
+                because it is waiting on a network fetch; this app's place data is
+                bundled, so a spinner here turns over a photo that is already fully
+                decoded and on screen — it reads as manufactured latency. Removing it
+                also makes this chrome an exact match for DetailOverlay's real header,
+                which is what keeps the T3 hand-off from popping. See MORPH_HOLD_MS. */}
           </div>
         </div>
         <div

@@ -1,0 +1,17 @@
+{
+ "label": "unthrottled",
+ "note": "Summary extracted from the raw Chrome trace; the raw event dump (25-31MB) was discarded.",
+ "window": "last 2.6s of the trace = the morph",
+ "renderedFrames": 312,
+ "fps": 120.0,
+ "frameGapMs": {
+  "min": 0.2,
+  "p50": 0.8,
+  "p90": 16.8,
+  "max": 18.4
+ },
+ "gapsOver20ms": 0,
+ "gapsOver33ms": 0,
+ "longTasksOver30msInWindow": [],
+ "clsObservedByDevTools": 0.0
+}

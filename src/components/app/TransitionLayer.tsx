@@ -21,23 +21,16 @@ import {
   SCRIM_BLUR_LIGHT_PX,
   SHEET_OVERLAP_PX,
   BASE_VIEW_RECEDE_SCALE,
+  backgroundPhaseFor,
+  sheetExpansionInsetPx,
+  clamp01,
+  mix,
+  shouldRetargetMidFlight,
+  retargetGeometry,
+  retargetFeatureProgress,
+  type MorphGeometry,
 } from "@/lib/morph-config";
 import { PlaceImage } from "./PlaceImage";
-
-function clamp01(n: number): number {
-  return n < 0 ? 0 : n > 1 ? 1 : n;
-}
-function mix(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
-}
-
-interface Geometry {
-  originLeft: number; // relative to hero left
-  originTop: number; // relative to hero top (0)
-  scaleX: number;
-  scaleY: number;
-  startRadius: number;
-}
 
 interface TransitionLayerProps {
   // Ref to the base-view element (AppShell's <main>) that should recede/scale during
@@ -55,14 +48,19 @@ interface TransitionLayerProps {
 // back-then-forward) continue smoothly from the live position instead of snapping — a
 // plain re-render-driven approach can't do that without jank.
 //
-// Sequencing model (see docs/transition-notes.md for the full write-up):
-//   progress 0                          MORPH_RADIUS_SNAP_PROGRESS        progress 1        +MORPH_HOLD_MS
-//   |-- position/scale/opacity morph -->|-- bottom-radius snaps, chrome starts fading in -->|-- hold (spinner) --> crossfade into real content -->
+// Sequencing model — the reference spec's phases, expressed in progress rather than in
+// milliseconds (a spring has no fixed duration; see SPEC_HALF_TRAVEL_PROGRESS):
 //
-// T3 (crossfade) falls out of the architecture for free: the chrome's spinner and the
-// rest of this clone are the SAME fading subtree, so "spinner fades out at the same
-// instant the sheet crossfades into real content" doesn't need separate choreography —
-// it's one opacity transition on one container.
+//   progress 0            0.5 = half travel (spec t=0.3s)        progress 1      +MORPH_HOLD_MS
+//   |-- photo translate/scale, sheet fades in AND expands -->|-- corner snap (hard cut),
+//        title + loader + buttons fade in ------------------->|-- hold: loader only ---->|
+//        background blur + recede: one continuous ramp, all the way to content-ready --->|
+//                                                                                        |-- crossfade
+//
+// T3 (crossfade) falls out of the architecture for free: this whole clone is ONE fading
+// subtree, so "main content fades in while the loading indicator fades out, at the same
+// instant" needs no separate choreography — it is one opacity transition on one
+// container, and the loader is inside it.
 export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
   const morphPlace = useAppStore((s) => s.morphPlace);
   const morphPhase = useAppStore((s) => s.morphPhase);
@@ -78,9 +76,18 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
   const scrimLightRef = useRef<HTMLDivElement>(null);
   const scrimHeavyRef = useRef<HTMLDivElement>(null);
   const chromeRef = useRef<HTMLDivElement>(null);
+  // Title + loading indicator: same fade curve as the header chrome, but they live on the
+  // sheet, not over the photo, so they need their own element to write opacity on.
+  const sheetChromeRef = useRef<HTMLDivElement>(null);
+  // Clone-coordinate box, needed by applyFrame for the sheet's bottom-edge expansion.
+  const heroBoxRef = useRef({ width: 0, height: 0 });
   const progressRef = useRef(0);
+  // Progress captured at a mid-flight retarget so the shape features (sheet expansion,
+  // sheet/chrome opacity, bottom-corner snap) hold instead of popping back to their t=0
+  // state when progressRef resets to 0. 0 = no retarget in effect (see retargetFeatureProgress).
+  const retargetFloorRef = useRef(0);
   const controlsRef = useRef<AnimationPlaybackControls | null>(null);
-  const geometryRef = useRef<Geometry | null>(null);
+  const geometryRef = useRef<MorphGeometry | null>(null);
   const holdTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cardInstanceRef = useRef<string | null>(null);
 
@@ -116,34 +123,55 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
     // shape-extension threshold passes, since the bottom edge is what tucks under the
     // sheet and 0 is structurally correct there regardless of edge-to-edge-ness.
     const topRadius = mix(g.startRadius, MORPH_RADIUS_HERO_PX, t);
-    const bottomRadius = t < MORPH_RADIUS_SNAP_PROGRESS ? g.startRadius : 0;
+
+    // Shape features (bottom snap, sheet expansion, sheet/chrome opacity) run on a progress
+    // that can't dip below where a mid-flight retarget caught them — otherwise resetting
+    // progressRef to 0 for the fresh flight would visibly pop them back to their t=0 state
+    // while the position (handled by retargetGeometry) morphs on smoothly. On a first open or
+    // a reverse leg retargetFloorRef is 0, so featureProgress === t: an exact no-op.
+    const featureProgress = retargetFeatureProgress(t, retargetFloorRef.current);
+    const bottomRadius = featureProgress < MORPH_RADIUS_SNAP_PROGRESS ? g.startRadius : 0;
+
+    // Sheet bottom-edge expansion (spec phase 2): the visible box starts as the card's
+    // own photo + text block and grows downward until it reaches the screen's aspect
+    // ratio at the half-travel anchor. Done as a bottom inset on the SAME clip-path that
+    // already carries the corner radii — one style write, no layout, and the photo at the
+    // top of the box is untouched, which is what keeps the photo a rigid translate/scale.
+    const bottomInset = sheetExpansionInsetPx(featureProgress, heroBoxRef.current.width, heroBoxRef.current.height);
 
     el.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
-    el.style.clipPath = `inset(0 round ${topRadius}px ${topRadius}px ${bottomRadius}px ${bottomRadius}px)`;
+    el.style.clipPath = `inset(0px 0px ${bottomInset}px 0px round ${topRadius}px ${topRadius}px ${bottomRadius}px ${bottomRadius}px)`;
 
-    // Sheet: fades in as a function of progress, finishing shortly before the
-    // transform itself arrives (SHEET_FADE_END < 1) so it reads as "attached to the
-    // photo," not trailing it.
-    if (sheetRef.current) sheetRef.current.style.opacity = String(clamp01(t / SHEET_FADE_END));
+    // Sheet opacity: reaches 1 at the same instant the expansion completes and the
+    // corners snap — the spec's "100% opacity AND final aspect ratio at exactly t=0.3s".
+    if (sheetRef.current) sheetRef.current.style.opacity = String(clamp01(featureProgress / SHEET_FADE_END));
 
-    // Chrome (back button / type badge / favorite button / loading spinner): starts
-    // fading in once the shape-extension is basically done, finishing exactly when the
-    // position/scale morph lands — landing together is the point, not a coincidence.
-    if (chromeRef.current) {
-      chromeRef.current.style.opacity = String(clamp01((t - MORPH_CHROME_FADE_START) / (1 - MORPH_CHROME_FADE_START)));
-    }
+    // One shared fade for everything the spec says lands together at the end of the
+    // positional morph: back button / type badge / favorite (over the photo) and the
+    // place title + loading indicator (on the sheet). Starts at the half-travel anchor,
+    // reaches 1 exactly when the transform arrives — landing together is the point.
+    const chromeOpacity = String(clamp01((featureProgress - MORPH_CHROME_FADE_START) / (1 - MORPH_CHROME_FADE_START)));
+    if (chromeRef.current) chromeRef.current.style.opacity = chromeOpacity;
+    if (sheetChromeRef.current) sheetChromeRef.current.style.opacity = chromeOpacity;
 
-    // Scrim: two constant-blur layers cross-faded by progress fake a continuously
-    // *increasing* blur without ever animating `backdrop-filter` itself (Chromium
-    // interpolates that janky — see coding-standards.md).
-    if (scrimLightRef.current) scrimLightRef.current.style.opacity = String(clamp01(t / SCRIM_LIGHT_FADE_END));
-    if (scrimHeavyRef.current) scrimHeavyRef.current.style.opacity = String(clamp01(t / SCRIM_FADE_END));
+    // Background scene (blur + recede) runs on its own phase u, which spans tap ->
+    // content-ready rather than tap -> morph-complete: the spec has it still intensifying
+    // through the hold. On the forward leg t=1 is therefore only part of the way and the
+    // hold hands it the rest (see onComplete below); the reverse leg has no hold, so it
+    // maps over the full range — see backgroundPhaseFor.
+    const u = backgroundPhaseFor(t, morphPhase);
 
-    // Background recede (E11 — scale half): the base view scales down in the same
-    // window as everything else here. See BASE_VIEW_RECEDE_SCALE in morph-config.ts
-    // for why this scales <main> specifically and not an ancestor of this clone.
+    // Two constant-blur layers cross-faded by u fake a continuously *increasing* blur
+    // without ever animating `backdrop-filter` itself (Chromium interpolates that janky —
+    // see coding-standards.md, and the spec's own "never animate backdrop-filter").
+    if (scrimLightRef.current) scrimLightRef.current.style.opacity = String(clamp01(u / SCRIM_LIGHT_FADE_END));
+    if (scrimHeavyRef.current) scrimHeavyRef.current.style.opacity = String(clamp01(u / SCRIM_FADE_END));
+
+    // Background recede (scale half), in lockstep with the blur on the same u. See
+    // BASE_VIEW_RECEDE_SCALE in morph-config.ts for why this scales <main> specifically
+    // and not an ancestor of this clone.
     if (baseViewRef?.current) {
-      baseViewRef.current.style.transform = `scale(${mix(1, BASE_VIEW_RECEDE_SCALE, t)})`;
+      baseViewRef.current.style.transform = `scale(${mix(1, BASE_VIEW_RECEDE_SCALE, u)})`;
     }
   };
 
@@ -171,7 +199,14 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
         scrimHeavyRef.current.style.transition = `opacity ${MORPH_CROSSFADE_MS}ms ease-out`;
         scrimHeavyRef.current.style.opacity = "0";
       }
-      if (baseViewRef?.current) baseViewRef.current.style.willChange = "auto";
+      if (baseViewRef?.current) {
+        // The hold left a `transform <holdMs>ms` transition on <main> to carry the recede
+        // the last stretch. Drop it here: from idle onward the only thing that writes this
+        // transform again is the next run's per-frame applyFrame, and a lingering
+        // transition would make the base view lag the spring by a whole hold's worth.
+        baseViewRef.current.style.transition = "";
+        baseViewRef.current.style.willChange = "auto";
+      }
       return;
     }
 
@@ -206,17 +241,19 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
     //    after the bottom-radius snap threshold can still show a brief bottom-corner
     //    correction — a narrow, sub-300ms edge case judged an acceptable trade-off
     //    against fully modeling both corners independently through a retarget.
-    const midFlightRetarget = morphPhase === "forward" && isFreshTarget && !!prevGeometry && t0 > 0 && !restingAtHero;
+    const midFlightRetarget = shouldRetargetMidFlight({
+      phase: morphPhase,
+      isFreshTarget,
+      hasPreviousGeometry: !!prevGeometry,
+      progress: t0,
+    });
 
     if (midFlightRetarget && prevGeometry) {
-      geometryRef.current = {
-        originLeft: mix(prevGeometry.originLeft, 0, t0),
-        originTop: mix(prevGeometry.originTop, 0, t0),
-        scaleX: mix(prevGeometry.scaleX, 1, t0),
-        scaleY: mix(prevGeometry.scaleY, 1, t0),
-        startRadius: mix(prevGeometry.startRadius, MORPH_RADIUS_HERO_PX, t0),
-      };
+      geometryRef.current = retargetGeometry(prevGeometry, t0, MORPH_RADIUS_HERO_PX);
       progressRef.current = 0;
+      // Hold the shape features at where this retarget caught them (see
+      // retargetFeatureProgress) so they don't pop back while the fresh flight re-morphs.
+      retargetFloorRef.current = t0;
     } else {
       geometryRef.current = {
         originLeft: origin.left - heroLeft,
@@ -225,6 +262,9 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
         scaleY: startContainerHeight / heroContainerHeight,
         startRadius: morphPlace.radius,
       };
+      // Fresh open (incl. resting retarget from an open detail page): no floor — features
+      // track raw t from the card, exactly as a first open should.
+      retargetFloorRef.current = 0;
       if (morphPhase === "forward" && isFreshTarget && restingAtHero) {
         progressRef.current = 0;
       }
@@ -237,9 +277,13 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
     // the scrim visibly lag a frame or more behind the spring).
     if (scrimLightRef.current) scrimLightRef.current.style.transition = "none";
     if (scrimHeavyRef.current) scrimHeavyRef.current.style.transition = "none";
-    if (baseViewRef?.current) baseViewRef.current.style.willChange = "transform";
+    if (baseViewRef?.current) {
+      baseViewRef.current.style.transition = "none";
+      baseViewRef.current.style.willChange = "transform";
+    }
 
     const el = containerRef.current;
+    heroBoxRef.current = { width: heroWidth, height: heroContainerHeight };
     el.style.width = `${heroWidth}px`;
     el.style.height = `${heroContainerHeight}px`;
     el.style.left = `${heroLeft}px`;
@@ -257,8 +301,29 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
         onComplete: () => {
           progressRef.current = 1;
           applyFrame(1);
-          // T2 reached. Hold (spinner keeps spinning via its own CSS animation,
-          // untouched by this JS) until T3, then hand off to the real content.
+          // Positional morph done (spec t=0.6s). The hold is the spec's "only the loading
+          // indicator keeps animating" window — but the background scene is the stated
+          // exception: its blur and recede must keep intensifying right up to
+          // content-ready. applyFrame has stopped running, so the remaining stretch of the
+          // background phase (BACKGROUND_MORPH_SHARE -> 1) is handed to CSS transitions of
+          // exactly the hold's length. Still opacity-and-transform only: the blur radius
+          // itself never animates.
+          if (holdMs > 0) {
+            const linear = (prop: string) => `${prop} ${holdMs}ms linear`;
+            if (scrimLightRef.current) {
+              scrimLightRef.current.style.transition = linear("opacity");
+              scrimLightRef.current.style.opacity = String(clamp01(1 / SCRIM_LIGHT_FADE_END));
+            }
+            if (scrimHeavyRef.current) {
+              scrimHeavyRef.current.style.transition = linear("opacity");
+              scrimHeavyRef.current.style.opacity = String(clamp01(1 / SCRIM_FADE_END));
+            }
+            if (baseViewRef?.current) {
+              baseViewRef.current.style.transition = linear("transform");
+              baseViewRef.current.style.transform = `scale(${BASE_VIEW_RECEDE_SCALE})`;
+            }
+          }
+          // T3: hand off to the real content once the hold is up.
           holdTimeoutRef.current = setTimeout(() => {
             holdTimeoutRef.current = null;
             finishMorphForward();
@@ -296,10 +361,15 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
   useEffect(() => {
     if (!morphPlace) {
       progressRef.current = 0;
+      retargetFloorRef.current = 0;
       cardInstanceRef.current = null;
       if (baseViewRef?.current) {
         baseViewRef.current.style.transform = "";
         baseViewRef.current.style.willChange = "auto";
+        // Also drop the inline `transition` this layer writes on <main> (none during a
+        // run, a timed one during the hold). Leaving `transition: none` behind would
+        // silently veto any CSS transition anyone else ever puts on the base view.
+        baseViewRef.current.style.transition = "";
       }
     }
   }, [morphPlace, baseViewRef]);
@@ -330,7 +400,7 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
         <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: `${MORPH_RADIUS_HERO_PX}px`, zIndex: 2 }}>
           <PlaceImage src={morphPlace.coverImage} alt="" />
 
-          {/* Chrome: back button / type badge / favorite button / spinner — E6/E7/E8.
+          {/* Chrome: back button / type badge / favorite button — E6/E8.
               Deliberately the SAME markup+positioning as DetailOverlay's real header
               buttons (see DetailView.tsx) so the T3 hand-off is a pixel-aligned swap,
               not a visible pop. pointer-events: none — these are decorative during the
@@ -350,11 +420,6 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
                 <Heart className={`h-[1.125rem] w-[1.125rem] ${isFav ? "fill-accent text-accent" : "text-white"}`} strokeWidth={2.4} />
               </span>
             </div>
-            {/* E7 — continuous spin loop, independent of this wrapper's own opacity
-                state (the CSS animation keeps running even while opacity is 0). */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="h-7 w-7 animate-spin text-white/90 drop-shadow" strokeWidth={2.4} />
-            </div>
           </div>
         </div>
         <div
@@ -368,7 +433,30 @@ export function TransitionLayer({ baseViewRef }: TransitionLayerProps) {
             zIndex: 3,
             opacity: 0,
           }}
-        />
+        >
+          {/* Place title + loading indicator, on the sheet, fading in on the same curve
+              as the header chrome so all of them land together at the end of the
+              positional morph — the spec's "Place Title, Loading Indicator, and all 3
+              Action Buttons reach full opacity simultaneously".
+
+              The title mirrors DetailOverlay's real <h1> exactly (same padding, size,
+              weight, leading, tracking, centering) so the T3 crossfade swaps two
+              pixel-aligned copies of the same heading rather than popping one in.
+
+              The indicator has no counterpart in the real page — that is the point: it is
+              the one element that survives alone through the hold and then fades out with
+              this whole subtree at content-ready, which is the spec's crossfade. */}
+          <div ref={sheetChromeRef} className="px-4 pt-6 text-center" style={{ opacity: 0 }}>
+            <h1 className="text-[1.875rem] font-bold leading-[1.05] tracking-[-0.025em] text-foreground">
+              {place?.name ?? ""}
+            </h1>
+            <Loader2
+              data-mv-spinner
+              className="mx-auto mt-8 h-7 w-7 animate-spin text-muted-foreground/50"
+              strokeWidth={2.4}
+            />
+          </div>
+        </div>
       </div>
     </>
   );

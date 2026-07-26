@@ -5,9 +5,55 @@ import { Heart, Star } from "lucide-react";
 import type { Place } from "@/lib/types";
 import { useAppStore } from "@/store/app-store";
 import { haptics, staggerDelay } from "@/lib/premium";
-import { MORPH_RADIUS_PX, CARD_WIDTH_CSS, SWIFT_EASE, CARD_TEXT_FADE_MS } from "@/lib/morph-config";
+import {
+  MORPH_RADIUS_PX,
+  CARD_WIDTH_CSS,
+  SWIFT_EASE,
+  CARD_TEXT_FADE_MS,
+  unscaleRectAroundCenter,
+} from "@/lib/morph-config";
 import { BlurFade } from "@/components/magicui";
 import { PlaceImage } from "./PlaceImage";
+
+// The tap origin must be stored in LAYOUT coordinates, but getBoundingClientRect()
+// reports the visual box — and while a morph is in flight, TransitionLayer is scaling
+// <main> (the E11 background recede) around its own centre. A card tapped during that
+// window (tap card A, change your mind, tap card B) therefore measures smaller and
+// lower than it really is, and the reverse morph later flies the photo back to that
+// wrong box: measured 40.8px too low and 10.2px too narrow after a re-tap 300ms in.
+//
+// The scale is read straight off the computed transform matrix rather than inferred
+// from `boundingRect.width / offsetWidth`: offsetWidth is integer-rounded, so at a
+// fractional viewport width (browser zoom, some HiDPI setups) that ratio is a hair off
+// 1 even at rest, and the no-op path below would then apply a spurious correction to
+// every single tap. The matrix is exact, so "no morph in flight" really is a no-op.
+//
+// Cards that are not inside <main> at all — the related-places strip lives in
+// DetailOverlay's portal — find no ancestor and are left untouched, which is correct:
+// nothing scales them.
+//
+// Known limitation, pre-existing and deliberately not compensated: the tap-scale on the
+// card itself (`whileTap`) and BlurFade's own transforms are also folded into
+// getBoundingClientRect(). Only <main>'s recede is undone here, because that is the one
+// that is still running when the origin is stored.
+function layoutRectOf(el: HTMLElement): { left: number; top: number; width: number; height: number } {
+  const rect = el.getBoundingClientRect();
+  const base = el.closest("main");
+  if (!base) return rect;
+  // The untransformed case is the overwhelmingly common one (every first tap), so it is
+  // short-circuited on the string before DOMMatrixReadOnly ever sees it: Chrome happily
+  // parses "none" as the identity matrix, but that is not worth betting the primary code
+  // path on across engines — this app's e2e gate runs WebKit.
+  const transform = getComputedStyle(base).transform;
+  if (!transform || transform === "none") return rect;
+  const scale = new DOMMatrixReadOnly(transform).a;
+  if (!scale || scale === 1) return rect;
+  // Scaling about `center center` leaves the centre itself fixed, so the visual box's
+  // centre is also the layout centre — no need to know <main>'s untransformed position.
+  const baseRect = base.getBoundingClientRect();
+  const center = { x: baseRect.left + baseRect.width / 2, y: baseRect.top + baseRect.height / 2 };
+  return unscaleRectAroundCenter(rect, center, scale);
+}
 
 // SWIFT_EASE imported from morph-config.
 const CARD_SHADOW =
@@ -81,7 +127,7 @@ export const MorphCard = memo(function MorphCard({
   const handleTap = () => {
     const wrapper = imgWrapperRef.current;
     if (!wrapper) return;
-    const rect = wrapper.getBoundingClientRect();
+    const rect = layoutRectOf(wrapper);
     setMorphPlace({
       id: place.id,
       cardInstanceId,

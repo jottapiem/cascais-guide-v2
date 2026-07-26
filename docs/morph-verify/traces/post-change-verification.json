@@ -1,0 +1,73 @@
+{
+ "note": "Measurements taken AFTER the changes in commit 75241bf, via the in-app Browser pane (the Chrome DevTools MCP connection that allowed pre-load script injection had dropped by then, so these are DOM/timing measurements rather than per-frame rAF traces).",
+ "viewportsUsed": ["375x812 (mobile preset)", "817x442 / 817x964 (sm: breakpoint)"],
+
+ "holdRemoval": {
+  "spinnerNodesInClone": 0,
+  "comment": "was 1 before the change; querySelectorAll('.animate-spin') inside the clone",
+  "springSettledAtMs": 529,
+  "realContentMountedAtMs": 557,
+  "gapT2toT3Ms": 28,
+  "cloneCrossfadeStartedAtMs": 557,
+  "before": "~250ms (MORPH_HOLD_MS 220 + commit latency)"
+ },
+
+ "originRectCorrection": {
+  "singleFrameReadout": {
+   "whenMs": 300,
+   "mainInlineTransform": "scale(0.932783)",
+   "scaleFromComputedMatrix": 0.932783,
+   "scaleFromWidthRatio": 0.932783,
+   "mainVisualRect": {"left": 200.49, "top": -196.84, "width": 416.02, "height": 1503.18},
+   "mainCenter": {"x": 408.5, "y": 554.75},
+   "mainLayout": {"offsetWidth": 446, "offsetHeight": 1612},
+   "cardRectAtRest": {"left": 393.05, "top": -64.0, "width": 179.55},
+   "cardRectRawWhileReceding": {"left": 394.09, "top": -22.41, "width": 167.49},
+   "rawError": {"top": 41.59, "width": -12.06}
+  },
+  "correctedViaLayoutRectOf": {"top": 187.0, "width": 147.1, "errorTop": 0.0, "errorWidth": 0.0,
+   "note": "second run at the 375px viewport: raw top 228.9 / width 137.1 against truth 187 / 147.1"},
+  "endToEndRetargetThenReverse": {
+   "mainScaleAtSecondTap": "scale(0.931956)",
+   "navigatedTo": "Cabo da Roca",
+   "reverseLandingErrorPx": {"left": -0.1, "top": -0.1, "width": 0.1},
+   "before": {"top": 40.8, "width": -10.2},
+   "reverseMaxFrameJumpPx": 31.9
+  }
+ },
+
+ "hitTestingGate": {
+  "method": "document.elementFromPoint() at each button's centre — respects pointer-events and z-order, unlike a directly dispatched click",
+  "atRest": {"back": {"isHitTarget": true, "pointerEvents": "auto"}, "favourite": {"isHitTarget": true, "pointerEvents": "auto"}},
+  "midMorph": {"samples": 12, "spanMs": 275, "back": {"isHitTarget": false, "hitTag": "IMG", "pointerEvents": "none"}, "favourite": {"isHitTarget": false, "hitTag": "IMG", "pointerEvents": "none"}},
+  "afterSettle": {"back": {"isHitTarget": true, "pointerEvents": "auto"}, "favourite": {"isHitTarget": true, "pointerEvents": "auto"}},
+  "comment": "The favourite button is now probed via DetailOverlay's fixed header bar. An earlier probe matched a per-card heart instead, which reported false at rest as well and therefore proved nothing."
+ },
+
+ "darkMode": {
+  "htmlClass": "dark",
+  "pageBackground": "lab(2.75381 0 0)",
+  "realDetailSheetBackground": "rgb(247, 246, 244)",
+  "cloneSheetBackground": "rgb(247, 246, 244)",
+  "cloneMatchesRealSheet": true,
+  "verdict": "Morph hand-off is consistent in dark mode: clone and real sheet are the identical hardcoded #F7F6F4, so nothing pops at T3. The light slab against a near-black page is a design decision in DetailView/TransitionLayer, not a morph defect - reported, not changed."
+ },
+
+ "smBreakpointAfterChange": {
+  "viewport": "817x964",
+  "columnWidth": 414.8,
+  "detailOverlayWidth": 448,
+  "scrimInlineOpacityAtIdle": ["0", "0"],
+  "scrimComputedOpacityAtIdle": ["0", "0"],
+  "scrimRectAtIdle": ["817x964", "817x964"],
+  "mainWillChangeAtIdle": "auto",
+  "comment": "column is 446 * 0.93 = 414.8, not 448 * 0.93 - max-w-md minus the sm: border-x"
+ },
+
+ "cleanupAfterBack": {
+  "detailMounted": false, "mainTransform": "", "mainWillChange": "auto",
+  "bodyOverflow": "", "clonePresent": false, "scrimCount": 0
+ },
+
+ "consoleErrorsAfterDozensOfMorphs": ["pre-existing 404 on /icon-apple.png (manifest icon, not this agent's terrain)"]
+}

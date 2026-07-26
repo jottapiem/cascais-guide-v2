@@ -181,6 +181,36 @@ _(vervolg wordt hieronder bijgehouden)_
 
 ---
 
+## 2026-07-26 — E2E merge-gate staat (`04c982f`)
+
+`npm run e2e` draait nu en is groen: **5/5** in WebKit op iPhone-formaat, over de route
+home → kaart → morph → detail → terug. Details en onderbouwing staan in de commit.
+
+**Waarom dit een dag stil lag:** de browserinstallatie brak op 25-07 om 20:41 halverwege
+af toen de schijf volliep. Wat overbleef was een lege stub in `~/Library/Caches/ms-playwright/`
+en een corrupte `.next` (`Failed to open database / Loading persistence directory failed`).
+Beide opgeruimd; alleen WebKit geïnstalleerd, niet alle drie de browsers. Die valkuil
+staat nu ook in `AGENTS.md`.
+
+**Stand van de drie agents op dit moment** — alle drie nog bezig, afgebroken op usage
+limits. Niets gecommit, dus niets te mergen:
+
+| Agent | Ongecommit in worktree |
+|---|---|
+| `morph-verify` | `TransitionLayer.tsx`, `morph-config.ts`, `tests/morph/`, `docs/morph-verify/` |
+| `content-layer` | 17 paden — `images-v2.ts` verwijderd, `content/photos/`, `public/photos/`, `scripts/`, 7 nieuwe lib-modules |
+| `bags-features` | `BagsView.tsx`, `app-store.ts`, `tests/bags/` |
+
+**Conflict dat er aankomt:** `content-layer` heeft `AGENTS.md` en `package.json`
+gewijzigd. `04c982f` raakt allebei ook. Bij die merge dus handmatig samenvoegen, niet
+blind een kant kiezen — de verificatie-sectie in `AGENTS.md` en het `e2e`-script in
+`package.json` moeten allebei overleven.
+
+**Niet in git gezet:** `morph-verify-shots/` (56 MB browser-traces, waarvan twee van
+24 en 31 MB). Blijft op schijf staan als meetbewijs, is nu gitignored.
+
+---
+
 ## Escalaties
 
 _Nog geen._

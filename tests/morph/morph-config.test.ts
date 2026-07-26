@@ -65,17 +65,21 @@ describe("proportional corner-radius system", () => {
   });
 });
 
-// The sequencing constants encode T1 -> T1b -> T2 as progress fractions. Their
-// ORDER is the contract; the exact values are tuning. Measured 2026-07-25 in
-// Chrome: bottom-radius snap and chrome fade-in both fire on the first frame at
-// or past 0.55, sheet opacity lands one frame later. See PROGRESS.md.
+// The sequencing constants encode the spec's phase boundaries as progress fractions.
+// Their ORDER is the contract; the exact values are tuning. Measured 2026-07-26 in
+// Chrome: the snap, the chrome fade-in and the sheet's opacity/expansion finish all
+// fire on the first frame at or past 0.5. See PROGRESS.md.
 describe("morph sequencing thresholds", () => {
   it("fires the chrome fade at the same instant as the shape/radius snap (both are T1)", () => {
     expect(MORPH_CHROME_FADE_START).toBe(MORPH_RADIUS_SNAP_PROGRESS);
   });
 
-  it("finishes the sheet fade after the shape threshold, not before it", () => {
-    expect(SHEET_FADE_END).toBeGreaterThan(MORPH_RADIUS_SNAP_PROGRESS);
+  // Was "finishes the sheet fade AFTER the shape threshold". The reference spec pins both
+  // to one instant — "Sheet hits 100% opacity and final aspect ratio at exactly t = 0.3s"
+  // is the same sentence that fires the corner snap — so a strict inequality now asserts
+  // the opposite of the contract. Equality IS the contract.
+  it("finishes the sheet fade on the shape threshold, not after it", () => {
+    expect(SHEET_FADE_END).toBe(MORPH_RADIUS_SNAP_PROGRESS);
   });
 
   it("keeps every progress threshold inside the 0..1 progress range", () => {

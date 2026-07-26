@@ -82,6 +82,25 @@ export function retargetGeometry(prev: MorphGeometry, progress: number, heroRadi
   };
 }
 
+// Mid-flight retarget continuity for the t-driven SHAPE features (sheet expansion,
+// sheet/chrome opacity, bottom-corner snap) — the analogue of retargetGeometry for the
+// position. retargetGeometry keeps the *position* continuous by re-baselining geometry so
+// mix(...,0) lands on the current on-screen box. But the shape features are pure functions
+// of the raw progress t and would otherwise snap back to their t=0 values the instant a
+// retarget resets progress to 0: a sheet that had already expanded would un-expand, faded-in
+// chrome would blink out, square bottom corners would round again — a visible three-property
+// pop, precisely in the sub-300ms window the retarget exists to smooth.
+//
+// The fix: never let those features run *backward* across a retarget. `floor` is the progress
+// captured at the moment of retarget; the effective progress is clamped to never dip below it,
+// so a feature holds at wherever it was and resumes forward once the fresh flight's t catches
+// up. Destination is identical either way (the hero), so monotonic-forward is exactly right.
+// On a first open or a reverse leg the floor is 0, making this an exact no-op — features track
+// raw t as before, and reverse still runs them smoothly back down.
+export function retargetFeatureProgress(t: number, floor: number): number {
+  return Math.max(t, floor);
+}
+
 // getBoundingClientRect() reports the *visual* box. A card tapped while the base
 // view is mid-recede (BASE_VIEW_RECEDE_SCALE, applied to <main>) therefore
 // measures smaller and offset, and that wrong rect is what a later reverse morph
@@ -120,6 +139,16 @@ export function springSettleRate(spring: { stiffness: number; damping: number; m
   return zeta <= 1 ? zeta * omega0 : omega0 * (zeta - Math.sqrt(zeta * zeta - 1));
 }
 
+// Peak overshoot of a step response, as a fraction of the travelled distance: how far
+// PAST its resting value the thing goes before settling back. Critically damped and
+// overdamped springs never cross their target, so they report 0. This is the number that
+// makes "bouncy" a measurable property instead of a taste claim — see BOTTOM_BAR_SPRING.
+export function springOvershoot(spring: { stiffness: number; damping: number; mass: number }): number {
+  const zeta = springDampingRatio(spring);
+  if (zeta >= 1) return 0;
+  return Math.exp((-Math.PI * zeta) / Math.sqrt(1 - zeta * zeta));
+}
+
 // ─── Sheet overlap ──────────────────────────────────────────────────────────
 export const SHEET_OVERLAP_PX = 48;
 export const SHEET_OVERLAP_REM = `${SHEET_OVERLAP_PX / 16}rem`;
@@ -131,14 +160,35 @@ export const HERO_HEIGHT_CSS = `min(${APP_CONTAINER_REM}rem, 100vw)`;
 export const MORPH_DURATION_MS = 480;
 export const MORPH_DURATION_S = MORPH_DURATION_MS / 1000;
 export const MORPH_SPRING = { type: "spring" as const, stiffness: 400, damping: 40, mass: 1 };
-// Ground-truth observation: E4's opacity fade (T0 -> T1b) finishes *shortly after* the
-// shape/radius-snap threshold (T1, MORPH_RADIUS_SNAP_PROGRESS below) — not gradually,
-// all the way out near full completion. 0.78 previously put the sheet's opacity finish
-// almost at T2's territory instead of just past T1; 0.62 sits just after the 0.55
-// shape-done threshold, matching "opacity catches up shortly after." Re-tune alongside
-// MORPH_RADIUS_SNAP_PROGRESS if that value ever moves.
-export const SHEET_FADE_END = 0.62;
-export const SCRIM_FADE_END = 0.9;
+
+// ─── The spec's t=0.3s, expressed the only way a spring can hold it ─────────────
+// The reference spec is written against a fixed 0.8-0.9s clock. A spring has no fixed
+// duration — its elapsed time depends on the distance travelled, which differs per card
+// position — so a millisecond offset cannot be a contract here. The spec supplies its
+// own bridge: at t=0.3s "the photo+sheet unit has covered 50% of its total translate/
+// scale distance", and it pins every other phase-2 event to that same instant. Travel,
+// not time, is therefore the invariant, and 50% travel is progress 0.5.
+//
+// What that costs, stated plainly: this spring passes 50% travel ~166ms after the tap
+// (measured in Chrome, 393x852), not at 300ms. The spec's own motion-quality section
+// demands "fast initial acceleration, an early velocity peak, then steep deceleration",
+// and any curve of that shape is well past half its distance at half its duration — so
+// "50% of travel" and "at 0.3s of a 0.6s morph" cannot both hold. Travel wins, because
+// it is what the phase-2 sequencing is written against and because the spring config is
+// a project constraint. See PROGRESS.md, evaluate/verify tables.
+export const SPEC_HALF_TRAVEL_PROGRESS = 0.5;
+
+// Sheet opacity finishes at the anchor, not after it. Spec: "Sheet hits 100% opacity and
+// final aspect ratio at exactly t = 0.3s" — the same instant as the corner snap and the
+// chrome fade-in start, so all three coincide by construction rather than by tuning.
+// (Was 0.62, one frame *after* the old 0.55 threshold; the spec wants them simultaneous.)
+export const SHEET_FADE_END = SPEC_HALF_TRAVEL_PROGRESS;
+
+// Heavy scrim layer's fade end, expressed in BACKGROUND phase u (see backgroundPhase),
+// not in morph progress. 1 means it is still deepening when the positional morph lands
+// and only peaks at content-ready — which is exactly what the spec's Background Scene
+// section requires. (Was 0.9 in progress-space, i.e. fully done before the morph ended.)
+export const SCRIM_FADE_END = 1;
 
 // Reduced-motion fallback: the global CSS `prefers-reduced-motion` rule (globals.css)
 // forces CSS transition/animation durations to ~0, but it can't reach this spring
@@ -156,50 +206,120 @@ export const SCRIM_FADE_END = 0.9;
 // ~1.6x faster settle. `springSettleRate` in this file is what the test asserts on.
 export const MORPH_SPRING_REDUCED = { type: "spring" as const, stiffness: 1000, damping: 63, mass: 1 };
 
-// ─── Shape vs. motion completion (T1) ────────────────────────────────────────
-// Ground-truth observation: the sheet's shape-extension (aspect-ratio match) finishes
-// well before the position/scale morph does — around 17–50% of the way through, while
-// the image is still only ~50% of the way to its final position. Framer's spring
-// `progress` (0→1) doesn't map to a fixed ms timeline the way a duration-based
-// animation would, so T1 is expressed here as a progress fraction rather than a ms
-// offset. 0.55 sits in the observed range — tune if the spring config above changes.
+// ─── Shape vs. motion completion (the spec's t=0.3s) ─────────────────────────
+// Spec, phase 2: "Instant, zero-duration event at t = 0.3s: Photo's bottom corners snap
+// from rounded to square. This is a hard cut, not a fast ease — do not add any transition
+// duration to this." Implemented literally: applyFrame writes the radius per frame with
+// no CSS transition on clip-path, so the change lands inside a single frame.
 //
-// Verified in Chrome 2026-07-25 (393x852, 60fps): the snap fires on the first frame
-// at or past 0.55, which lands ~150ms into a ~480ms morph — 31% of elapsed time,
-// with the image 55% of the way to its final size. That is inside the observed
-// "17-50% of the way through, image still ~50% there" window, so the value stands.
+// Moved 0.55 -> 0.5 so it sits on the 50%-travel anchor together with the chrome fade-in
+// and the sheet's opacity/expansion finish, per the spec's "also triggered at t = 0.3s".
 //
-// What the same run also showed, and what this constant cannot fix on its own: the
-// bottom corners it hard-snaps from startRadius to 0 are NOT tucked under anything
-// mid-flight. At 0.55 the clone's bottom edge floats around 63% down the screen, so
-// the snap is a visible corner pop on a free-floating edge. See PROGRESS.md
-// ("bottom-radius snap") for the before/after screenshots and the options.
-export const MORPH_RADIUS_SNAP_PROGRESS = 0.55;
-export const MORPH_CHROME_FADE_START = 0.55;
+// Previously recorded here, and still true: the corners this snaps are not tucked under
+// anything mid-flight — the clone's bottom edge floats mid-screen, so the hard cut is
+// visible. That is no longer filed as a defect: the spec calls for exactly this hard cut,
+// and with the sheet's bottom-edge expansion now landing on the same instant, the snap
+// coincides with the box reaching its final aspect ratio instead of happening in the
+// middle of nothing. Kept as a deliberate, spec-mandated event.
+export const MORPH_RADIUS_SNAP_PROGRESS = SPEC_HALF_TRAVEL_PROGRESS;
+// Spec, phase 2/3: place title, loading indicator and all three action buttons begin
+// fading in at the anchor and reach full opacity together at the end of the positional
+// morph. One shared opacity curve drives all of them — see TransitionLayer.applyFrame.
+export const MORPH_CHROME_FADE_START = SPEC_HALF_TRAVEL_PROGRESS;
 
-// ─── Hold phase (T2 → T3) + crossfade ───────────────────────────────────────
-// The reference observation ties this hold to content-load time (Airbnb fetches the
-// detail page over the network). This app's place data is bundled and local — there
-// is no load to wait on — so this was a fixed, tuned placeholder purely for
-// perceptual pacing.
+// ─── Sheet bottom-edge expansion (spec phase 2) ──────────────────────────────
+// Spec: the sheet's bottom edge extends downward while it fades in, until the photo+sheet
+// bounding box's aspect ratio matches the screen's — reaching it at the anchor. Before
+// this, the clone's box was ALREADY at the final 19.5/9 ratio on frame one and merely
+// scaled up, so no expansion was ever visible (screenshot spec-pass/B3-morph-t055-before).
 //
-// Cut from 220 to 0 after watching it: the hold buys 220ms of an empty white sheet
-// with a spinner turning over a photo that is already fully loaded, on top of a
-// spring that takes ~560ms to settle and a 260ms crossfade after that. It reads as
-// manufactured latency, not craft. The spinner (E7) it existed to display has been
-// removed from TransitionLayer for the same reason. The timeout itself is kept in
-// place at 0 so the T2 -> T3 hand-off keeps its own well-tested code path and the
-// hold can be dialled back up without restructuring anything.
-export const MORPH_HOLD_MS = 0;
-// T3: E4 (this clone) fades out the instant E9 (the real content sheet) fades in —
-// literally the same fading DOM subtree here, so that simultaneity falls out of the
-// architecture for free rather than needing separate choreography. (E7, the spinner
-// this sentence used to also cover, no longer exists — see MORPH_HOLD_MS above.)
-// This constant is that crossfade's duration; measured 243ms in Chrome.
+// Implemented as a bottom inset on the clone's existing clip-path rather than by animating
+// height: clip-path is already written every frame, costs no layout, and leaves the photo
+// at the top of the box completely untouched — which is what keeps "no crop or aspect
+// change, pure translate/scale" true for the photo itself.
+export const SHEET_EXPAND_END = SPEC_HALF_TRAVEL_PROGRESS;
+// Height of a card's title/subtitle block as a fraction of the card's own width. Measured
+// in Chrome on the 393px rail card: photo 155.11px wide, text block (including its mt-1
+// gap) 61.75px tall -> 0.398. This is what makes the sheet start exactly where the card's
+// text was, per the spec's phase-1 starting geometry, instead of at a guessed offset.
+export const CARD_TEXT_BLOCK_RATIO = 0.398;
+
+// Bottom inset (in clone coordinates) that hides the not-yet-expanded part of the sheet.
+// At t=0 the visible box is photo + text block; by SHEET_EXPAND_END it is the full
+// container and the inset is exactly 0 from there on.
+export function sheetExpansionInsetPx(t: number, heroWidth: number, containerHeight: number): number {
+  const e = clamp01(t / SHEET_EXPAND_END);
+  const startHeight = heroWidth * (1 + CARD_TEXT_BLOCK_RATIO);
+  return Math.max(0, containerHeight - mix(startHeight, containerHeight, e));
+}
+
+// ─── Background phase (spec: continuous to content-ready) ────────────────────
+// Spec, Background Scene: blur and z-recede increase "continuously and monotonically
+// across the ENTIRE transition — still intensifying right up to content-ready, not just
+// until t=0.6s". The positional morph only occupies the first stretch of that window, so
+// the background runs on its own phase u in [0,1] spanning tap -> content-ready. The
+// morph covers BACKGROUND_MORPH_SHARE of it; the hold carries u the rest of the way.
+//
+// 0.7 is measurement-derived, then deliberately rounded — not a free knob. The spring's
+// settle callback was clocked at 569-603ms after tap across runs (569ms in this pass's
+// post-change trace, 603ms in the earlier baseline; both above the 4x-CPU noise floor).
+// MORPH_HOLD_MS adds 250ms, so the morph occupies 819/1069 = 0.75 down to 603/853 = 0.707
+// of the tap->content-ready window. 0.7 is the rounded lower bound: it keeps content-ready
+// inside the spec's 0.8-0.9s band (0.7 share => 250ms hold => 833-861ms total) with a hair
+// of margin against the faster settle, rather than tracking either raw millisecond figure.
+export const BACKGROUND_MORPH_SHARE = 0.7;
+export function backgroundPhase(t: number): number {
+  return clamp01(t) * BACKGROUND_MORPH_SHARE;
+}
+
+// Only the FORWARD leg has a hold, so only the forward leg's background window is longer
+// than its morph. A reverse always starts from a settled detail page, where the hold has
+// already carried the background all the way to u = 1 — so the reverse must map its
+// progress over the full range, or its very first frame would pop the base view back out
+// by (1 - BACKGROUND_MORPH_SHARE) of the recede before starting to animate.
+// Reverse cannot be entered mid-forward-flight (DetailOverlay, which owns the back
+// button, only mounts at T3), so the two mappings can never meet in the middle.
+export function backgroundPhaseFor(t: number, phase: MorphPhase): number {
+  return phase === "reverse" ? clamp01(t) : backgroundPhase(t);
+}
+
+// ─── Hold phase (spec t=0.6s → content-ready) + crossfade ───────────────────
+// Spec, phase 4: between the end of the positional morph and content-ready "only the
+// Loading Indicator keeps animating; everything else is static", with content-ready
+// landing at ~0.8-0.9s. That window is what this constant is.
+//
+// History worth keeping, because it is a reversal: a previous verification pass measured
+// this hold at 220ms, watched it, and cut it to 0 — the app's place data is bundled, so a
+// spinner here turns over a photo that is already decoded and on screen, which read as
+// manufactured latency. The reference spec then asked for the hold and the loading
+// indicator back, explicitly and by name. The spec wins as a design decision, but the
+// earlier observation was not wrong and is not deleted: this pause is perceptual pacing,
+// not a real wait. 250ms is derived, not re-guessed — the spring settles 603ms after the
+// tap (measured), so 603 + 250 = 853ms puts content-ready inside the spec's 0.8-0.9s
+// window. Asserted in tests/morph/morph-spec-timeline.test.ts.
+export const MORPH_HOLD_MS = 250;
+// T3: the clone fades out the instant the real content sheet fades in — literally the
+// same fading DOM subtree here, so the spec's "single simultaneous crossfade, zero gap
+// between them" falls out of the architecture rather than needing two synced timers. The
+// loading indicator lives inside that same subtree, so it fades out with it, on the same
+// frame, by construction. Measured 243ms in Chrome against this 260ms setting.
 export const MORPH_CROSSFADE_MS = 260;
 
-// E10: bottom bar rise, explicitly unspecified by the observation. Independent,
-// translateY-only, not tied to any opacity fade.
+// Spec, phase 5: the bottom bar rises "after the content crossfade ends" — "strictly
+// sequential, not parallel with the crossfade". The crossfade starts the instant the
+// morph hands off, so waiting exactly its duration is what makes the two sequential.
+// (Was 50ms, which started the bar in the middle of the crossfade — measured at 753ms
+// against a crossfade running 603 -> 863ms.)
+export const BOTTOM_BAR_DELAY_MS = MORPH_CROSSFADE_MS;
+
+// Spec, phase 5: translate-only, "never a fade", and the ONE element with genuine bounce
+// rather than the overdamped settle used everywhere else — it should visibly overshoot
+// its resting position before settling back. Damping 24 against stiffness 400 puts the
+// damping ratio at 0.6, i.e. a 9.5% peak overshoot (springOvershoot above): on a ~70px
+// bar that is ~6.7px past the resting line — visible, not comical. Replaces a 340ms
+// easeOut, which by definition never overshoots at all.
+export const BOTTOM_BAR_SPRING = { type: "spring" as const, stiffness: 400, damping: 24, mass: 1 };
+// Kept for the reverse/instant paths, which use a plain duration rather than the spring.
 export const BOTTOM_BAR_RISE_MS = 340;
 
 // E3: card title/subtitle fade-out on tap.
@@ -214,12 +334,17 @@ export const SWIFT_EASE = [0.22, 1, 0.36, 1] as const;
 // see coding-standards.md). Replaces the single-layer scrim; SCRIM_BLUR_PX/SCRIM_TINT
 // stay as the "heavy" layer so nothing else importing them needs to change.
 //
-// Measured 2026-07-25: the light layer reaches full opacity at progress 0.45 and the
-// heavy one at 0.90, exactly as the two fade-end constants specify, and the blur does
-// read as continuously increasing rather than stepping. Kept as-is. Noted honestly:
-// on this light-on-light UI the combination is strong — by progress 0.5 the base view
-// is an unreadable wash (see 02b screenshot in docs/morph-verify). That is on the
-// heavy side of "recede" but it is a taste call, not a defect, so it stays.
+// Both fade-end points are now expressed in BACKGROUND phase u (see backgroundPhase),
+// not in morph progress: the spec requires the blur to keep intensifying through the
+// hold, right up to content-ready, so the heavy layer must not be finished when the
+// positional morph lands. The light layer still crosses first, which is what makes the
+// blur read as increasing rather than stepping.
+//
+// Measured 2026-07-25 (previous pass, in progress-space): the two-layer cross-fade does
+// read as a continuous increase rather than a step. Noted honestly and unchanged: on this
+// light-on-light UI the combination is strong — around half-travel the base view is
+// already an unreadable wash. That is on the heavy side of "recede" but it is a taste
+// call, not a defect, so the blur amounts stay.
 export const SCRIM_BLUR_PX = 24;
 export const SCRIM_BLUR_LIGHT_PX = 10;
 export const SCRIM_LIGHT_FADE_END = 0.45;
@@ -242,6 +367,11 @@ export const SCRIM_TINT = "oklch(0.16 0.012 230 / 0.10)";
 // zoom-out, both on a 393px phone and at the sm: breakpoint where the shrunken
 // column is fully covered by DetailOverlay (448px wide against the receded 414.8px)
 // and the revealed gap shows the parent's identical bg-background — no seam.
+//
+// This is now the value at CONTENT-READY, not at the end of the positional morph: the
+// recede runs on the same background phase u as the blur, so at morph-complete it sits at
+// mix(1, 0.93, BACKGROUND_MORPH_SHARE) = 0.951 and keeps receding through the hold. Spec:
+// the z-recede continues "in lockstep with the blur" across the entire transition.
 //
 // It has one non-obvious consequence, now handled: while this transform is applied,
 // getBoundingClientRect() on any card inside <main> returns the *visually scaled*
